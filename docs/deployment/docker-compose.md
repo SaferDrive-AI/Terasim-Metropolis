@@ -21,11 +21,12 @@ Run every command below from the repository root.
 
 ## Get the image
 
-Either pull the published image and tag it with the name the compose file uses:
+Either pull the published image from the GitHub Container Registry and tag it with the name the
+compose file uses (`<owner>` is a placeholder until the public repository is set up):
 
 ```bash
-docker pull <registry>/terasim-metropolis:0.1.0
-docker tag <registry>/terasim-metropolis:0.1.0 terasim-metropolis:0.1.0
+docker pull ghcr.io/<owner>/terasim-metropolis:0.1.0
+docker tag ghcr.io/<owner>/terasim-metropolis:0.1.0 terasim-metropolis:0.1.0
 ```
 
 or build it from the checkout:
@@ -33,6 +34,10 @@ or build it from the checkout:
 ```bash
 docker compose -f apps/deploy/city/phase1/compose.yml build
 ```
+
+The Neural NDE image, its runtime module and the model checkpoint are not published with the
+release image; they are obtained separately (see
+[Neural NDE traffic](#neural-nde-traffic-on-a-gpu-host-optional)).
 
 ## Start offline, with the behavior stub
 

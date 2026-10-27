@@ -33,6 +33,20 @@ W=$PWD PKG=$PWD/terasim-metropolis-phase1-0.1.0 SJ=$PWD/sj-reference-corridor-0.
 CORRIDOR=$(python3 -c "import json; print(json.load(open('$SJ/terasim/Metadata.json'))['corridor_id'])")
 ```
 
+Or, from the public repository and image, in place of the `unzip` and `docker load` lines
+(`<owner>` and `<repository>` are placeholders until the public repository is set up):
+
+```bash
+git clone https://github.com/<owner>/<repository>.git terasim-metropolis
+docker pull ghcr.io/<owner>/terasim-metropolis:0.1.0
+docker tag ghcr.io/<owner>/terasim-metropolis:0.1.0 terasim-metropolis:0.1.0
+```
+
+In the steps below, `$PKG/source/terasim-metropolis` is then the clone and `$PKG/deployment`
+its `deployment/` folder. The Neural NDE image (`terasim-metropolis:0.1.0-cnde`), the checkpoint
+`nn_weights.pth` (in `$W`) and the San José reference corridor package (`$SJ`) are obtained
+separately.
+
 ### Step 2. TeraSim deployment directory
 
 ```bash
