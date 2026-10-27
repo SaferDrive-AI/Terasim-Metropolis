@@ -40,10 +40,13 @@ First public release of TeraSim Metropolis: the Phase 1 open-source MVP.
 - Plugin Interface / SDK (`terasim-plugin-sdk` 0.1.0) with an example third-party plug-in
   (`examples/plugins/webster_fixed_time`).
 - Deployment: container image definition (`apps/deploy/city/Dockerfile`, image
-  `terasim-metropolis:0.1.0`), Docker Compose stack with an offline VSS behavior stub, Helm
-  chart `terasim-phase1` 0.6.0 for Kubernetes and OpenShift (restricted-v2, Routes,
+  `terasim-metropolis:0.1.0`, Python 3.11), Docker Compose stack with an offline VSS behavior
+  stub, Helm chart `terasim-phase1` 0.6.0 for Kubernetes and OpenShift (restricted-v2, Routes,
   NetworkPolicies, Redis authentication, corridor files from values or an operator-managed
   ConfigMap through `corridorConfig`).
+- Image publishing: for a version tag, `.github/workflows/images.yml` builds the image, stops on
+  a CRITICAL vulnerability that has a fix, and pushes
+  `ghcr.io/<owner>/terasim-metropolis:<version>` and `latest` to the GitHub Container Registry.
 - Corridor and camera configuration (`apps/deploy/city/camera-config/camcfg.py`): one camera
   inventory (corridor, intersections, cameras) generates the TMC spec, the corridor
   configuration, the Helm values or ConfigMap, the registration scripts, the VSS stream list and
@@ -55,9 +58,10 @@ First public release of TeraSim Metropolis: the Phase 1 open-source MVP.
   deployment limits `TERASIM_CITY_CNDE_MAX_WORKERS` / `TERASIM_CITY_CNDE_MAX_TRIALS` and is
   recorded and answered as such) and the optional GPU re-evaluation stage of the optimizer,
   configured by deployment settings; the Neural NDE image definition
-  (`apps/deploy/city/Dockerfile.cnde`) and its Compose override (`compose.cnde.yml`). The
-  runtime module and its checkpoint are installed separately. Neural NDE trials run about
-  1.4 times faster than the runtime's original code with identical results; the fast mode
+  (`apps/deploy/city/Dockerfile.cnde`, on the Python 3.10 variant of the release image) and its
+  Compose override (`compose.cnde.yml`). The runtime module and its checkpoint are installed
+  separately. Neural NDE trials run about 1.4 times faster than the runtime's original code
+  with identical results; the fast mode
   (`TERASIM_CITY_CNDE_PREDICT_CONTROL_ONLY=1`) predicts only the vehicles the model may control;
   per-step diagnostic logs are written on request (`TERASIM_CITY_CNDE_DIAG_LOGS=1`); vehicles
   the model hands back to SUMO resume SUMO's full safety checks (red lights, right of way,
