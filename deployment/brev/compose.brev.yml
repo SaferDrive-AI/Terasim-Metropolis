@@ -1,0 +1,23 @@
+# Reference deployment on NVIDIA Brev, the last file over compose.yml and compose.cnde.yml (README, steps 2 and 3).
+services:
+  terasim-service:
+    volumes:
+      - ${CNDE_MAP_PACKAGE:-./cnde_map}:/data/input/cnde_map:ro   # corridor map package (scheduled_config.yaml)
+    environment:
+      TERASIM_CITY_MAX_CONCURRENCY: "18"          # scheduled (8) + chat (8) + Neural NDE workers
+      TERASIM_CITY_SIM_METRICS: "1"
+      TERASIM_CITY_OSM_DOWNLOAD: ${TERASIM_CITY_OSM_DOWNLOAD:-0}
+      TERASIM_CITY_SCHEDULER_ENABLED: ${TERASIM_CITY_SCHEDULER_ENABLED:-1}
+      TERASIM_CITY_CADENCE_S: ${TERASIM_CITY_CADENCE_S:-600}
+      # Neural NDE fast mode: eight trials at a time, two math-library threads each.
+      TERASIM_CITY_CNDE_PREDICT_CONTROL_ONLY: "1"
+      TERASIM_CITY_CNDE_MAX_WORKERS: "8"
+      TERASIM_CITY_CNDE_MAX_TRIALS: "24"
+      OMP_NUM_THREADS: "2"
+      MKL_NUM_THREADS: "2"
+      OPENBLAS_NUM_THREADS: "2"
+  terasim-mcp:
+    ports:
+      - "<instance-private-ip>:9911:9911"         # MCP for the VSS agent (README, steps 2 and 6)
+    environment:
+      TERASIM_CITY_TIMEOUT_S: "1800"              # README, timeouts table

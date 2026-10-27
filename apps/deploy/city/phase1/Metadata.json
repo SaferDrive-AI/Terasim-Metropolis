@@ -1,0 +1,111 @@
+{
+  "corridor_id": "demo_arterial",
+  "observation_interval": "10m",
+  "intersections": [
+    {
+      "intersection_id": "i1",
+      "lat": 37.335,
+      "lon": -121.90339,
+      "Headings": {
+        "j1n1-j1": "South",
+        "j1-j1s1": "South",
+        "j2-j1": "West",
+        "j1-w1": "West",
+        "j1s1-j1": "North",
+        "j1-j1n1": "North",
+        "w1-j1": "East",
+        "j1-j2": "East"
+      },
+      "Movements": {
+        "South - West": "Right",
+        "South - South": "Straight",
+        "South - East": "Left",
+        "North - East": "Right",
+        "North - North": "Straight",
+        "North - West": "Left",
+        "West - North": "Right",
+        "West - West": "Straight",
+        "West - South": "Left",
+        "East - South": "Right",
+        "East - East": "Straight",
+        "East - North": "Left"
+      },
+      "Assignments": {
+        "South": "i1-cam1",
+        "West": "i1-cam2",
+        "North": "i1-cam3",
+        "East": "i1-cam4"
+      }
+    },
+    {
+      "intersection_id": "i2",
+      "lat": 37.335,
+      "lon": -121.9,
+      "Headings": {
+        "j2n1-j2": "South",
+        "j2-j2s1": "South",
+        "j3-j2": "West",
+        "j2-j1": "West",
+        "j2s1-j2": "North",
+        "j2-j2n1": "North",
+        "j1-j2": "East",
+        "j2-j3": "East"
+      },
+      "Movements": {
+        "South - West": "Right",
+        "South - South": "Straight",
+        "South - East": "Left",
+        "North - East": "Right",
+        "North - North": "Straight",
+        "North - West": "Left",
+        "West - North": "Right",
+        "West - West": "Straight",
+        "West - South": "Left",
+        "East - South": "Right",
+        "East - East": "Straight",
+        "East - North": "Left"
+      },
+      "Assignments": {
+        "South": "i2-cam1",
+        "West": "i2-cam2",
+        "North": "i2-cam3",
+        "East": "i2-cam4"
+      }
+    },
+    {
+      "intersection_id": "i3",
+      "lat": 37.335,
+      "lon": -121.89661,
+      "Headings": {
+        "j3n1-j3": "South",
+        "j3-j3s1": "South",
+        "e1-j3": "West",
+        "j3-j2": "West",
+        "j3s1-j3": "North",
+        "j3-j3n1": "North",
+        "j2-j3": "East",
+        "j3-e1": "East"
+      },
+      "Movements": {
+        "South - West": "Right",
+        "South - South": "Straight",
+        "South - East": "Left",
+        "North - East": "Right",
+        "North - North": "Straight",
+        "North - West": "Left",
+        "West - North": "Right",
+        "West - West": "Straight",
+        "West - South": "Left",
+        "East - South": "Right",
+        "East - East": "Straight",
+        "East - North": "Left"
+      },
+      "Assignments": {
+        "South": "i3-cam1",
+        "West": "i3-cam2",
+        "North": "i3-cam3",
+        "East": "i3-cam4"
+      }
+    }
+  ]
+}

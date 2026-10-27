@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<connections>
+  <connection from="EB_1" to="SB_J1_2" fromLane="0" toLane="0"/>
+  <connection from="EB_1" to="EB_2" fromLane="0" toLane="0"/>
+  <connection from="EB_1" to="EB_2" fromLane="1" toLane="1"/>
+  <connection from="EB_1" to="NB_J1_2" fromLane="1" toLane="0"/>
+  <connection from="WB_3" to="NB_J1_2" fromLane="0" toLane="0"/>
+  <connection from="WB_3" to="WB_4" fromLane="0" toLane="0"/>
+  <connection from="WB_3" to="WB_4" fromLane="1" toLane="1"/>
+  <connection from="WB_3" to="SB_J1_2" fromLane="1" toLane="0"/>
+  <connection from="NB_J1_1" to="EB_2" fromLane="0" toLane="0"/>
+  <connection from="NB_J1_1" to="NB_J1_2" fromLane="0" toLane="0"/>
+  <connection from="NB_J1_1" to="WB_4" fromLane="0" toLane="1"/>
+  <connection from="SB_J1_1" to="WB_4" fromLane="0" toLane="0"/>
+  <connection from="SB_J1_1" to="SB_J1_2" fromLane="0" toLane="0"/>
+  <connection from="SB_J1_1" to="EB_2" fromLane="0" toLane="1"/>
+  <connection from="EB_2" to="SB_J2_2" fromLane="0" toLane="0"/>
+  <connection from="EB_2" to="EB_3" fromLane="0" toLane="0"/>
+  <connection from="EB_2" to="EB_3" fromLane="1" toLane="1"/>
+  <connection from="EB_2" to="NB_J2_2" fromLane="1" toLane="0"/>
+  <connection from="WB_2" to="NB_J2_2" fromLane="0" toLane="0"/>
+  <connection from="WB_2" to="WB_3" fromLane="0" toLane="0"/>
+  <connection from="WB_2" to="WB_3" fromLane="1" toLane="1"/>
+  <connection from="WB_2" to="SB_J2_2" fromLane="1" toLane="0"/>
+  <connection from="NB_J2_1" to="EB_3" fromLane="0" toLane="0"/>
+  <connection from="NB_J2_1" to="NB_J2_2" fromLane="0" toLane="0"/>
+  <connection from="NB_J2_1" to="WB_3" fromLane="0" toLane="1"/>
+  <connection from="SB_J2_1" to="WB_3" fromLane="0" toLane="0"/>
+  <connection from="SB_J2_1" to="SB_J2_2" fromLane="0" toLane="0"/>
+  <connection from="SB_J2_1" to="EB_3" fromLane="0" toLane="1"/>
+  <connection from="EB_3" to="SB_J3_2" fromLane="0" toLane="0"/>
+  <connection from="EB_3" to="EB_4" fromLane="0" toLane="0"/>
+  <connection from="EB_3" to="EB_4" fromLane="1" toLane="1"/>
+  <connection from="EB_3" to="NB_J3_2" fromLane="1" toLane="0"/>
+  <connection from="WB_1" to="NB_J3_2" fromLane="0" toLane="0"/>
+  <connection from="WB_1" to="WB_2" fromLane="0" toLane="0"/>
+  <connection from="WB_1" to="WB_2" fromLane="1" toLane="1"/>
+  <connection from="WB_1" to="SB_J3_2" fromLane="1" toLane="0"/>
+  <connection from="NB_J3_1" to="EB_4" fromLane="0" toLane="0"/>
+  <connection from="NB_J3_1" to="NB_J3_2" fromLane="0" toLane="0"/>
+  <connection from="NB_J3_1" to="WB_2" fromLane="0" toLane="1"/>
+  <connection from="SB_J3_1" to="WB_2" fromLane="0" toLane="0"/>
+  <connection from="SB_J3_1" to="SB_J3_2" fromLane="0" toLane="0"/>
+  <connection from="SB_J3_1" to="EB_4" fromLane="0" toLane="1"/>
+</connections>

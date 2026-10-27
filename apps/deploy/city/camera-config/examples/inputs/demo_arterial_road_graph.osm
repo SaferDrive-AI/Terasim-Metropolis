@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic road graph of the demo corridor (examples/corridor_demo); not real map data. -->
+<osm version="0.6" generator="build_synthetic_inputs.py">
+  <bounds minlat="37.3295922" minlon="-121.9101695" maxlat="37.3404078" maxlon="-121.8898305"/>
+  <node id="101" lat="37.3350000" lon="-121.9101695" version="1" visible="true"/>
+  <node id="102" lat="37.3350000" lon="-121.9067797" version="1" visible="true"/>
+  <node id="103" lat="37.3350000" lon="-121.9033898" version="1" visible="true">
+    <tag k="highway" v="traffic_signals"/>
+  </node>
+  <node id="104" lat="37.3350000" lon="-121.9000000" version="1" visible="true">
+    <tag k="highway" v="traffic_signals"/>
+  </node>
+  <node id="105" lat="37.3350000" lon="-121.8966102" version="1" visible="true">
+    <tag k="highway" v="traffic_signals"/>
+  </node>
+  <node id="106" lat="37.3350000" lon="-121.8932203" version="1" visible="true"/>
+  <node id="107" lat="37.3350000" lon="-121.8898305" version="1" visible="true"/>
+  <node id="111" lat="37.3377039" lon="-121.9033898" version="1" visible="true"/>
+  <node id="112" lat="37.3404078" lon="-121.9033898" version="1" visible="true"/>
+  <node id="113" lat="37.3322961" lon="-121.9033898" version="1" visible="true"/>
+  <node id="114" lat="37.3295922" lon="-121.9033898" version="1" visible="true"/>
+  <node id="121" lat="37.3377039" lon="-121.9000000" version="1" visible="true"/>
+  <node id="122" lat="37.3404078" lon="-121.9000000" version="1" visible="true"/>
+  <node id="123" lat="37.3322961" lon="-121.9000000" version="1" visible="true"/>
+  <node id="124" lat="37.3295922" lon="-121.9000000" version="1" visible="true"/>
+  <node id="131" lat="37.3377039" lon="-121.8966102" version="1" visible="true"/>
+  <node id="132" lat="37.3404078" lon="-121.8966102" version="1" visible="true"/>
+  <node id="133" lat="37.3322961" lon="-121.8966102" version="1" visible="true"/>
+  <node id="134" lat="37.3295922" lon="-121.8966102" version="1" visible="true"/>
+  <way id="1" version="1" visible="true">
+    <nd ref="101"/>
+    <nd ref="102"/>
+    <nd ref="103"/>
+    <nd ref="104"/>
+    <nd ref="105"/>
+    <nd ref="106"/>
+    <nd ref="107"/>
+    <tag k="highway" v="secondary"/>
+    <tag k="lanes" v="4"/>
+    <tag k="maxspeed" v="50"/>
+    <tag k="name" v="Arterial Ave"/>
+  </way>
+  <way id="2" version="1" visible="true">
+    <nd ref="114"/>
+    <nd ref="113"/>
+    <nd ref="103"/>
+    <nd ref="111"/>
+    <nd ref="112"/>
+    <tag k="highway" v="tertiary"/>
+    <tag k="lanes" v="2"/>
+    <tag k="maxspeed" v="40"/>
+    <tag k="name" v="1st Cross St"/>
+  </way>
+  <way id="3" version="1" visible="true">
+    <nd ref="124"/>
+    <nd ref="123"/>
+    <nd ref="104"/>
+    <nd ref="121"/>
+    <nd ref="122"/>
+    <tag k="highway" v="tertiary"/>
+    <tag k="lanes" v="2"/>
+    <tag k="maxspeed" v="40"/>
+    <tag k="name" v="2nd Cross St"/>
+  </way>
+  <way id="4" version="1" visible="true">
+    <nd ref="134"/>
+    <nd ref="133"/>
+    <nd ref="105"/>
+    <nd ref="131"/>
+    <nd ref="132"/>
+    <tag k="highway" v="tertiary"/>
+    <tag k="lanes" v="2"/>
+    <tag k="maxspeed" v="40"/>
+    <tag k="name" v="3rd Cross St"/>
+  </way>
+</osm>

@@ -1,0 +1,130 @@
+{
+  "schema": "terasim.timing_sheet.v1",
+  "corridor_id": "demo_arterial",
+  "cycle_s": 90,
+  "intersections": [
+    {
+      "intersection_id": "i1",
+      "tls_id": "J1",
+      "offset_s": 0,
+      "phases": [
+        {
+          "nema_phases": [
+            2,
+            6
+          ],
+          "movements": [
+            "EB-left",
+            "EB-through",
+            "EB-right",
+            "WB-left",
+            "WB-through",
+            "WB-right"
+          ],
+          "green_s": 48,
+          "yellow_s": 3,
+          "all_red_s": 1
+        },
+        {
+          "nema_phases": [
+            4,
+            8
+          ],
+          "movements": [
+            "NB-left",
+            "NB-through",
+            "NB-right",
+            "SB-left",
+            "SB-through",
+            "SB-right"
+          ],
+          "green_s": 34,
+          "yellow_s": 3,
+          "all_red_s": 1
+        }
+      ]
+    },
+    {
+      "intersection_id": "i2",
+      "tls_id": "J2",
+      "offset_s": 0,
+      "phases": [
+        {
+          "nema_phases": [
+            2,
+            6
+          ],
+          "movements": [
+            "EB-left",
+            "EB-through",
+            "EB-right",
+            "WB-left",
+            "WB-through",
+            "WB-right"
+          ],
+          "green_s": 48,
+          "yellow_s": 3,
+          "all_red_s": 1
+        },
+        {
+          "nema_phases": [
+            4,
+            8
+          ],
+          "movements": [
+            "NB-left",
+            "NB-through",
+            "NB-right",
+            "SB-left",
+            "SB-through",
+            "SB-right"
+          ],
+          "green_s": 34,
+          "yellow_s": 3,
+          "all_red_s": 1
+        }
+      ]
+    },
+    {
+      "intersection_id": "i3",
+      "tls_id": "J3",
+      "offset_s": 0,
+      "phases": [
+        {
+          "nema_phases": [
+            2,
+            6
+          ],
+          "movements": [
+            "EB-left",
+            "EB-through",
+            "EB-right",
+            "WB-left",
+            "WB-through",
+            "WB-right"
+          ],
+          "green_s": 48,
+          "yellow_s": 3,
+          "all_red_s": 1
+        },
+        {
+          "nema_phases": [
+            4,
+            8
+          ],
+          "movements": [
+            "NB-left",
+            "NB-through",
+            "NB-right",
+            "SB-left",
+            "SB-through",
+            "SB-right"
+          ],
+          "green_s": 34,
+          "yellow_s": 3,
+          "all_red_s": 1
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+{{- /*
+Per-component NetworkPolicies, ingress only (values.yaml `networkPolicy`
+explains the model and why egress stays open). Rendered when the
+networking.k8s.io/v1 API is present and networkPolicy.enabled.
+  redis   <- the TeraSim components in networkPolicy.redisClients (6379)
+  service <- pods in this namespace
+  tmc     <- pods in this namespace
+  mcp     <- pods in this namespace, the VSS agent's namespace(s) and, when the
+             /files Route is on, the OpenShift router
+*/}}
+{{- if and .Values.networkPolicy.enabled (.Capabilities.APIVersions.Has "networking.k8s.io/v1") }}
+{{- $np := .Values.networkPolicy }}
+{{- $mcpNamespaces := include "terasim-phase1.mcpClientNamespaces" . | fromYamlArray }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "terasim-phase1.componentName" (dict "root" . "component" "redis") }}
+  labels:
+    {{- include "terasim-phase1.labels" (dict "root" . "component" "redis") | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "terasim-phase1.selectorLabels" (dict "root" . "component" "redis") | nindent 6 }}
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        {{- range $np.redisClients }}
+        - podSelector:
+            matchLabels:
+              {{- include "terasim-phase1.selectorLabels" (dict "root" $ "component" .) | nindent 14 }}
+        {{- end }}
+        {{- with $np.extraIngressFrom.redis }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      ports:
+        - protocol: TCP
+          port: 6379
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "terasim-phase1.componentName" (dict "root" . "component" "service") }}
+  labels:
+    {{- include "terasim-phase1.labels" (dict "root" . "component" "service") | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "terasim-phase1.selectorLabels" (dict "root" . "component" "service") | nindent 6 }}
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        # any pod in this namespace: terasim-mcp, terasim-tmc, the helm test pod
+        - podSelector: {}
+        {{- with $np.extraIngressFrom.service }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.service.port }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "terasim-phase1.componentName" (dict "root" . "component" "tmc") }}
+  labels:
+    {{- include "terasim-phase1.labels" (dict "root" . "component" "tmc") | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "terasim-phase1.selectorLabels" (dict "root" . "component" "tmc") | nindent 6 }}
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        # any pod in this namespace: terasim-mcp, the helm test pod
+        - podSelector: {}
+        {{- with $np.extraIngressFrom.tmc }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.tmc.port }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "terasim-phase1.componentName" (dict "root" . "component" "mcp") }}
+  labels:
+    {{- include "terasim-phase1.labels" (dict "root" . "component" "mcp") | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "terasim-phase1.selectorLabels" (dict "root" . "component" "mcp") | nindent 6 }}
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        # any pod in this namespace (helm test pod, operators)
+        - podSelector: {}
+        {{- range $mcpNamespaces }}
+        # the VSS agent's namespace (networkPolicy.mcpClientNamespaces / tmc.vssBehaviorUrl)
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ . | quote }}
+        {{- end }}
+        {{- if .Values.route.enabled }}
+        {{- range $np.routerNamespaceSelectors }}
+        # the OpenShift router, which terminates the /files Route
+        - namespaceSelector:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- end }}
+        {{- with $np.extraIngressFrom.mcp }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.mcp.port }}
+{{- end }}

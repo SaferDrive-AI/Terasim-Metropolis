@@ -1,0 +1,9 @@
+corridors:
+  demo_arterial:
+    base_sumocfg: examples/corridor_demo/demo.sumocfg
+    corridor:
+      tls_ids: [J1, J2, J3]
+    baseline_sheet: examples/corridor_demo/baseline_sheet_uncoordinated.json
+    sim_end: 600
+    max_trials: 6
+    n_workers: 2

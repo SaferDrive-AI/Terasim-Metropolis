@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic eight-signal arterial for the 32-camera example; not real map data. -->
+<osm version="0.6" generator="build_synthetic_inputs.py">
+  <bounds minlat="37.3530171" minlon="-121.9143249" maxlat="37.3569829" maxlon="-121.8889011"/>
+  <node id="1000" lat="37.3550000" lon="-121.9143249" version="1" visible="true"/>
+  <node id="1001" lat="37.3550000" lon="-121.9115000" version="1" visible="true">
+    <tag k="highway" v="traffic_signals"/>
+  </node>
+  <node id="1002" lat="37.3550000" lon="-121.9086751" version="1" visible="true">
+    <tag k="highway" v="traffic_signals"/>
+  </node>
+  <node id="1003" lat="37.3550000" lon="-121.9058503" version="1" visible="true">
+    <tag k="highway" v="traffic_signals"/>
+  </node>
+  <node id="1004" lat="37.3550000" lon="-121.9030254" version="1" visible="true">
+    <tag k="highway" v="traffic_signals"/>
+  </node>
+  <node id="1005" lat="37.3550000" lon="-121.9002006" version="1" visible="true">
+    <tag k="highway" v="traffic_signals"/>
+  </node>
+  <node id="1006" lat="37.3550000" lon="-121.8973757" version="1" visible="true">
+    <tag k="highway" v="traffic_signals"/>
+  </node>
+  <node id="1007" lat="37.3550000" lon="-121.8945508" version="1" visible="true">
+    <tag k="highway" v="traffic_signals"/>
+  </node>
+  <node id="1008" lat="37.3550000" lon="-121.8917260" version="1" visible="true">
+    <tag k="highway" v="traffic_signals"/>
+  </node>
+  <node id="1009" lat="37.3550000" lon="-121.8889011" version="1" visible="true"/>
+  <node id="1111" lat="37.3557210" lon="-121.9115000" version="1" visible="true"/>
+  <node id="1112" lat="37.3569829" lon="-121.9115000" version="1" visible="true"/>
+  <node id="1121" lat="37.3542790" lon="-121.9115000" version="1" visible="true"/>
+  <node id="1122" lat="37.3530171" lon="-121.9115000" version="1" visible="true"/>
+  <node id="1211" lat="37.3557210" lon="-121.9086751" version="1" visible="true"/>
+  <node id="1212" lat="37.3569829" lon="-121.9086751" version="1" visible="true"/>
+  <node id="1221" lat="37.3542790" lon="-121.9086751" version="1" visible="true"/>
+  <node id="1222" lat="37.3530171" lon="-121.9086751" version="1" visible="true"/>
+  <node id="1311" lat="37.3557210" lon="-121.9058503" version="1" visible="true"/>
+  <node id="1312" lat="37.3569829" lon="-121.9058503" version="1" visible="true"/>
+  <node id="1321" lat="37.3542790" lon="-121.9058503" version="1" visible="true"/>
+  <node id="1322" lat="37.3530171" lon="-121.9058503" version="1" visible="true"/>
+  <node id="1411" lat="37.3557210" lon="-121.9030254" version="1" visible="true"/>
+  <node id="1412" lat="37.3569829" lon="-121.9030254" version="1" visible="true"/>
+  <node id="1421" lat="37.3542790" lon="-121.9030254" version="1" visible="true"/>
+  <node id="1422" lat="37.3530171" lon="-121.9030254" version="1" visible="true"/>
+  <node id="1511" lat="37.3557210" lon="-121.9002006" version="1" visible="true"/>
+  <node id="1512" lat="37.3569829" lon="-121.9002006" version="1" visible="true"/>
+  <node id="1521" lat="37.3542790" lon="-121.9002006" version="1" visible="true"/>
+  <node id="1522" lat="37.3530171" lon="-121.9002006" version="1" visible="true"/>
+  <node id="1611" lat="37.3557210" lon="-121.8973757" version="1" visible="true"/>
+  <node id="1612" lat="37.3569829" lon="-121.8973757" version="1" visible="true"/>
+  <node id="1621" lat="37.3542790" lon="-121.8973757" version="1" visible="true"/>
+  <node id="1622" lat="37.3530171" lon="-121.8973757" version="1" visible="true"/>
+  <node id="1711" lat="37.3557210" lon="-121.8945508" version="1" visible="true"/>
+  <node id="1712" lat="37.3569829" lon="-121.8945508" version="1" visible="true"/>
+  <node id="1721" lat="37.3542790" lon="-121.8945508" version="1" visible="true"/>
+  <node id="1722" lat="37.3530171" lon="-121.8945508" version="1" visible="true"/>
+  <node id="1811" lat="37.3557210" lon="-121.8917260" version="1" visible="true"/>
+  <node id="1812" lat="37.3569829" lon="-121.8917260" version="1" visible="true"/>
+  <node id="1831" lat="37.3544592" lon="-121.8917260" version="1" visible="true"/>
+  <node id="1832" lat="37.3543240" lon="-121.8917260" version="1" visible="true"/>
+  <node id="1833" lat="37.3537382" lon="-121.8917260" version="1" visible="true"/>
+  <node id="1834" lat="37.3530171" lon="-121.8917260" version="1" visible="true"/>
+  <way id="10" version="1" visible="true">
+    <nd ref="1000"/>
+    <nd ref="1001"/>
+    <nd ref="1002"/>
+    <nd ref="1003"/>
+    <nd ref="1004"/>
+    <nd ref="1005"/>
+    <nd ref="1006"/>
+    <nd ref="1007"/>
+    <nd ref="1008"/>
+    <nd ref="1009"/>
+    <tag k="highway" v="secondary"/>
+    <tag k="lanes" v="4"/>
+    <tag k="maxspeed" v="50"/>
+    <tag k="name" v="Arterial Blvd"/>
+  </way>
+  <way id="111" version="1" visible="true">
+    <nd ref="1001"/>
+    <nd ref="1111"/>
+    <nd ref="1112"/>
+    <tag k="highway" v="residential"/>
+    <tag k="lanes" v="2"/>
+    <tag k="maxspeed" v="40"/>
+    <tag k="name" v="Oak St"/>
+  </way>
+  <way id="112" version="1" visible="true">
+    <nd ref="1001"/>
+    <nd ref="1121"/>
+    <nd ref="1122"/>
+    <tag k="highway" v="residential"/>
+    <tag k="lanes" v="2"/>
+    <tag k="maxspeed" v="40"/>
+    <tag k="name" v="Oak St"/>
+  </way>
+  <way id="121" version="1" visible="true">
+    <nd ref="1002"/>
+    <nd ref="1211"/>
+    <nd ref="1212"/>
+    <tag k="highway" v="pedestrian"/>
+    <tag k="name" v="Elm St"/>
+  </way>
+  <way id="122" version="1" visible="true">
+    <nd ref="1002"/>
+    <nd ref="1221"/>
+    <nd ref="1222"/>
+    <tag k="highway" v="residential"/>
+    <tag k="lanes" v="2"/>
+    <tag k="maxspeed" v="40"/>
+    <tag k="name" v="Elm St"/>
+  </way>
+  <way id="131" version="1" visible="true">
+    <nd ref="1003"/>
+    <nd ref="1311"/>
+    <nd ref="1312"/>
+    <tag k="highway" v="residential"/>
+    <tag k="lanes" v="2"/>
+    <tag k="maxspeed" v="40"/>
+    <tag k="name" v="Pine St"/>
+  </way>
+  <way id="132" version="1" visible="true">
+    <nd ref="1003"/>
+    <nd ref="1321"/>
+    <nd ref="1322"/>
+    <tag k="highway" v="residential"/>
+    <tag k="lanes" v="2"/>
+    <tag k="maxspeed" v="40"/>
+    <tag k="name" v="Pine St"/>
+  </way>
+  <way id="140" version="1" visible="true">
+    <nd ref="1422"/>
+    <nd ref="1421"/>
+    <nd ref="1004"/>
+    <nd ref="1411"/>
+    <nd ref="1412"/>
+    <tag k="highway" v="residential"/>
+    <tag k="lanes" v="1"/>
+    <tag k="maxspeed" v="40"/>
+    <tag k="name" v="Cedar St"/>
+    <tag k="oneway" v="yes"/>
+  </way>
+  <way id="150" version="1" visible="true">
+    <nd ref="1512"/>
+    <nd ref="1511"/>
+    <nd ref="1005"/>
+    <nd ref="1521"/>
+    <nd ref="1522"/>
+    <tag k="highway" v="residential"/>
+    <tag k="lanes" v="1"/>
+    <tag k="maxspeed" v="40"/>
+    <tag k="name" v="Maple St"/>
+    <tag k="oneway" v="yes"/>
+  </way>
+  <way id="160" version="1" visible="true">
+    <nd ref="1622"/>
+    <nd ref="1621"/>
+    <nd ref="1006"/>
+    <nd ref="1611"/>
+    <nd ref="1612"/>
+    <tag k="highway" v="residential"/>
+    <tag k="lanes" v="1"/>
+    <tag k="maxspeed" v="40"/>
+    <tag k="name" v="Birch St"/>
+    <tag k="oneway" v="yes"/>
+  </way>
+  <way id="170" version="1" visible="true">
+    <nd ref="1712"/>
+    <nd ref="1711"/>
+    <nd ref="1007"/>
+    <nd ref="1721"/>
+    <nd ref="1722"/>
+    <tag k="highway" v="residential"/>
+    <tag k="lanes" v="1"/>
+    <tag k="maxspeed" v="40"/>
+    <tag k="name" v="Ash St"/>
+    <tag k="oneway" v="yes"/>
+  </way>
+  <way id="181" version="1" visible="true">
+    <nd ref="1008"/>
+    <nd ref="1811"/>
+    <nd ref="1812"/>
+    <tag k="highway" v="residential"/>
+    <tag k="lanes" v="2"/>
+    <tag k="maxspeed" v="40"/>
+    <tag k="name" v="Walnut St"/>
+  </way>
+  <way id="182" version="1" visible="true">
+    <nd ref="1008"/>
+    <nd ref="1831"/>
+    <tag k="highway" v="pedestrian"/>
+    <tag k="name" v="Walnut Plaza"/>
+  </way>
+  <way id="185" version="1" visible="true">
+    <nd ref="1832"/>
+    <nd ref="1833"/>
+    <nd ref="1834"/>
+    <tag k="highway" v="residential"/>
+    <tag k="lanes" v="2"/>
+    <tag k="maxspeed" v="40"/>
+    <tag k="name" v="S Walnut St"/>
+  </way>
+</osm>

@@ -1,0 +1,18 @@
+{{- include "terasim-phase1.validate" . -}}
+{{- if not (.Values.corridorConfig | default dict).existingConfigMap }}
+# The corridor files, mounted read-only at /config: the service reads
+# scheduled_config.yaml, the tmc collector reads Metadata.json; both via env vars
+# pointing here, so nothing shadows the image's /data/input. Content: the
+# corridorConfig values when set, else the files shipped with the chart (configs/).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "terasim-phase1.corridorConfigMapName" . }}
+  labels:
+    {{- include "terasim-phase1.labels" (dict "root" . "component" "config") | nindent 4 }}
+data:
+  scheduled_config.yaml: |
+{{ include "terasim-phase1.corridorScheduledConfig" . | nindent 4 }}
+  Metadata.json: |
+{{ include "terasim-phase1.corridorMetadataJson" . | nindent 4 }}
+{{- end }}

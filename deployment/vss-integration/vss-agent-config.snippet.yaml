@@ -1,0 +1,44 @@
+# TeraSim Metropolis - additions to the VSS agent's config.yml (back it up, then restart the agent).
+# Exact texts: docs/deployment/vss-integration.md of the source tree, "VSS agent configuration".
+
+# 1. Tool group: after function_groups.video_analytics_mcp, before functions:
+function_groups:
+  terasim_mcp:
+    _type: mcp_client
+    server:
+      transport: streamable-http
+      # Helm (release terasim-phase1 in namespace <terasim-namespace>):
+      #   http://terasim-phase1-mcp.<terasim-namespace>.svc:9911/mcp
+      # Docker Compose with the agent on the same host (host networking):
+      #   http://127.0.0.1:9911/mcp
+      url: http://terasim-phase1-mcp.<terasim-namespace>.svc:9911/mcp
+    tool_call_timeout: 300          # an optimization is synchronous and takes minutes;
+                                    # 3600 when the deployment offers Neural NDE traffic (24 candidates)
+    include:
+    - list_intersections
+    - register_intersection
+    - upload_map
+    - upload_signal_plan
+    - upload_traffic_snapshot
+    - optimize_registered_intersection
+    - optimize_intersection
+    - optimize_corridor
+
+workflow:
+  # 2. Append to the existing workflow.tool_names list:
+  tool_names:
+  - terasim_mcp.list_intersections
+  - terasim_mcp.register_intersection
+  - terasim_mcp.optimize_registered_intersection
+  - terasim_mcp.optimize_intersection
+  - terasim_mcp.optimize_corridor
+  - terasim_mcp.upload_signal_plan
+
+  # 3. Recommended: room for the registration, the optimization and the answer.
+  max_iterations: 25
+
+  # 4. The answer is the tool's markdown block; a plan-execution step would summarize it.
+  planning_enabled: false
+
+  # 5. workflow.prompt: PRIORITY ACTIONS item 8, the SIGNAL TIMING OPTIMIZATION section (before
+  #    GET PLACES TOOL) and RESPONSE FORMAT (CRITICAL) item 4, as in the documentation page.

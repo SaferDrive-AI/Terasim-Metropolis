@@ -1,0 +1,26 @@
+# Corridor configuration of terasim-service (TERASIM_CITY_SCHEDULED_CONFIG).
+#
+# One entry per corridor, keyed by the corridor_id the TMC snapshots carry. The
+# synchronous optimize call (POST /v1/city/optimize, the MCP optimize tools) merges
+# the entry's keys in as request defaults, and the optional built-in scheduler
+# (TERASIM_CITY_SCHEDULER_ENABLED) optimizes every entry once per cadence from the
+# snapshots of the last TERASIM_CITY_WINDOW_S seconds.
+#
+# demo_arterial is the synthetic demo corridor baked into the image at
+# /data/input/map (examples/corridor_demo): an E-W arterial with the signals J1, J2
+# and J3, the intersections i1, i2 and i3 of the TMC spec (Metadata.json).
+corridors:
+  demo_arterial:
+    base_sumocfg: /data/input/map/demo.sumocfg
+    corridor:
+      tls_ids: [J1, J2, J3]
+    # Each trial simulates 30 minutes of traffic.
+    sim_end: 1800
+    # Search budget: at most 24 trials, and the search stops after `patience` trials
+    # without improvement. Keep patience above the 10 random start-up trials of the
+    # Bayesian (TPE) sampler, so the model-guided search always gets to run.
+    max_trials: 24
+    patience: 16
+    # SUMO processes per run (one CPU core and one worker slot each); at most
+    # TERASIM_CITY_MAX_CONCURRENCY.
+    n_workers: 4

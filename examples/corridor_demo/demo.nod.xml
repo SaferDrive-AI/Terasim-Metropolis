@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<nodes>
+  <node id="W2" x="-121.910169" y="37.335000" type="priority"/>
+  <node id="W1" x="-121.906780" y="37.335000" type="priority"/>
+  <node id="J1" x="-121.903390" y="37.335000" type="traffic_light"/>
+  <node id="J2" x="-121.900000" y="37.335000" type="traffic_light"/>
+  <node id="J3" x="-121.896610" y="37.335000" type="traffic_light"/>
+  <node id="E1" x="-121.893220" y="37.335000" type="priority"/>
+  <node id="E2" x="-121.889831" y="37.335000" type="priority"/>
+  <node id="J1_N1" x="-121.903390" y="37.337704" type="priority"/>
+  <node id="J1_S1" x="-121.903390" y="37.332296" type="priority"/>
+  <node id="J1_N2" x="-121.903390" y="37.340408" type="priority"/>
+  <node id="J1_S2" x="-121.903390" y="37.329592" type="priority"/>
+  <node id="J2_N1" x="-121.900000" y="37.337704" type="priority"/>
+  <node id="J2_S1" x="-121.900000" y="37.332296" type="priority"/>
+  <node id="J2_N2" x="-121.900000" y="37.340408" type="priority"/>
+  <node id="J2_S2" x="-121.900000" y="37.329592" type="priority"/>
+  <node id="J3_N1" x="-121.896610" y="37.337704" type="priority"/>
+  <node id="J3_S1" x="-121.896610" y="37.332296" type="priority"/>
+  <node id="J3_N2" x="-121.896610" y="37.340408" type="priority"/>
+  <node id="J3_S2" x="-121.896610" y="37.329592" type="priority"/>
+</nodes>

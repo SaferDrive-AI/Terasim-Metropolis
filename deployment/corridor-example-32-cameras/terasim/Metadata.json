@@ -1,0 +1,256 @@
+{
+  "corridor_id": "arterial_blvd",
+  "observation_interval": "10m",
+  "intersections": [
+    {
+      "intersection_id": "oak",
+      "lat": 37.355,
+      "lon": -121.9115,
+      "Headings": {
+        "1001-1111": "North",
+        "1111-1112": "North",
+        "1121-1001": "North",
+        "1122-1121": "North",
+        "1000-1001": "East",
+        "1001-1002": "East",
+        "1001-1121": "South",
+        "1111-1001": "South",
+        "1112-1111": "South",
+        "1121-1122": "South",
+        "1001-1000": "West",
+        "1002-1001": "West"
+      },
+      "Movements": {
+        "North - East": "Right",
+        "North - North": "Straight",
+        "North - West": "Left",
+        "East - South": "Right",
+        "East - East": "Straight",
+        "East - North": "Left",
+        "South - West": "Right",
+        "South - South": "Straight",
+        "South - East": "Left",
+        "West - North": "Right",
+        "West - West": "Straight",
+        "West - South": "Left"
+      },
+      "Assignments": {
+        "South": "cam5",
+        "West": "cam6",
+        "North": "cam7",
+        "East": "cam8"
+      }
+    },
+    {
+      "intersection_id": "elm",
+      "lat": 37.355,
+      "lon": -121.9086751,
+      "Headings": {
+        "1221-1002": "North",
+        "1222-1221": "North",
+        "1001-1002": "East",
+        "1002-1003": "East",
+        "1002-1221": "South",
+        "1221-1222": "South",
+        "1002-1001": "West",
+        "1003-1002": "West"
+      },
+      "Movements": {
+        "North - East": "Right",
+        "North - West": "Left",
+        "East - South": "Right",
+        "East - East": "Straight",
+        "West - West": "Straight",
+        "West - South": "Left"
+      },
+      "Assignments": {
+        "West": "cam10",
+        "North": "cam11",
+        "East": "cam12"
+      }
+    },
+    {
+      "intersection_id": "pine",
+      "lat": 37.355,
+      "lon": -121.9058503,
+      "Headings": {
+        "1003-1311": "North",
+        "1311-1312": "North",
+        "1321-1003": "North",
+        "1322-1321": "North",
+        "1002-1003": "East",
+        "1003-1004": "East",
+        "1003-1321": "South",
+        "1311-1003": "South",
+        "1312-1311": "South",
+        "1321-1322": "South",
+        "1003-1002": "West",
+        "1004-1003": "West"
+      },
+      "Movements": {
+        "North - East": "Right",
+        "North - North": "Straight",
+        "North - West": "Left",
+        "East - South": "Right",
+        "East - East": "Straight",
+        "East - North": "Left",
+        "South - West": "Right",
+        "South - South": "Straight",
+        "South - East": "Left",
+        "West - North": "Right",
+        "West - West": "Straight",
+        "West - South": "Left"
+      },
+      "Assignments": {
+        "South": "cam1",
+        "West": "cam2",
+        "North": "cam3",
+        "East": "cam4"
+      }
+    },
+    {
+      "intersection_id": "cedar",
+      "lat": 37.355,
+      "lon": -121.9030254,
+      "Headings": {
+        "1004-1411": "North",
+        "1411-1412": "North",
+        "1421-1004": "North",
+        "1422-1421": "North",
+        "1003-1004": "East",
+        "1004-1005": "East",
+        "1004-1003": "West",
+        "1005-1004": "West"
+      },
+      "Movements": {
+        "North - East": "Right",
+        "North - North": "Straight",
+        "North - West": "Left",
+        "East - East": "Straight",
+        "East - North": "Left",
+        "West - North": "Right",
+        "West - West": "Straight"
+      },
+      "Assignments": {
+        "West": "cam14",
+        "North": "cam15",
+        "East": "cam16"
+      }
+    },
+    {
+      "intersection_id": "maple",
+      "lat": 37.355,
+      "lon": -121.9002006,
+      "Headings": {
+        "1004-1005": "East",
+        "1005-1006": "East",
+        "1005-1521": "South",
+        "1511-1005": "South",
+        "1512-1511": "South",
+        "1521-1522": "South",
+        "1005-1004": "West",
+        "1006-1005": "West"
+      },
+      "Movements": {
+        "East - South": "Right",
+        "East - East": "Straight",
+        "South - West": "Right",
+        "South - South": "Straight",
+        "South - East": "Left",
+        "West - West": "Straight",
+        "West - South": "Left"
+      },
+      "Assignments": {
+        "South": "cam17",
+        "West": "cam18",
+        "East": "cam20"
+      }
+    },
+    {
+      "intersection_id": "birch",
+      "lat": 37.355,
+      "lon": -121.8973757,
+      "Headings": {
+        "1006-1611": "North",
+        "1611-1612": "North",
+        "1621-1006": "North",
+        "1622-1621": "North",
+        "1005-1006": "East",
+        "1006-1007": "East",
+        "1006-1005": "West",
+        "1007-1006": "West"
+      },
+      "Movements": {
+        "North - East": "Right",
+        "North - North": "Straight",
+        "North - West": "Left",
+        "East - East": "Straight",
+        "East - North": "Left",
+        "West - North": "Right",
+        "West - West": "Straight"
+      },
+      "Assignments": {
+        "West": "cam22",
+        "North": "cam23",
+        "East": "cam24"
+      }
+    },
+    {
+      "intersection_id": "ash",
+      "lat": 37.355,
+      "lon": -121.8945508,
+      "Headings": {
+        "1006-1007": "East",
+        "1007-1008": "East",
+        "1007-1721": "South",
+        "1711-1007": "South",
+        "1712-1711": "South",
+        "1721-1722": "South",
+        "1007-1006": "West",
+        "1008-1007": "West"
+      },
+      "Movements": {
+        "East - South": "Right",
+        "East - East": "Straight",
+        "South - West": "Right",
+        "South - South": "Straight",
+        "South - East": "Left",
+        "West - West": "Straight",
+        "West - South": "Left"
+      },
+      "Assignments": {
+        "South": "cam25",
+        "West": "cam26",
+        "East": "cam28"
+      }
+    },
+    {
+      "intersection_id": "walnut",
+      "lat": 37.355,
+      "lon": -121.891726,
+      "Headings": {
+        "1008-1811": "North",
+        "1811-1812": "North",
+        "1007-1008": "East",
+        "1008-1009": "East",
+        "1811-1008": "South",
+        "1812-1811": "South",
+        "1008-1007": "West",
+        "1009-1008": "West"
+      },
+      "Movements": {
+        "East - East": "Straight",
+        "East - North": "Left",
+        "South - West": "Right",
+        "South - East": "Left",
+        "West - North": "Right",
+        "West - West": "Straight"
+      },
+      "Assignments": {
+        "South": "cam29",
+        "West": "cam30",
+        "East": "cam32"
+      }
+    }
+  ]
+}

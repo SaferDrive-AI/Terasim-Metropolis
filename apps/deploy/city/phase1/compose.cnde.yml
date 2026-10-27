@@ -1,0 +1,51 @@
+# Optional Neural NDE (CNDE) traffic on a GPU host, layered on compose.yml:
+#   docker compose -f apps/deploy/city/phase1/compose.yml -f apps/deploy/city/phase1/compose.cnde.yml up -d
+# Back to SUMO traffic only:
+#   docker compose -f apps/deploy/city/phase1/compose.yml up -d
+#
+# terasim-service runs the Neural NDE image (Dockerfile.cnde) on one GPU, with the model
+# checkpoint and a map package that holds its CNDE map artifacts mounted read-only. A request
+# then runs every candidate plan under Neural NDE when it names traffic_model="cnde"; requests
+# without it and scheduled runs keep SUMO traffic. Point the corridor's base_sumocfg in the
+# corridor configuration (scheduled_config.yaml) at the map package's base sumocfg, for example
+# /data/input/cnde_map/base.sumocfg.
+#
+# Environment overrides (all optional):
+#   TERASIM_CNDE_IMAGE        the Neural NDE image                (terasim-metropolis:0.1.0-cnde)
+#   CNDE_CHECKPOINT           the checkpoint file on the host     (./cnde_assets/nn_weights.pth)
+#   CNDE_MAP_PACKAGE          the map package directory          (./cnde_map)
+#   CNDE_GPU                  the GPU device id                   (0)
+#   TERASIM_CITY_CNDE_MAX_WORKERS / TERASIM_CITY_CNDE_MAX_TRIALS  (3 / unset)
+#   TERASIM_CITY_CNDE_PREDICT_CONTROL_ONLY  1: fast mode, predict only the controllable vehicles (0)
+#   TERASIM_CITY_TIMEOUT_S    the MCP server's timeout of one synchronous optimization (1800)
+# Relative paths resolve against the directory of the first compose file.
+services:
+  terasim-service:
+    image: ${TERASIM_CNDE_IMAGE:-terasim-metropolis:0.1.0-cnde}
+    volumes:
+      # The checkpoint, at the fixed path the runtime reads it from (never baked).
+      - ${CNDE_CHECKPOINT:-./cnde_assets/nn_weights.pth}:/app/TeraSim/packages/cnde/assets/nn_weights.pth:ro
+      # A map package with cnde_map.pkl and cnde_id_mapping.pkl next to its base sumocfg.
+      - ${CNDE_MAP_PACKAGE:-./cnde_map}:/data/input/cnde_map:ro
+    environment:
+      # Neural NDE trials of one traffic_model="cnde" run that share the GPU at once.
+      TERASIM_CITY_CNDE_MAX_WORKERS: ${TERASIM_CITY_CNDE_MAX_WORKERS:-3}
+      # Most Bayesian trials of a traffic_model="cnde" run (empty: the request's own budget).
+      TERASIM_CITY_CNDE_MAX_TRIALS: ${TERASIM_CITY_CNDE_MAX_TRIALS:-}
+      # 1: fast mode, the model predicts only the vehicles it may control.
+      TERASIM_CITY_CNDE_PREDICT_CONTROL_ONLY: ${TERASIM_CITY_CNDE_PREDICT_CONTROL_ONLY:-0}
+      PYTORCH_CUDA_ALLOC_CONF: expandable_segments:True
+      NVIDIA_VISIBLE_DEVICES: ${CNDE_GPU:-0}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["${CNDE_GPU:-0}"]
+              capabilities: [gpu]
+
+  terasim-mcp:
+    environment:
+      # The MCP server's timeout of one synchronous optimization (read by the MCP server, not
+      # by the service): a Neural NDE optimization takes minutes per candidate plan.
+      TERASIM_CITY_TIMEOUT_S: ${TERASIM_CITY_TIMEOUT_S:-1800}

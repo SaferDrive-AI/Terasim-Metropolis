@@ -1,0 +1,46 @@
+# Redis related constants
+ENVIRONMENT_VARIABLE_HOST = "TERASIM_REDIS_HOST"
+ENVIRONMENT_VARIABLE_PORT = "TERASIM_REDIS_PORT"
+ENVIRONMENT_VARIABLE_PASSWORD = "TERASIM_REDIS_PASSWORD"
+ENVIRONMENT_VARIABLE_DB = "TERASIM_REDIS_DB"
+
+# City signal-evaluation service env vars
+ENVIRONMENT_VARIABLE_CITY_OUTPUT_ROOT = "TERASIM_CITY_OUTPUT_ROOT"
+ENVIRONMENT_VARIABLE_CITY_INPUT_ROOT = "TERASIM_CITY_INPUT_ROOT"
+ENVIRONMENT_VARIABLE_CITY_MAX_CONCURRENCY = "TERASIM_CITY_MAX_CONCURRENCY"
+ENVIRONMENT_VARIABLE_CITY_LEASE_TTL = "TERASIM_CITY_LEASE_TTL"
+# Reserved concurrency headroom usable only by incident-expedited runs.
+ENVIRONMENT_VARIABLE_CITY_EMERGENCY_SLOTS = "TERASIM_CITY_EMERGENCY_SLOTS"
+# City API is opt-in: only when truthy does create_app() mount the public city API.
+ENVIRONMENT_VARIABLE_ENABLE_CITY_API = "TERASIM_ENABLE_CITY_API"
+# Simulated signal-performance measures computed after every completed run (default on),
+# the wall time their two SUMO re-runs may take, and how long they wait for a worker slot.
+ENVIRONMENT_VARIABLE_CITY_SIM_METRICS = "TERASIM_CITY_SIM_METRICS"
+ENVIRONMENT_VARIABLE_CITY_SIM_METRICS_TIMEOUT_S = "TERASIM_CITY_SIM_METRICS_TIMEOUT_S"
+ENVIRONMENT_VARIABLE_CITY_SIM_METRICS_SLOT_WAIT_S = "TERASIM_CITY_SIM_METRICS_SLOT_WAIT_S"
+# Audit log of the console's operator events (feedback, plan views and downloads,
+# console sessions) under <output root>/audit/ (default on).
+ENVIRONMENT_VARIABLE_CITY_AUDIT_ENABLED = "TERASIM_CITY_AUDIT_ENABLED"
+
+# Scheduled corridor optimization (requires the city API to be enabled)
+ENVIRONMENT_VARIABLE_CITY_SCHEDULER_ENABLED = "TERASIM_CITY_SCHEDULER_ENABLED"
+ENVIRONMENT_VARIABLE_CITY_SCHEDULED_CONFIG = "TERASIM_CITY_SCHEDULED_CONFIG"
+ENVIRONMENT_VARIABLE_CITY_CADENCE_S = "TERASIM_CITY_CADENCE_S"
+ENVIRONMENT_VARIABLE_CITY_WINDOW_S = "TERASIM_CITY_WINDOW_S"
+
+# Redis channels or keys
+AV_INFO = "av_info"
+TLS_INFO = "tls_info"
+
+TERASIM_ACTOR_INFO = "terasim_actor_info"
+CONSTRUCTION_ZONE_INFO = "construction_zone_info"
+
+LATENCY = "terasim/latency"
+FLAG = "terasim/flag"
+
+VEHICLE_CONTROL = "terasim/vehicle_control"
+VEHICLE_STATE = "terasim/vehicle_state"
+VEHICLE_PLANNING = "terasim/vehicle_planning"
+
+UPDATE_RATE_SET = 20
+UPDATE_RATE_GET = 50

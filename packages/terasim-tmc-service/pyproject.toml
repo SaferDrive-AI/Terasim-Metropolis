@@ -1,0 +1,36 @@
+[project]
+name = "terasim-tmc-service"
+version = "0.1.0"
+description = "TMC microservice: intersection registry, periodic VSS behavior -> TMC generator, snapshot injector"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+authors = [
+    {name = "Inchor", email = "dev@inchor.ai"},
+]
+dependencies = [
+    "terasim-agent-skill>=0.1.0",
+    # Mirrors terasim-service; apps/deploy/city/constraints.txt is the single source of
+    # truth for the versions actually installed into the terasim-metropolis image.
+    "fastapi>=0.141.1",
+    "starlette>=1.3.1",     # fastapi only requires >=0.46; 1.3.1 closes the 2025/2026 CVEs
+    "uvicorn>=0.34.0",
+    "httpx>=0.24",
+    "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+]
+
+[project.scripts]
+terasim-tmc-service = "terasim_tmc_service.app:main"
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["terasim_tmc_service*"]

@@ -1,0 +1,35 @@
+[project]
+name = "terasim-plugin-sdk"
+version = "0.1.0"
+description = "Plugin Interface / SDK for TeraSim Metropolis Traffic Operation plug-ins"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+license = "Apache-2.0"
+authors = [
+    {name = "Inchor", email = "dev@inchor.ai"},
+]
+dependencies = [
+    # The SDK builds on the corridor pipeline (scenario generation, evaluation,
+    # scoring, NEMA export) of the matching terasim-city release.
+    "terasim-city>=0.1.0,<0.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+]
+
+[project.scripts]
+terasim-plugin = "terasim_plugin_sdk.cli:main"
+
+[build-system]
+# PEP 639 license expression above: setuptools 77 or newer.
+requires = ["setuptools>=77.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["terasim_plugin_sdk*"]
+
+[tool.setuptools.package-data]
+terasim_plugin_sdk = ["py.typed"]

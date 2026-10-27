@@ -1,0 +1,32 @@
+[project]
+name = "terasim-webster-fixed-time"
+version = "0.1.0"
+description = "Example Traffic Operation plug-in for TeraSim Metropolis: a Webster fixed-time plan from turning-movement counts"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+license = "Apache-2.0"
+dependencies = [
+    "terasim-plugin-sdk>=0.1.0,<0.2",
+    "terasim-city>=0.1.0,<0.2",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.4",
+]
+
+# This entry point is the whole integration: the SDK's registry discovers the
+# plugin through it once the distribution is installed.
+[project.entry-points."terasim.operation_plugins"]
+webster_fixed_time = "webster_fixed_time:WebsterFixedTimePlugin"
+
+[build-system]
+requires = ["setuptools>=77.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["webster_fixed_time*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

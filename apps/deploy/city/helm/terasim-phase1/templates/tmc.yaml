@@ -1,0 +1,136 @@
+{{- $tmc := printf "%s-tmc" (include "terasim-phase1.fullname" .) }}
+{{- $svc := printf "%s-service" (include "terasim-phase1.fullname" .) }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $tmc }}
+  labels:
+    {{- include "terasim-phase1.labels" (dict "root" . "component" "tmc") | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "terasim-phase1.selectorLabels" (dict "root" . "component" "tmc") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "terasim-phase1.selectorLabels" (dict "root" . "component" "tmc") | nindent 8 }}
+      annotations:
+        # Changes with the corridor files (corridorConfig): an upgrade that changes them
+        # restarts this pod, which reads them at start-up.
+        checksum/corridor-config: {{ include "terasim-phase1.corridorChecksum" . }}
+    spec:
+      serviceAccountName: {{ include "terasim-phase1.serviceAccountName" . }}
+      {{- include "terasim-phase1.imagePullSecrets" . | nindent 6 }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: tmc
+          image: {{ include "terasim-phase1.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          command: ["terasim-tmc-service"]
+          ports:
+            - name: tmc
+              containerPort: {{ .Values.tmc.port }}
+          env:
+            - name: TERASIM_REDIS_HOST
+              value: {{ include "terasim-phase1.redisHost" . | quote }}
+            - name: TMC_SPEC_FILE
+              value: /config/Metadata.json
+            - name: TMC_REGISTRY_FILE
+              value: /data/tmc/tmc_registry.json
+            - name: VSS_BEHAVIOR_URL
+              value: {{ .Values.tmc.vssBehaviorUrl | quote }}
+            - name: TERASIM_CITY_URL
+              value: {{ printf "http://%s:%v" $svc .Values.service.port | quote }}
+            - name: TMC_SETTLE_LAG_S
+              value: {{ .Values.tmc.settleLagS | quote }}
+            {{- with .Values.tmc.countedObjectTypes }}
+            - name: TMC_COUNTED_OBJECT_TYPES
+              value: {{ . | quote }}
+            {{- end }}
+            - name: TMC_HOST
+              value: "0.0.0.0"
+            - name: TMC_PORT
+              value: {{ .Values.tmc.port | quote }}
+          readinessProbe:
+            httpGet: { path: /v1/tmc/health, port: tmc }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 30
+          livenessProbe:
+            httpGet: { path: /v1/tmc/health, port: tmc }
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            failureThreshold: 6
+          {{- with .Values.tmc.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: tmc-data
+              mountPath: /data/tmc
+            - name: config
+              mountPath: /config
+              readOnly: true
+            # Read-only root filesystem: scratch and $HOME are emptyDirs.
+            - name: tmp
+              mountPath: /tmp
+            - name: home
+              mountPath: /home/terasim
+      volumes:
+        - name: tmc-data
+          persistentVolumeClaim:
+            claimName: {{ $tmc }}-data
+        - name: config
+          configMap:
+            name: {{ include "terasim-phase1.corridorConfigMapName" . }}
+        - name: tmp
+          emptyDir: {}
+        - name: home
+          emptyDir: {}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $tmc }}
+  labels:
+    {{- include "terasim-phase1.labels" (dict "root" . "component" "tmc") | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "terasim-phase1.selectorLabels" (dict "root" . "component" "tmc") | nindent 4 }}
+  ports:
+    - name: tmc
+      port: {{ .Values.tmc.port }}
+      targetPort: tmc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $tmc }}-data
+  labels:
+    {{- include "terasim-phase1.labels" (dict "root" . "component" "tmc") | nindent 4 }}
+spec:
+  accessModes:
+    - {{ .Values.tmc.storage.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.tmc.storage.size }}
+  {{- if .Values.global.storageClass }}
+  storageClassName: {{ .Values.global.storageClass | quote }}
+  {{- end }}

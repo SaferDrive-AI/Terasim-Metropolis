@@ -1,0 +1,125 @@
+# Documentation site of TeraSim Metropolis: MkDocs with the Material theme, published to
+# GitHub Pages by .github/workflows/docs.yml.
+#
+#   pip install -r docs/requirements.txt
+#   mkdocs serve              # live preview at http://127.0.0.1:8000
+#   mkdocs build --strict     # the check CI runs; the site lands in ./site
+#
+# The reference pages under docs/reference/ (http-api.md, mcp-tools.md, openapi*.json) are
+# generated from the code: python docs/_scripts/gen_reference.py
+#
+# For the published site, add the repository keys (the build stays strict-clean with them):
+#   site_url: https://<github-org>.github.io/terasim-metropolis/
+#   repo_url: https://github.com/<github-org>/terasim-metropolis
+#   repo_name: <github-org>/terasim-metropolis
+#   edit_uri: edit/main/docs/
+
+site_name: TeraSim Metropolis
+site_description: >-
+  Simulation-based traffic signal timing optimization for NVIDIA Metropolis VSS:
+  turning-movement counts in, an optimized NEMA timing plan and its KPIs out.
+copyright: TeraSim Metropolis is released under the Apache License 2.0.
+
+docs_dir: docs
+# Build tooling inside docs/ that is not part of the published site.
+exclude_docs: |
+  /_scripts/
+  /requirements.txt
+
+theme:
+  name: material
+  language: en
+  icon:
+    logo: material/traffic-light
+  favicon: assets/favicon.svg
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.indexes
+    - navigation.footer
+    - toc.follow
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn
+
+nav:
+  - Home: index.md
+  - Architecture: architecture.md
+  - Getting started:
+      - Installation: getting-started/installation.md
+      - Quickstart: getting-started/quickstart.md
+  - Developer guide:
+      - Repository layout: developer-guide/repository-layout.md
+      - Packages: developer-guide/packages.md
+      - Python API: developer-guide/python-api.md
+      - Configuration system: developer-guide/configuration.md
+      - Behavior models: developer-guide/behavior-models.md
+      - Adversarial environment: developer-guide/adversarial-environment.md
+      - Testing: developer-guide/testing.md
+      - Contributing: developer-guide/contributing.md
+  - Deployment:
+      - Docker Compose: deployment/docker-compose.md
+      - Helm on OpenShift: deployment/helm-openshift.md
+      - Corridor and cameras: deployment/corridor-configuration.md
+      - VSS integration: deployment/vss-integration.md
+      - Configuration reference: deployment/configuration.md
+  - Examples:
+      - Synthetic corridor: examples/synthetic-corridor.md
+      - On-Demand mode: examples/on-demand.md
+      - Scheduled mode: examples/scheduled.md
+      - Acceptance test: examples/acceptance.md
+  - Plugin SDK:
+      - Overview: plugins/index.md
+      - Example plugin: plugins/example-plugin.md
+  - Reference:
+      - HTTP API: reference/http-api.md
+      - MCP tools: reference/mcp-tools.md
+      - KPIs: reference/kpis.md
+      - Map formats: reference/map-formats.md
+      - NEMA plan formats: reference/nema-plan-format.md
+      - TMC snapshot format: reference/tmc-snapshot-format.md
+      - Timing sheet format: reference/timing-sheet-format.md
+  - Release notes: release-notes.md
+  - License: license.md

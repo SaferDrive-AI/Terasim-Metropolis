@@ -1,0 +1,48 @@
+# Example site values for the terasim-phase1 chart (0.6.0) on Red Hat OpenShift
+# (restricted-v2, no SCC grant needed). Copy, fill in the <...> values and install:
+#
+#   helm upgrade --install terasim-phase1 terasim-phase1-0.6.0.tgz -n <terasim-namespace> \
+#     -f values-openshift.example.yaml [-f values-corridor.yaml]
+#
+# values-corridor.yaml (the corridor's TMC spec and scheduled configuration) is generated from a
+# camera inventory by apps/deploy/city/camera-config/camcfg.py; without it the chart mounts its
+# shipped demo corridor. Chart reference: the chart's README.md and docs/deployment/.
+
+global:
+  # Host of the Route that serves the download links (/files) of the chat answers.
+  externalHost: terasim.apps.<cluster-domain>
+  externalScheme: https
+  # Pull secret for the registry that holds the image (an existing Secret in the namespace).
+  imagePullSecrets:
+    - name: <pull-secret>
+  # Empty: the cluster's default StorageClass.
+  storageClass: ""
+
+image:
+  repository: <registry>/terasim-metropolis
+  tag: "0.1.0"
+
+service:
+  # Maps ship as files or are registered with POST /v1/city/maps: no OpenStreetMap download.
+  osmDownload:
+    enabled: false
+  # Worker slots (one SUMO process each); size resources.limits.cpu to match.
+  maxConcurrency: 8
+
+# Scheduled mode: the VSS agent invokes the optimization tool on its own cadence (no TeraSim-side
+# scheduler needed). Enable the built-in scheduler only for deployments without such a caller.
+scheduler:
+  enabled: false
+  cadenceSeconds: 3600
+
+tmc:
+  # VSS video-analytics API (behavior objects) in the VSS namespace.
+  vssBehaviorUrl: http://vss-video-analytics-api.<vss-namespace>.svc:8081
+  # Detector labels counted as traffic; e.g. "car,bicycle" for a detector with lowercase labels
+  # (see deployment/vss-integration/labels-and-analytics.md). Empty: Vehicle,two_wheeler.
+  countedObjectTypes: ""
+
+networkPolicy:
+  # Namespaces whose pods may call the MCP server (the VSS agent's namespace). Empty: derived
+  # from tmc.vssBehaviorUrl.
+  mcpClientNamespaces: []

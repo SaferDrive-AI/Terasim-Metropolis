@@ -1,0 +1,109 @@
+{{- $redis := include "terasim-phase1.redisHost" . }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $redis }}
+  labels:
+    {{- include "terasim-phase1.labels" (dict "root" . "component" "redis") | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "terasim-phase1.selectorLabels" (dict "root" . "component" "redis") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "terasim-phase1.selectorLabels" (dict "root" . "component" "redis") | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "terasim-phase1.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- include "terasim-phase1.imagePullSecrets" . | nindent 6 }}
+      containers:
+        - name: redis
+          # Default: the redis-server inside the TeraSim image (non-root,
+          # arbitrary uid). redis.image switches to an external Redis image.
+          image: {{ .Values.redis.image | default (include "terasim-phase1.image" .) | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- $ctx := deepCopy .Values.securityContext }}
+          {{- if .Values.redis.runAsUser }}
+          {{- $_ := set $ctx "runAsUser" (int .Values.redis.runAsUser) }}
+          {{- end }}
+          {{- with $ctx }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          # `command` bypasses the image entrypoint (the TeraSim image would
+          # otherwise start its own embedded Redis first). The launcher writes
+          # `requirepass` into a 0600 config file on the /tmp emptyDir, so the
+          # password is neither in the pod spec nor on the process command
+          # line, then exec's redis-server as PID 1. Ephemeral snapshot
+          # buffer: no persistence on purpose (a restart clears it and the
+          # next TMC window refills it).
+          # protected-mode off: other pods connect over the ClusterIP (the
+          # Debian build defaults it on, the Docker Hub image patches it off);
+          # with requirepass set it is moot anyway.
+          command: ["/bin/sh", "-ec"]
+          args:
+            - |
+              umask 077
+              cfg=/tmp/redis.conf
+              : > "$cfg"
+              if [ -n "${REDIS_PASSWORD:-}" ]; then
+                esc=$(printf '%s' "$REDIS_PASSWORD" | sed 's/[\\"]/\\&/g')
+                printf 'requirepass "%s"\n' "$esc" >> "$cfg"
+              fi
+              exec redis-server "$cfg" --save "" --appendonly no --protected-mode no --dir /tmp
+          {{- if .Values.redis.auth.enabled }}
+          env:
+            - name: REDIS_PASSWORD
+              {{- include "terasim-phase1.redisAuthSecretKeyRef" . | nindent 14 }}
+            # redis-cli (readiness probe) authenticates with this variable.
+            - name: REDISCLI_AUTH
+              {{- include "terasim-phase1.redisAuthSecretKeyRef" . | nindent 14 }}
+          {{- end }}
+          ports:
+            - name: redis
+              containerPort: 6379
+          readinessProbe:
+            exec:
+              # -e: a NOAUTH/WRONGPASS reply exits 1, so a wrong password
+              # keeps the pod unready instead of passing silently.
+              command: ["redis-cli", "-e", "ping"]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          {{- with .Values.redis.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $redis }}
+  labels:
+    {{- include "terasim-phase1.labels" (dict "root" . "component" "redis") | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "terasim-phase1.selectorLabels" (dict "root" . "component" "redis") | nindent 4 }}
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: redis

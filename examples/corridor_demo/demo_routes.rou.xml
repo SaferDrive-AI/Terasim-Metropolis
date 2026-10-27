@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Demand of the bundled demo scenario (demo_scenario.sumocfg): the E-W arterial
+  through J1, J2 and J3 in both directions with left turns off it at J2, and a
+  N-S cross street at each junction. Flows run for an hour (begin 0, end 3600)
+  at constant rates; the scenario is simulated for 600 s. The routes use edge
+  ids of demo.net.xml.
+-->
+<routes>
+  <vType id="car_normal" vClass="passenger" accel="2.6" decel="4.5" maxSpeed="33.3" sigma="0.5" tau="1.2" length="4.5" minGap="2.5"/>
+
+  <!-- Arterial: the whole way through the three junctions -->
+  <route id="arterial_eb" edges="EB_0 EB_1 EB_2 EB_3 EB_4 EB_5"/>
+  <route id="arterial_wb" edges="WB_0 WB_1 WB_2 WB_3 WB_4 WB_5"/>
+  <!-- Left turns off the arterial at J2 -->
+  <route id="eb_left_j2" edges="EB_0 EB_1 EB_2 NB_J2_2 NB_J2_3"/>
+  <route id="wb_left_j2" edges="WB_0 WB_1 WB_2 SB_J2_2 SB_J2_3"/>
+  <!-- Cross streets, straight across the arterial -->
+  <route id="j1_nb" edges="NB_J1_0 NB_J1_1 NB_J1_2 NB_J1_3"/>
+  <route id="j1_sb" edges="SB_J1_0 SB_J1_1 SB_J1_2 SB_J1_3"/>
+  <route id="j2_nb" edges="NB_J2_0 NB_J2_1 NB_J2_2 NB_J2_3"/>
+  <route id="j2_sb" edges="SB_J2_0 SB_J2_1 SB_J2_2 SB_J2_3"/>
+  <route id="j3_nb" edges="NB_J3_0 NB_J3_1 NB_J3_2 NB_J3_3"/>
+  <route id="j3_sb" edges="SB_J3_0 SB_J3_1 SB_J3_2 SB_J3_3"/>
+
+  <flow id="arterial_eb" type="car_normal" route="arterial_eb" begin="0" end="3600" vehsPerHour="600" departLane="best" departSpeed="max"/>
+  <flow id="arterial_wb" type="car_normal" route="arterial_wb" begin="0" end="3600" vehsPerHour="450" departLane="best" departSpeed="max"/>
+  <flow id="eb_left_j2" type="car_normal" route="eb_left_j2" begin="0" end="3600" vehsPerHour="250" departLane="best" departSpeed="max"/>
+  <flow id="wb_left_j2" type="car_normal" route="wb_left_j2" begin="0" end="3600" vehsPerHour="200" departLane="best" departSpeed="max"/>
+  <flow id="j1_nb" type="car_normal" route="j1_nb" begin="0" end="3600" vehsPerHour="150" departLane="best" departSpeed="max"/>
+  <flow id="j1_sb" type="car_normal" route="j1_sb" begin="0" end="3600" vehsPerHour="120" departLane="best" departSpeed="max"/>
+  <flow id="j2_nb" type="car_normal" route="j2_nb" begin="0" end="3600" vehsPerHour="180" departLane="best" departSpeed="max"/>
+  <flow id="j2_sb" type="car_normal" route="j2_sb" begin="0" end="3600" vehsPerHour="140" departLane="best" departSpeed="max"/>
+  <flow id="j3_nb" type="car_normal" route="j3_nb" begin="0" end="3600" vehsPerHour="130" departLane="best" departSpeed="max"/>
+  <flow id="j3_sb" type="car_normal" route="j3_sb" begin="0" end="3600" vehsPerHour="160" departLane="best" departSpeed="max"/>
+</routes>

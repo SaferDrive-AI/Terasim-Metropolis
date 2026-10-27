@@ -1,0 +1,34 @@
+[project]
+name = "terasim-city"
+version = "0.1.0"
+description = "City traffic data integrations that produce SUMO-runnable scenarios for TeraSim"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+license = "Apache-2.0"
+authors = [
+    {name = "Inchor", email = "dev@inchor.ai"},
+]
+dependencies = [
+    "sumolib>=1.22",
+    "lxml>=5.0",
+    "optuna>=4.0",
+    "terasim>=0.2.0",
+    "terasim-nde-nade>=0.2.0",
+    # Offline coordinate -> IANA timezone lookup: signal schedules are local
+    # wall-clock tables and the timezone is derived from corridor coordinates
+    # (terasim_city.geo_timezone), never configured.
+    "tzfpy>=1.3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["terasim_city*"]

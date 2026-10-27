@@ -1,0 +1,13 @@
+# Generated run artifacts — optimization trials, sim output, scenarios.
+# The demo scripts write these; they are never committed.
+run_*/
+output/
+__pycache__/
+
+# demo_tmc.json is a committed source fixture (the demo's traffic counts),
+# re-included despite the repo-wide "*.json" ignore.
+!demo_tmc.json
+
+# placeholder_tmc.json is the committed placeholder TMC file of the customer-style
+# scenario (demo_scenario.sumocfg), re-included for the same reason.
+!placeholder_tmc.json

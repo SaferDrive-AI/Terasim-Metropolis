@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.python-version
+
+# Cython-generated sources (built by packages/terasim-nde-nade/setup.py)
+packages/terasim-nde-nade/terasim_nde_nade/utils/collision/collision_check_cy.c
+packages/terasim-nde-nade/terasim_nde_nade/utils/geometry/geometry_utils_cy.c
+packages/terasim-nde-nade/terasim_nde_nade/utils/trajectory/trajectory_utils_cy.c
+
+# Test and coverage artefacts
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.ruff_cache/
+.mypy_cache/
+
+# Documentation build
+site/
+
+# Simulation and run outputs
+outputs/
+output/
+logs/
+*.log
+*.fcd.xml
+*.lc.xml
+*.collision.xml
+*.traj.xml
+acceptance-out-*/
+
+# Model checkpoints and large binaries are never committed
+*.pth
+*.pt
+*.ckpt
+*.onnx
+*.safetensors
+
+# Editors and OS
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db

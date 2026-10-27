@@ -1,0 +1,146 @@
+{{- $mcp := printf "%s-mcp" (include "terasim-phase1.fullname" .) }}
+{{- $svc := printf "%s-service" (include "terasim-phase1.fullname" .) }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $mcp }}
+  labels:
+    {{- include "terasim-phase1.labels" (dict "root" . "component" "mcp") | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "terasim-phase1.selectorLabels" (dict "root" . "component" "mcp") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "terasim-phase1.selectorLabels" (dict "root" . "component" "mcp") | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "terasim-phase1.serviceAccountName" . }}
+      {{- include "terasim-phase1.imagePullSecrets" . | nindent 6 }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.coScheduleServiceAndMcp }}
+      # terasim-service (RW) and terasim-mcp (RO) share the output PVC; on RWO
+      # storage both pods must be on the same node.
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  {{- include "terasim-phase1.selectorLabels" (dict "root" . "component" "service") | nindent 18 }}
+              topologyKey: kubernetes.io/hostname
+      {{- end }}
+      containers:
+        - name: mcp
+          image: {{ include "terasim-phase1.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          command: ["terasim-agent-skill"]
+          ports:
+            - name: mcp
+              containerPort: {{ .Values.mcp.port }}
+          env:
+            - name: TERASIM_REDIS_HOST
+              value: {{ include "terasim-phase1.redisHost" . | quote }}
+            - name: TERASIM_CITY_URL
+              value: {{ printf "http://%s:%v" $svc .Values.service.port | quote }}
+            - name: TERASIM_TMC_URL
+              value: {{ printf "http://%s-tmc:%v" (include "terasim-phase1.fullname" .) .Values.tmc.port | quote }}
+            - name: TERASIM_CITY_DATA_ROOT
+              value: /data/output/store
+            - name: TERASIM_MCP_TRANSPORT
+              value: streamable-http
+            - name: TERASIM_MCP_HOST
+              value: "0.0.0.0"
+            - name: TERASIM_MCP_PORT
+              value: {{ .Values.mcp.port | quote }}
+            - name: TERASIM_MCP_HEARTBEAT_S
+              value: {{ .Values.mcp.heartbeatS | quote }}
+            - name: TERASIM_ARTIFACT_ROOT
+              value: /data/artifacts
+            {{- $pub := include "terasim-phase1.mcpPublicUrl" . }}
+            {{- if $pub }}
+            - name: TERASIM_MCP_PUBLIC_URL
+              value: {{ $pub | quote }}
+            {{- end }}
+          readinessProbe:
+            tcpSocket: { port: mcp }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 30
+          livenessProbe:
+            tcpSocket: { port: mcp }
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            failureThreshold: 6
+          {{- with .Values.mcp.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: output
+              mountPath: /data/output
+              readOnly: true
+            - name: artifacts
+              mountPath: /data/artifacts
+            # Read-only root filesystem: scratch and $HOME are emptyDirs.
+            - name: tmp
+              mountPath: /tmp
+            - name: home
+              mountPath: /home/terasim
+      volumes:
+        - name: output
+          persistentVolumeClaim:
+            claimName: {{ $svc }}-output
+        - name: artifacts
+          persistentVolumeClaim:
+            claimName: {{ $mcp }}-artifacts
+        - name: tmp
+          emptyDir: {}
+        - name: home
+          emptyDir: {}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $mcp }}
+  labels:
+    {{- include "terasim-phase1.labels" (dict "root" . "component" "mcp") | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "terasim-phase1.selectorLabels" (dict "root" . "component" "mcp") | nindent 4 }}
+  ports:
+    - name: mcp
+      port: {{ .Values.mcp.port }}
+      targetPort: mcp
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $mcp }}-artifacts
+  labels:
+    {{- include "terasim-phase1.labels" (dict "root" . "component" "mcp") | nindent 4 }}
+spec:
+  accessModes:
+    - {{ .Values.mcp.artifacts.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.mcp.artifacts.size }}
+  {{- if .Values.global.storageClass }}
+  storageClassName: {{ .Values.global.storageClass | quote }}
+  {{- end }}

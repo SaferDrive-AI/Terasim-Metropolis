@@ -1,0 +1,67 @@
+# Camera inventory of the demo corridor: the synthetic three-signal arterial of
+# examples/corridor_demo, whose map is baked into the TeraSim image. Four cameras per
+# signal, one per approach. It regenerates the two corridor files the Helm chart ships
+# (configs/Metadata.json and configs/scheduled_config.yaml); only the road-segment ids of
+# the Headings tables differ, because here they are the node pairs of the synthetic road
+# graph in inputs/:
+#   python3 camcfg.py generate examples/demo_arterial.yaml -o out/demo_arterial
+# Paths are relative to this file. Every input is synthetic (inputs/build_synthetic_inputs.py).
+version: 1
+
+corridor:
+  id: demo_arterial                  # corridor_id of the TMC spec and of the scheduled configuration
+  name: Arterial Ave
+  description: Synthetic demo corridor, signals J1-J3
+  city: {id: example, name: Example City}
+  observation_interval: 10m          # TMC window
+
+map:
+  # TeraSim's simulation map as the service sees it (scheduled_config.yaml base_sumocfg):
+  # the demo corridor baked into the image.
+  sumocfg: /data/input/map/demo.sumocfg
+  # A local copy of the same map's network, read by the generator to bind the signals.
+  sumo_net: ../../../../../examples/corridor_demo/demo.net.xml
+
+road_graph:
+  # The OpenStreetMap road graph VSS behavior analytics map-matches against: behaviors
+  # carry their path as its edges, so the Headings table is built from it.
+  osm: inputs/demo_arterial_road_graph.osm
+  headings_radius_m: 125             # how far along each street the Headings table reaches
+
+optimization:                        # scheduled_config.yaml request defaults
+  sim_end: 1800
+  max_trials: 24
+  patience: 16
+  n_workers: 4
+
+intersections:
+  - id: i1
+    name: Arterial Ave & 1st Cross St
+    lat: 37.335
+    lon: -121.90339
+    cameras:
+      # approach = the traffic the camera counts, by direction of travel (South = southbound).
+      - {sensor: i1-cam1, approach: South, rtsp_url: "rtsp://i1-cam1.cameras.example:554/stream1"}
+      - {sensor: i1-cam2, approach: West, rtsp_url: "rtsp://i1-cam2.cameras.example:554/stream1"}
+      - {sensor: i1-cam3, approach: North, rtsp_url: "rtsp://i1-cam3.cameras.example:554/stream1"}
+      - {sensor: i1-cam4, approach: East, rtsp_url: "rtsp://i1-cam4.cameras.example:554/stream1"}
+
+  - id: i2
+    name: Arterial Ave & 2nd Cross St
+    lat: 37.335
+    lon: -121.9
+    cameras:
+      - {sensor: i2-cam1, approach: South, rtsp_url: "rtsp://i2-cam1.cameras.example:554/stream1"}
+      - {sensor: i2-cam2, approach: West, rtsp_url: "rtsp://i2-cam2.cameras.example:554/stream1"}
+      - {sensor: i2-cam3, approach: North, rtsp_url: "rtsp://i2-cam3.cameras.example:554/stream1"}
+      - {sensor: i2-cam4, approach: East, rtsp_url: "rtsp://i2-cam4.cameras.example:554/stream1"}
+
+  - id: i3
+    name: Arterial Ave & 3rd Cross St
+    lat: 37.335
+    lon: -121.89661
+    cameras:
+      - {sensor: i3-cam1, approach: South, rtsp_url: "rtsp://i3-cam1.cameras.example:554/stream1"}
+      - {sensor: i3-cam2, approach: West, rtsp_url: "rtsp://i3-cam2.cameras.example:554/stream1"}
+      - {sensor: i3-cam3, approach: North, rtsp_url: "rtsp://i3-cam3.cameras.example:554/stream1"}
+      - {sensor: i3-cam4, approach: East, rtsp_url: "rtsp://i3-cam4.cameras.example:554/stream1"}

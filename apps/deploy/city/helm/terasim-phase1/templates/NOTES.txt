@@ -1,0 +1,67 @@
+TeraSim Metropolis ({{ .Chart.AppVersion }}) installed as release "{{ .Release.Name }}" in namespace "{{ .Release.Namespace }}".
+
+Services (ClusterIP):
+  terasim-service : {{ include "terasim-phase1.serviceHost" . }}:{{ .Values.service.port }}   (REST /v1/city/*)
+  terasim-mcp     : {{ include "terasim-phase1.mcpHost" . }}:{{ .Values.mcp.port }}   (MCP /mcp for the VSS agent)
+  terasim-tmc     : {{ include "terasim-phase1.tmcHost" . }}:{{ .Values.tmc.port }}   (periodic TMC collector)
+
+{{ $corridorConfig := .Values.corridorConfig | default dict -}}
+{{ if $corridorConfig.existingConfigMap -}}
+Corridor files: ConfigMap "{{ $corridorConfig.existingConfigMap }}" (yours). After changing it, restart both readers:
+  oc rollout restart deploy/{{ include "terasim-phase1.serviceHost" . }} deploy/{{ include "terasim-phase1.tmcHost" . }} -n {{ .Release.Namespace }}
+{{- else -}}
+{{ $corridor := include "terasim-phase1.corridorSummary" . | fromYaml -}}
+Corridor "{{ $corridor.corridorId }}": {{ $corridor.intersections }} intersection(s), {{ $corridor.cameras }} camera(s) in the TMC spec
+  ({{ if $corridorConfig.metadataJson }}corridorConfig.metadataJson{{ else }}the chart's configs/Metadata.json{{ end }}); scheduled corridors: {{ join ", " $corridor.scheduled }}
+  ({{ if $corridorConfig.scheduledConfigYaml }}corridorConfig.scheduledConfigYaml{{ else }}the chart's configs/scheduled_config.yaml{{ end }}).
+{{- if not (has $corridor.corridorId $corridor.scheduled) }}
+  WARNING: the TMC spec's corridor "{{ $corridor.corridorId }}" is not in scheduled_config.yaml: the scheduler and the
+  chat requests for it get no map or budget from the configuration. Generate both files from one inventory.
+{{- end }}
+  Register each intersection with the TMC collector once (camcfg.py writes register-intersections.sh).
+{{- end }}
+
+VSS agent wiring (in the operator's VSS namespace): point terasim_mcp at
+  http://{{ include "terasim-phase1.mcpHost" . }}.{{ .Release.Namespace }}.svc:{{ .Values.mcp.port }}/mcp
+
+{{- $pub := include "terasim-phase1.mcpPublicUrl" . }}
+{{- if $pub }}
+Download links in the chat answer are served at:
+  {{ $pub }}/files/<artifact_id>/<file>
+{{- else }}
+NOTE: no external host set (global.externalHost empty) -> no download Route; the
+MCP is reachable in-cluster only. Set global.externalHost to publish download links.
+{{- end }}
+
+Security: the pods run under the default restricted-v2 SCC (non-root image,
+arbitrary uid, read-only root filesystem, no capabilities) — no SCC grant needed.
+
+{{- $secret := include "terasim-phase1.redisAuthSecretName" . }}
+{{- if .Values.redis.auth.enabled }}
+Redis: password-protected (requirepass). Secret "{{ $secret }}", key "{{ .Values.redis.auth.secretKey }}"
+  {{- if .Values.redis.auth.existingSecret }} (your Secret).{{ else }} (chart-managed: kept on uninstall, reused on upgrade).{{ end }}
+  Read it :  oc get secret {{ $secret }} -n {{ .Release.Namespace }} -o jsonpath='{.data.{{ .Values.redis.auth.secretKey }}}' | base64 -d
+  Rotate  :  change it, then  oc rollout restart deploy/{{ include "terasim-phase1.redisHost" . }} deploy/{{ include "terasim-phase1.serviceHost" . }} -n {{ .Release.Namespace }}
+{{- else }}
+WARNING: redis.auth.enabled=false — the Redis snapshot buffer accepts unauthenticated connections.
+{{- end }}
+
+{{- $mcpNamespaces := include "terasim-phase1.mcpClientNamespaces" . | fromYamlArray }}
+{{- if and .Values.networkPolicy.enabled (.Capabilities.APIVersions.Has "networking.k8s.io/v1") }}
+NetworkPolicy: ingress limited per component (enforced by NetworkPolicy-capable CNIs such as OVN-Kubernetes):
+  redis        <- {{ join ", " .Values.networkPolicy.redisClients }} pod(s) only
+  service, tmc <- pods in this namespace
+  mcp          <- pods in this namespace{{ if $mcpNamespaces }} + namespace(s) {{ join ", " $mcpNamespaces }}{{ end }}{{ if .Values.route.enabled }} + the OpenShift router (Route /files){{ end }}
+{{- if not $mcpNamespaces }}
+  WARNING: no VSS namespace resolved (networkPolicy.mcpClientNamespaces is empty and
+  tmc.vssBehaviorUrl is not a <svc>.<namespace>.svc URL): the VSS agent can reach /mcp
+  only from this namespace. Set networkPolicy.mcpClientNamespaces={<vss-namespace>}.
+{{- end }}
+  Egress is not restricted (VSS behavior API in another namespace, optional Overpass, DNS).
+{{- else }}
+NetworkPolicy: not rendered (networkPolicy.enabled=false or networking.k8s.io/v1 unavailable).
+{{- end }}
+
+Verify:
+  oc get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+  helm test {{ .Release.Name }} -n {{ .Release.Namespace }}    # also checks Redis rejects an unauthenticated PING

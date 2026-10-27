@@ -1,0 +1,28 @@
+{{- /*
+OpenShift Route exposing terasim-mcp's /files download path. Gated on the
+route.openshift.io/v1 capability (renders only on OpenShift), on route.enabled,
+and on an external host being set. Edge TLS with HTTP->HTTPS redirect so the
+download links (which the chat answer prints as https URLs) are not blocked as
+mixed content. Only /files is exposed; the MCP protocol endpoint (/mcp) stays
+in-cluster only.
+*/}}
+{{- if and .Values.route.enabled (.Capabilities.APIVersions.Has "route.openshift.io/v1") (include "terasim-phase1.externalBase" .) }}
+{{- $mcp := printf "%s-mcp" (include "terasim-phase1.fullname" .) }}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ $mcp }}-files
+  labels:
+    {{- include "terasim-phase1.labels" (dict "root" . "component" "mcp") | nindent 4 }}
+spec:
+  host: {{ .Values.global.externalHost | quote }}
+  path: {{ printf "%s/files" (.Values.route.pathPrefix | default "" | trimSuffix "/") | quote }}
+  to:
+    kind: Service
+    name: {{ $mcp }}
+  port:
+    targetPort: mcp
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+{{- end }}

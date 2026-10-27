@@ -1,0 +1,51 @@
+TeraSim Metropolis
+Copyright 2026 The TeraSim Metropolis Authors
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This product includes software from the TeraSim project
+(https://github.com/mcity/TeraSim), originally developed at Mcity, University of
+Michigan, licensed under the Apache License, Version 2.0: the simulation engine
+(packages/terasim), the naturalistic and adversarial driving environment
+(packages/terasim-nde-nade) and parts of the service package
+(packages/terasim-service).
+
+packages/terasim-tmc-service/terasim_tmc_service/nv_generate_tmc.py contains
+turning-movement counting functions from a reference script provided by
+NVIDIA Corporation for the integration with NVIDIA Metropolis VSS.
+
+packages/terasim-nde-nade/terasim_nde_nade/utils/sumo_lane_locator.py is ported from
+Eclipse SUMO (Copyright (C) 2001-2025 German Aerospace Center (DLR) and others) and is
+licensed under EPL-2.0 OR GPL-2.0-or-later (LICENSES/EPL-2.0.txt), not under the Apache
+License, Version 2.0.
+
+Third-party components used by this product, and the components contained in
+its container image, are listed with their licenses in THIRD_PARTY_NOTICES.md.
+
+======================================================================
+Additional grant: redistribution for NVIDIA product integration
+======================================================================
+
+In addition to the rights granted under the Apache License, Version 2.0, the
+copyright holders grant NVIDIA Corporation and its affiliates ("NVIDIA") a
+perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+license to reproduce, modify, prepare derivative works of, integrate,
+publicly display, publicly perform, sublicense and distribute this software
+and its documentation (the "Software"), in source or object form, including
+as container images published in the NVIDIA NGC catalog, as part of or
+together with NVIDIA products and services (including NVIDIA Metropolis and
+the NVIDIA Video Search and Summarization (VSS) blueprint), and to license the
+Software to NVIDIA's customers as part of such products and services under
+NVIDIA's own license terms for those products, provided that:
+
+  1. the LICENSE and NOTICE files of the Software, and the copyright and
+     attribution notices in its source files, are retained in every copy of
+     the Software that NVIDIA distributes; and
+  2. the third-party components included in the Software remain subject to
+     their own licenses (THIRD_PARTY_NOTICES.md).
+
+This grant covers every released version of the Software up to and including
+the version this NOTICE file is part of. It does not grant permission to use
+the trade names, trademarks, service marks or product names of the copyright
+holders, except as required to describe the origin of the Software and to
+identify the integration in NVIDIA product documentation.

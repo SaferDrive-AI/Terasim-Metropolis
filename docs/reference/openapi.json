@@ -1,0 +1,3040 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "TeraSim Metropolis service",
+    "description": "\nTeraSim Metropolis service API. The `/v1/city` endpoints take traffic snapshots, maps and\nthe city's current signal plans, run simulation-based signal timing optimization and return\nNEMA timing plans with their KPIs. The co-simulation endpoints start and control individual\nTeraSim simulations.\n",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/simulation_result/{simulation_id}": {
+      "get": {
+        "tags": [
+          "simulations"
+        ],
+        "summary": "Get detailed simulation result data",
+        "description": "Retrieve detailed result data from Redis for a completed simulation.\n\nAccesses simulation results stored in Redis during execution.\nProvides structured access to key simulation outcomes and metrics.\n\nArgs:\n    simulation_id: UUID of the target simulation\n    \nReturns:\n    dict: Structured simulation result data from Redis storage\n    \nNote:\n    This endpoint retrieves results cached in Redis during simulation execution.\n    For comprehensive file-based results, use get_simulation_results instead.",
+        "operationId": "get_simulation_result_simulation_result__simulation_id__get",
+        "parameters": [
+          {
+            "name": "simulation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Simulation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Simulation result retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "404": {
+            "description": "Simulation not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/av_route/{simulation_id}": {
+      "get": {
+        "tags": [
+          "simulations"
+        ],
+        "summary": "Get autonomous vehicle route coordinates",
+        "description": "Retrieve the autonomous vehicle's planned route in geographic coordinates.\n\nReturns the complete AV route as latitude/longitude coordinate pairs.\nEssential for understanding the AV's intended path and analyzing\nscenario interactions along the route.\n\nArgs:\n    simulation_id: UUID of simulation containing the AV route\n    \nReturns:\n    list: Array of [latitude, longitude] coordinate pairs defining the AV route\n    \nExample:\n    Returns route like: [[40.7128, -74.0060], [40.7140, -74.0070], ...]",
+        "operationId": "get_av_route_av_route__simulation_id__get",
+        "parameters": [
+          {
+            "name": "simulation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Simulation UUID to get AV route from",
+              "title": "Simulation Id"
+            },
+            "description": "Simulation UUID to get AV route from"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/start_simulation": {
+      "post": {
+        "tags": [
+          "simulations"
+        ],
+        "summary": "Start a new TeraSim simulation",
+        "description": "Start a new TeraSim simulation with advanced scenario generation capabilities.\n\nThis endpoint initializes a complete TeraSim simulation instance with support for:\n- Multi-agent autonomous vehicle scenarios\n- Real-time simulation control and monitoring\n- Corner case and adversarial scenario testing\n- Redis-based state management for distributed control\n\nArgs:\n    config: SimulationConfig containing the YAML configuration file path and execution settings\n    \nReturns:\n    dict: Response containing unique simulation_id for tracking and control\n    \nExample:\n    Start a highway merge scenario:\n    {\n        \"config_file\": \"/path/to/highway_merge.yaml\",\n        \"auto_run\": true\n    }",
+        "operationId": "start_simulation_start_simulation_post",
+        "parameters": [
+          {
+            "name": "enable_viz",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Enable Viz"
+            }
+          },
+          {
+            "name": "viz_port",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 8050,
+              "title": "Viz Port"
+            }
+          },
+          {
+            "name": "viz_update_freq",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 5,
+              "title": "Viz Update Freq"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SimulationConfig",
+                "description": "TeraSim simulation configuration including config file path and auto-run setting"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulation_status/{simulation_id}": {
+      "get": {
+        "tags": [
+          "simulations"
+        ],
+        "summary": "Get real-time simulation status",
+        "description": "Retrieve real-time status information for an active TeraSim simulation.\n\nProvides comprehensive status monitoring including execution state, progress tracking,\nand health information. Uses Redis backend for distributed state management.\n\nArgs:\n    simulation_id: UUID string identifier for the target simulation instance\n    \nReturns:\n    SimulationStatus: Detailed status object with current execution state\n    \nStatus values:\n    - \"started\": Simulation initialized but not yet running\n    - \"running\": Active execution in progress\n    - \"paused\": Temporarily suspended, can be resumed\n    - \"completed\": Successfully finished execution\n    - \"failed\": Encountered error during execution",
+        "operationId": "get_simulation_status_simulation_status__simulation_id__get",
+        "parameters": [
+          {
+            "name": "simulation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Simulation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationStatus"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Simulation not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulation_control/{simulation_id}": {
+      "post": {
+        "tags": [
+          "simulations"
+        ],
+        "summary": "Control simulation execution",
+        "description": "Send real-time control commands to manage simulation execution.\n\nProvides precise control over simulation lifecycle with immediate effect.\nCommands are processed through Redis messaging for distributed control.\n\nArgs:\n    simulation_id: UUID of the target simulation instance\n    command: Control operation to execute\n    \nAvailable commands:\n    - pause: Temporarily suspend simulation execution\n    - resume: Continue paused simulation from current state\n    - stop: Terminate simulation and clean up resources\n    \nReturns:\n    dict: Confirmation message with command execution status\n    \nExample:\n    Pause a running simulation:\n    {\n        \"command\": \"pause\"\n    }",
+        "operationId": "control_simulation_simulation_control__simulation_id__post",
+        "parameters": [
+          {
+            "name": "simulation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Simulation Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SimulationCommand",
+                "description": "Control command: pause, resume, or stop"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Command sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "404": {
+            "description": "Simulation not found"
+          },
+          "500": {
+            "description": "Failed to send command"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulation_tick/{simulation_id}": {
+      "post": {
+        "tags": [
+          "simulations"
+        ],
+        "summary": "Single-step simulation execution",
+        "description": "Advance simulation by exactly one time step for precise control.\n\nEnables step-by-step debugging and detailed scenario analysis.\nOnly functions when simulation was started with auto_run=false.\nEssential for detailed behavioral analysis and corner case investigation.\n\nArgs:\n    simulation_id: UUID of the target simulation instance\n    \nReturns:\n    dict: Confirmation that single step command was executed\n    \nNote:\n    This command requires the simulation to be started with auto_run=false.\n    Use this for detailed step-by-step analysis of vehicle behaviors.",
+        "operationId": "tick_simulation_simulation_tick__simulation_id__post",
+        "parameters": [
+          {
+            "name": "simulation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Simulation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tick command sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "404": {
+            "description": "Simulation not found"
+          },
+          "500": {
+            "description": "Failed to send tick command"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulation_results/{simulation_id}": {
+      "get": {
+        "tags": [
+          "simulations"
+        ],
+        "summary": "Get comprehensive simulation results",
+        "description": "Retrieve comprehensive results and analytics from completed simulation.\n\nProvides access to complete simulation output including vehicle trajectories,\ncollision data, performance metrics, and generated scenario files.\nResults include both quantitative metrics and qualitative behavioral analysis.\n\nArgs:\n    simulation_id: UUID of the simulation to retrieve results for\n    \nReturns:\n    dict: Complete simulation results including:\n        - Execution status and completion state\n        - Vehicle trajectory data (FCD files)\n        - Collision detection results\n        - Performance metrics and KPIs\n        - Generated OpenSCENARIO files\n        - Output directory paths for detailed files\n        \nResult states:\n    - running: Simulation still executing, partial results available\n    - completed: Full results available for analysis\n    - failed: Error occurred, diagnostic information provided",
+        "operationId": "get_simulation_results_simulation_results__simulation_id__get",
+        "parameters": [
+          {
+            "name": "simulation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Simulation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Simulation results retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "404": {
+            "description": "Simulation not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulation/{simulation_id}/state": {
+      "get": {
+        "tags": [
+          "simulations"
+        ],
+        "summary": "Get complete simulation state snapshot",
+        "description": "Retrieve comprehensive real-time state information for active simulation.\n\nProvides complete snapshot of current simulation state including:\nvehicle positions, speeds, accelerations, and behavioral states.\nEssential for real-time monitoring and analysis.\n\nArgs:\n    simulation_id: UUID of the target simulation\n    \nReturns:\n    dict: Complete simulation state including:\n        - All vehicle states (position, velocity, acceleration)\n        - Traffic light states\n        - Environmental conditions\n        - Simulation time and step information\n        - Agent behavioral states",
+        "operationId": "get_simulation_state_simulation__simulation_id__state_get",
+        "parameters": [
+          {
+            "name": "simulation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Simulation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulation/{simulation_id}/agent_command": {
+      "post": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "Send real-time command to control specific agent",
+        "description": "Send real-time control commands to specific agents during simulation.\n\nEnables precise control over individual vehicle or pedestrian behavior\nfor testing specific scenarios and edge cases. Commands are queued\nand executed in the next simulation step.\n\nArgs:\n    simulation_id: UUID of the simulation containing the target agent\n    command: AgentCommand containing agent ID and control parameters\n    \nReturns:\n    dict: Confirmation that command was queued for execution\n    \nCommand types:\n    - Lane change commands\n    - Speed control (acceleration/deceleration)\n    - Emergency braking\n    - Route modifications\n    - Behavioral parameter changes\n    \nExample:\n    Force emergency braking for vehicle \"car_1\":\n    {\n        \"agent_id\": \"car_1\",\n        \"command_type\": \"emergency_brake\",\n        \"parameters\": {\"deceleration\": 8.0}\n    }",
+        "operationId": "control_vehicle_simulation__simulation_id__agent_command_post",
+        "parameters": [
+          {
+            "name": "simulation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Simulation Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentCommand",
+                "description": "Control command for specific agent (vehicle or pedestrian)"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulation/{simulation_id}/agent_commands_batch": {
+      "post": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "Send coordinated batch commands to multiple agents",
+        "description": "Execute coordinated control commands across multiple agents simultaneously.\n\nEnables complex scenario orchestration by controlling multiple vehicles\nand pedestrians in coordination. Commands are executed in the order provided\nfor precise timing control.\n\nArgs:\n    simulation_id: UUID of simulation containing the target agents\n    command_batch: Collection of AgentCommand objects for batch execution\n    \nReturns:\n    dict: Confirmation with count of commands successfully queued\n    \nUse cases:\n    - Coordinated lane changes for convoy behavior\n    - Simultaneous emergency responses\n    - Traffic pattern manipulation\n    - Multi-agent corner case generation\n    \nExample:\n    Coordinate emergency braking across multiple vehicles:\n    {\n        \"commands\": [\n            {\"agent_id\": \"car_1\", \"command_type\": \"emergency_brake\"},\n            {\"agent_id\": \"car_2\", \"command_type\": \"lane_change\", \"target_lane\": 2}\n        ]\n    }",
+        "operationId": "control_agents_batch_simulation__simulation_id__agent_commands_batch_post",
+        "parameters": [
+          {
+            "name": "simulation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Simulation Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentCommandBatch",
+                "description": "Collection of commands for multiple agents to execute simultaneously"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/city/optimizations": {
+      "post": {
+        "tags": [
+          "city-optimization"
+        ],
+        "summary": "Submit",
+        "operationId": "submit_v1_city_optimizations_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OptimizationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "city-optimization"
+        ],
+        "summary": "Recent optimization runs",
+        "description": "Every optimization run, newest first: scheduled, API and synchronous ones.\n\nRuns are kept as long as their job record (seven days by default).",
+        "operationId": "list_runs_v1_city_optimizations_get",
+        "parameters": [
+          {
+            "name": "corridor_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only this corridor's runs.",
+              "title": "Corridor Id"
+            },
+            "description": "Only this corridor's runs."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "How many runs, newest first (at most 200).",
+              "default": 20,
+              "title": "Limit"
+            },
+            "description": "How many runs, newest first (at most 200)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OptimizationRunSummary"
+                  },
+                  "title": "Response List Runs V1 City Optimizations Get"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The job store is unavailable"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/city/optimize": {
+      "post": {
+        "tags": [
+          "city-optimization"
+        ],
+        "summary": "Optimize Direct",
+        "operationId": "optimize_direct_v1_city_optimize_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectOptimizationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirectOptimizationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/city/optimizations/{run_id}/status": {
+      "get": {
+        "tags": [
+          "city-optimization"
+        ],
+        "summary": "Get Status",
+        "operationId": "get_status_v1_city_optimizations__run_id__status_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/city/optimizations/{run_id}/result": {
+      "get": {
+        "tags": [
+          "city-optimization"
+        ],
+        "summary": "Get Result",
+        "operationId": "get_result_v1_city_optimizations__run_id__result_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/city/optimizations/{run_id}/nema": {
+      "get": {
+        "tags": [
+          "city-optimization"
+        ],
+        "summary": "Get Nema",
+        "operationId": "get_nema_v1_city_optimizations__run_id__nema_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/city/optimizations/{run_id}/baseline": {
+      "get": {
+        "tags": [
+          "city-optimization"
+        ],
+        "summary": "Baseline (current) plan of a run",
+        "description": "The plan the run's optimization was measured against, as NEMA timing.\n\n409 until the run has completed; 404 with the reason when the baseline cannot\nbe expressed as NEMA timing (or its files are gone).",
+        "operationId": "get_baseline_v1_city_optimizations__run_id__baseline_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaselinePlanResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown run, or the item cannot be produced (the detail says why)"
+          },
+          "409": {
+            "description": "The run has not completed (or failed)"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/city/optimizations/{run_id}/sim_metrics": {
+      "get": {
+        "tags": [
+          "city-optimization"
+        ],
+        "summary": "Simulated signal-performance measures of a run",
+        "description": "Simulated signal-performance measures of the run's baseline and optimized plans.\n\nComputed in the background after every completed run while\nTERASIM_CITY_SIM_METRICS is on (two extra SUMO runs per optimization):\n202 {\"status\": \"pending\"} until then, 404 with the reason when disabled or\nwhen the computation failed.",
+        "operationId": "get_sim_metrics_v1_city_optimizations__run_id__sim_metrics_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The metrics document",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimMetricsDocument"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Still being computed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimMetricsPending"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown run, metrics disabled, or the computation failed (the detail says why)"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/city/optimizations/{run_id}/report.pdf": {
+      "get": {
+        "tags": [
+          "city-optimization"
+        ],
+        "summary": "Timing report (PDF) of a run",
+        "description": "The run's signal timing report: current plan, optimized plan and KPI comparison.\n\nRendered on the first request and kept; 409 until the run has completed; 404 with\nthe reason when it cannot be rendered (no NEMA plan exported, no PDF renderer on\nthis deployment, or a rendering error).",
+        "operationId": "get_report_v1_city_optimizations__run_id__report_pdf_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The timing report",
+            "content": {
+              "application/pdf": {}
+            }
+          },
+          "404": {
+            "description": "Unknown run, or the item cannot be produced (the detail says why)"
+          },
+          "409": {
+            "description": "The run has not completed (or failed)"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/city/audit/events": {
+      "post": {
+        "tags": [
+          "city-optimization",
+          "city-audit"
+        ],
+        "summary": "Record a console event (feedback, plan view or download, session)",
+        "description": "Record one operator event. The service stamps id, time (UTC) and actor.\n\nactor: the authenticating proxy's X-Forwarded-User / X-Forwarded-Email /\nX-Remote-User (actor_source \"proxy\"), else the body's display name (\"self\"),\nelse \"anonymous\".",
+        "operationId": "post_event_v1_city_audit_events_post",
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditEvent"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The audit log is disabled on this deployment"
+          },
+          "413": {
+            "description": "Body larger than 8 KiB"
+          },
+          "415": {
+            "description": "Body not application/json"
+          },
+          "422": {
+            "description": "Invalid event (the detail says why)"
+          },
+          "429": {
+            "description": "Too many events per minute (Retry-After)"
+          },
+          "503": {
+            "description": "The log cannot be written (the detail says why)"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "description": "The body of POST /v1/city/audit/events.",
+                "properties": {
+                  "type": {
+                    "description": "console_opened | plan_viewed | plan_downloaded | feedback",
+                    "enum": [
+                      "console_opened",
+                      "plan_viewed",
+                      "plan_downloaded",
+                      "feedback"
+                    ],
+                    "title": "Type",
+                    "type": "string"
+                  },
+                  "corridor_id": {
+                    "description": "The corridor the event concerns (1-128 characters).",
+                    "title": "Corridor Id",
+                    "type": "string"
+                  },
+                  "run_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "The run whose plan the event concerns (required except for console_opened).",
+                    "title": "Run Id"
+                  },
+                  "intersection_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "Null: the run's whole plan.",
+                    "title": "Intersection Id"
+                  },
+                  "plan_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "title": "Plan Id"
+                  },
+                  "actor": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "Display name typed in the console (at most 100 characters); used only when no authenticating proxy identifies the user.",
+                    "title": "Actor"
+                  },
+                  "detail": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "plan_downloaded: {\"format\": \"pdf\"|\"json\"|\"nema\"|\"zip\"|...}; feedback: {\"verdict\": \"accepted\"|\"rejected\"|\"needs_changes\", \"comment\": \"<= 1000 chars\"}; otherwise empty.",
+                    "title": "Detail"
+                  }
+                },
+                "required": [
+                  "type",
+                  "corridor_id"
+                ],
+                "title": "AuditEventIn",
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "city-optimization",
+          "city-audit"
+        ],
+        "summary": "Audit log events, newest first",
+        "description": "Recorded events matching every given filter, newest first.",
+        "operationId": "list_events_v1_city_audit_events_get",
+        "parameters": [
+          {
+            "name": "corridor_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Corridor Id"
+            }
+          },
+          {
+            "name": "run_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Id"
+            }
+          },
+          {
+            "name": "intersection_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Intersection Id"
+            }
+          },
+          {
+            "name": "actor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Actor"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "console_opened",
+                    "plan_viewed",
+                    "plan_downloaded",
+                    "feedback"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Type"
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Inclusive; ISO-8601 date-time or date (UTC).",
+              "title": "Since"
+            },
+            "description": "Inclusive; ISO-8601 date-time or date (UTC)."
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Exclusive; ISO-8601 date-time or date (UTC).",
+              "title": "Until"
+            },
+            "description": "Exclusive; ISO-8601 date-time or date (UTC)."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "At most 2000 (larger values return that many).",
+              "default": 200,
+              "title": "Limit"
+            },
+            "description": "At most 2000 (larger values return that many)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Events, newest first",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AuditEvent"
+                  },
+                  "title": "Response 200 List Events V1 City Audit Events Get"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The audit log is disabled on this deployment"
+          },
+          "422": {
+            "description": "Invalid filter"
+          }
+        }
+      }
+    },
+    "/v1/city/audit/events.csv": {
+      "get": {
+        "tags": [
+          "city-optimization",
+          "city-audit"
+        ],
+        "summary": "Audit log events as CSV",
+        "description": "The events of GET /audit/events as a CSV file (UTF-8 with BOM), newest first.",
+        "operationId": "export_events_v1_city_audit_events_csv_get",
+        "parameters": [
+          {
+            "name": "corridor_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Corridor Id"
+            }
+          },
+          {
+            "name": "run_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Id"
+            }
+          },
+          {
+            "name": "intersection_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Intersection Id"
+            }
+          },
+          {
+            "name": "actor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Actor"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "console_opened",
+                    "plan_viewed",
+                    "plan_downloaded",
+                    "feedback"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Type"
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Inclusive; ISO-8601 date-time or date (UTC).",
+              "title": "Since"
+            },
+            "description": "Inclusive; ISO-8601 date-time or date (UTC)."
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Exclusive; ISO-8601 date-time or date (UTC).",
+              "title": "Until"
+            },
+            "description": "Exclusive; ISO-8601 date-time or date (UTC)."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "At most 100000 (larger values return that many).",
+              "default": 10000,
+              "title": "Limit"
+            },
+            "description": "At most 100000 (larger values return that many)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "CSV download",
+            "content": {
+              "text/csv": {}
+            }
+          },
+          "404": {
+            "description": "The audit log is disabled on this deployment"
+          },
+          "422": {
+            "description": "Invalid filter"
+          }
+        }
+      }
+    },
+    "/v1/city/audit/summary": {
+      "get": {
+        "tags": [
+          "city-optimization",
+          "city-audit"
+        ],
+        "summary": "Console usage and feedback of the last N days",
+        "description": "Per-day counts by event type, users, feedback verdicts and acceptance rate.",
+        "operationId": "summary_v1_city_audit_summary_get",
+        "parameters": [
+          {
+            "name": "corridor_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only this corridor (default: all).",
+              "title": "Corridor Id"
+            },
+            "description": "Only this corridor (default: all)."
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 366,
+              "minimum": 1,
+              "default": 30,
+              "title": "Days"
+            }
+          },
+          {
+            "name": "tz",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "IANA zone of the day buckets (default UTC).",
+              "title": "Tz"
+            },
+            "description": "IANA zone of the day buckets (default UTC)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditSummary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The audit log is disabled on this deployment"
+          },
+          "422": {
+            "description": "days outside 1-366"
+          }
+        }
+      }
+    },
+    "/v1/city/plans": {
+      "post": {
+        "tags": [
+          "city-assets"
+        ],
+        "summary": "Upload Plan",
+        "operationId": "upload_plan_v1_city_plans_post",
+        "parameters": [
+          {
+            "name": "corridor_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Corridor Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "title": "Payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "city-assets"
+        ],
+        "summary": "List Plans",
+        "operationId": "list_plans_v1_city_plans_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/city/maps": {
+      "get": {
+        "tags": [
+          "city-assets"
+        ],
+        "summary": "List Maps",
+        "operationId": "list_maps_v1_city_maps_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "city-assets"
+        ],
+        "summary": "Upload Map",
+        "operationId": "upload_map_v1_city_maps_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Payload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/city/snapshots": {
+      "post": {
+        "tags": [
+          "city-ingest"
+        ],
+        "summary": "Post Snapshot",
+        "operationId": "post_snapshot_v1_city_snapshots_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Payload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/city/snapshots/{corridor_id}": {
+      "get": {
+        "tags": [
+          "city-ingest"
+        ],
+        "summary": "Get Snapshots",
+        "operationId": "get_snapshots_v1_city_snapshots__corridor_id__get",
+        "parameters": [
+          {
+            "name": "corridor_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Corridor Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/city/scheduled/{corridor_id}/latest": {
+      "get": {
+        "tags": [
+          "city-scheduled"
+        ],
+        "summary": "Get Latest Scheduled Run",
+        "description": "run_id of the most recent scheduler-submitted run for this corridor.",
+        "operationId": "get_latest_scheduled_run_v1_city_scheduled__corridor_id__latest_get",
+        "parameters": [
+          {
+            "name": "corridor_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Corridor Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AgentCommand": {
+        "properties": {
+          "agent_id": {
+            "type": "string",
+            "title": "Agent Id",
+            "default": ""
+          },
+          "agent_type": {
+            "type": "string",
+            "title": "Agent Type",
+            "default": ""
+          },
+          "command_type": {
+            "type": "string",
+            "title": "Command Type",
+            "default": ""
+          },
+          "data": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Data",
+            "default": {}
+          }
+        },
+        "type": "object",
+        "title": "AgentCommand"
+      },
+      "AgentCommandBatch": {
+        "properties": {
+          "commands": {
+            "items": {
+              "$ref": "#/components/schemas/AgentCommand"
+            },
+            "type": "array",
+            "title": "Commands",
+            "description": "List of agent commands to execute"
+          }
+        },
+        "type": "object",
+        "required": [
+          "commands"
+        ],
+        "title": "AgentCommandBatch"
+      },
+      "AuditEvent": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "32 hex characters."
+          },
+          "at": {
+            "type": "string",
+            "title": "At",
+            "description": "Service time, ISO-8601 UTC with milliseconds."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "console_opened",
+              "plan_viewed",
+              "plan_downloaded",
+              "feedback"
+            ],
+            "title": "Type"
+          },
+          "corridor_id": {
+            "type": "string",
+            "title": "Corridor Id"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          },
+          "intersection_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intersection Id"
+          },
+          "plan_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Id"
+          },
+          "actor": {
+            "type": "string",
+            "title": "Actor",
+            "description": "Who: proxy identity, display name, or \"anonymous\"."
+          },
+          "actor_source": {
+            "type": "string",
+            "enum": [
+              "proxy",
+              "self",
+              "anonymous"
+            ],
+            "title": "Actor Source"
+          },
+          "detail": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "at",
+          "type",
+          "corridor_id",
+          "actor",
+          "actor_source",
+          "detail"
+        ],
+        "title": "AuditEvent",
+        "description": "One recorded event."
+      },
+      "AuditSummary": {
+        "properties": {
+          "corridor_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Corridor Id"
+          },
+          "days": {
+            "type": "integer",
+            "title": "Days"
+          },
+          "timezone": {
+            "type": "string",
+            "title": "Timezone",
+            "description": "Zone of the day buckets (UTC when the requested one is unknown)."
+          },
+          "since": {
+            "type": "string",
+            "title": "Since",
+            "description": "Start of the first day, ISO-8601 UTC."
+          },
+          "until": {
+            "type": "string",
+            "title": "Until",
+            "description": "Now, ISO-8601 UTC."
+          },
+          "totals": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Totals",
+            "description": "Events per type in the window, and total."
+          },
+          "per_day": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Per Day",
+            "description": "One entry per local day, oldest first."
+          },
+          "downloads_by_format": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Downloads By Format"
+          },
+          "feedback": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Feedback",
+            "description": "events (all feedback events), accepted / rejected / needs_changes and acceptance_rate over each user's latest verdict per plan (null without verdicts)."
+          },
+          "unique_actors": {
+            "type": "integer",
+            "title": "Unique Actors",
+            "description": "Distinct actors other than anonymous."
+          },
+          "anonymous_events": {
+            "type": "integer",
+            "title": "Anonymous Events"
+          },
+          "actors": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Actors",
+            "description": "Up to 20 actors, most events first."
+          },
+          "last_activity": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Activity",
+            "description": "The newest event of the corridor at any time."
+          }
+        },
+        "type": "object",
+        "required": [
+          "days",
+          "timezone",
+          "since",
+          "until",
+          "totals",
+          "per_day",
+          "downloads_by_format",
+          "feedback",
+          "unique_actors",
+          "anonymous_events",
+          "actors"
+        ],
+        "title": "AuditSummary",
+        "description": "Usage of the last N days."
+      },
+      "BaselinePlanResponse": {
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "plan_id": {
+            "type": "string",
+            "title": "Plan Id",
+            "description": "The baseline's plan id in the run's trial ledger."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Where the baseline came from: stored_nema (the uploaded signal plans), baseline_sheet (a timing sheet), webster_init (timings computed from the demand) or sumo_tls (the scenario's own signal programs)."
+          },
+          "nema_plan": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Nema Plan",
+            "description": "The baseline in the terasim.nema_timing.v1 shape of /nema: the stored plan as the run used it, or the export of the baseline static plan (stage rows with nema_phase null unless the plan numbers its phases)."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "run_id",
+          "plan_id",
+          "source",
+          "nema_plan"
+        ],
+        "title": "BaselinePlanResponse",
+        "description": "The plan a run measured its optimization against, as NEMA timing."
+      },
+      "CorridorRef": {
+        "properties": {
+          "from": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From"
+          },
+          "to": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To"
+          },
+          "tls_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tls Ids"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "CorridorRef",
+        "description": "Corridor selection: explicit TLS ids, or a from/to intersection pair.\n\n``from``/``to`` are the wire names (Python keywords, hence the aliases);\nthe field names ``from_ref``/``to_ref`` are also accepted for direct\n(in-process) callers."
+      },
+      "DirectCostResult": {
+        "properties": {
+          "cost": {
+            "type": "number",
+            "title": "Cost"
+          },
+          "metrics": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metrics"
+          },
+          "timing": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timing"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cost",
+          "metrics"
+        ],
+        "title": "DirectCostResult",
+        "description": "One side of the baseline-versus-optimized KPI comparison."
+      },
+      "DirectKpiResponse": {
+        "properties": {
+          "cost_weights": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Cost Weights"
+          },
+          "baseline": {
+            "$ref": "#/components/schemas/DirectCostResult"
+          },
+          "optimized": {
+            "$ref": "#/components/schemas/DirectCostResult"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cost_weights",
+          "baseline",
+          "optimized"
+        ],
+        "title": "DirectKpiResponse",
+        "description": "Stable KPI response contract of the synchronous optimization."
+      },
+      "DirectOptimizationRequest": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "intersection",
+              "corridor"
+            ],
+            "title": "Type"
+          },
+          "corridor_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Corridor Id"
+          },
+          "intersection": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GeoIntersectionRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "corridor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GeoCorridorRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cost": {
+            "$ref": "#/components/schemas/OptimizationCost"
+          },
+          "traffic_model": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "sumo",
+                  "cnde"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Traffic Model"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "type",
+          "corridor_id"
+        ],
+        "title": "DirectOptimizationRequest",
+        "description": "Minimal synchronous optimization contract.\n\nNatural-language interpretation and name-to-coordinate resolution happen\nin the caller.  This model intentionally does not expose internal BO\ncontrols such as optimizer choice or trial budget. ``traffic_model`` picks\nwhat every candidate plan is simulated with: ``\"sumo\"`` (the default, the\ndeployment's configured driver model) or ``\"cnde\"`` (the CNDE learned driver\nbehavior: much slower, GPU only, 422 where it is not installed)."
+      },
+      "DirectOptimizationResponse": {
+        "properties": {
+          "nema_plan": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Nema Plan"
+          },
+          "kpis": {
+            "$ref": "#/components/schemas/DirectKpiResponse"
+          },
+          "unserved_movements": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unserved Movements"
+          },
+          "config": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Config"
+          },
+          "traffic_model": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "sumo",
+                  "cnde"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Traffic Model"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "nema_plan",
+          "kpis"
+        ],
+        "title": "DirectOptimizationResponse",
+        "description": "Complete synchronous response; no run id or internal path is exposed.\n\n``unserved_movements`` (``{tls_id: [movement, ...]}``) names the vehicle\nmovements the returned plan never lets move; it is present only when there\nare some. ``config`` (``{\"flow_source\", \"counts_source\"}``) says where the\nsimulated demand came from; it is present only when either is the scenario's\nown routes. ``traffic_model`` (``\"cnde\"``) says every candidate was simulated\nwith the CNDE learned driver behavior; it is present only for such a run. A\ndefault run answers exactly as before."
+      },
+      "GeoCorridorRef": {
+        "properties": {
+          "from": {
+            "$ref": "#/components/schemas/GeoIntersectionRef"
+          },
+          "to": {
+            "$ref": "#/components/schemas/GeoIntersectionRef"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "from",
+          "to"
+        ],
+        "title": "GeoCorridorRef",
+        "description": "Two explicit, separately-addressable corridor endpoints."
+      },
+      "GeoIntersectionRef": {
+        "properties": {
+          "intersection_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Intersection Id"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "lat": {
+            "type": "number",
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "number",
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Lon"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "intersection_id",
+          "lat",
+          "lon"
+        ],
+        "title": "GeoIntersectionRef",
+        "description": "A TMC intersection the caller resolved; the service performs no NLP/geocoding."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "IncidentPayload": {
+        "properties": {
+          "stalled_vehicles": {
+            "items": {
+              "$ref": "#/components/schemas/StallItem"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Stalled Vehicles"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "stalled_vehicles"
+        ],
+        "title": "IncidentPayload",
+        "description": "Inline incident report: at least one stalled vehicle."
+      },
+      "OptimizationCost": {
+        "properties": {
+          "weights": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Weights"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "OptimizationCost",
+        "description": "Configurable weighted cost exposed to synchronous callers."
+      },
+      "OptimizationRequest": {
+        "properties": {
+          "tmc_json": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tmc Json"
+          },
+          "corridor_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Corridor Id"
+          },
+          "base_sumocfg": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Sumocfg"
+          },
+          "corridor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CorridorRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "baseline_sheet": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline Sheet"
+          },
+          "incident": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/IncidentPayload"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "optimizer": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "exhaustive",
+              "bayes_offsets",
+              "bayes_splits",
+              "bayes_corridor"
+            ],
+            "title": "Optimizer",
+            "default": "auto"
+          },
+          "max_trials": {
+            "type": "integer",
+            "maximum": 200.0,
+            "minimum": 1.0,
+            "title": "Max Trials",
+            "default": 20
+          },
+          "patience": {
+            "type": "integer",
+            "title": "Patience",
+            "default": 8
+          },
+          "kpi_weights": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kpi Weights"
+          },
+          "use_stored_plans": {
+            "type": "boolean",
+            "title": "Use Stored Plans",
+            "default": true
+          },
+          "plan_time": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Time"
+          },
+          "sim_end": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 7200.0,
+                "minimum": 30.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sim End"
+          },
+          "n_workers": {
+            "type": "integer",
+            "maximum": 8.0,
+            "minimum": 1.0,
+            "title": "N Workers",
+            "default": 2
+          },
+          "seed": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Seed",
+            "default": 42
+          },
+          "stage_mode": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "two_stage",
+                  "per_approach"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stage Mode"
+          },
+          "search_cycle": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Search Cycle"
+          },
+          "cycle_min_s": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 600.0,
+                "minimum": 20.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cycle Min S"
+          },
+          "cycle_max_s": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 600.0,
+                "minimum": 20.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cycle Max S"
+          },
+          "flow_source": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "corridor_graph",
+                  "scenario_routes"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flow Source"
+          },
+          "counts_source": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "tmc",
+                  "scenario_routes"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Counts Source"
+          },
+          "seed_from_scenario_programs": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed From Scenario Programs"
+          },
+          "traffic_model": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "sumo",
+                  "cnde"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Traffic Model"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "OptimizationRequest",
+        "description": "One corridor-optimization request. Unknown fields are rejected.\n\nDemand comes from EXACTLY one of ``corridor_id`` (primary: server-side\naggregation of buffered snapshots) or ``tmc_json`` (secondary/testing:\nan explicit file, ``base_sumocfg`` required).\n\n``corridor_id`` is the snapshot QUEUE key — it must match the\n``corridor_id`` field carried by the TMC payloads pushed to\nPOST /v1/city/snapshots. A scheduled-config entry for the id is optional:\nwhen present it supplies defaults (explicit request fields win, and\n``base_sumocfg`` may be omitted). When it is absent, the worker selects a\ncovering cached map or downloads and persists an OSM extract.\n\n``corridor`` names the GEOMETRY (from/to intersections or tls_ids) and\nmay be combined with either demand source; when given alongside\n``corridor_id`` it wins over any config entry's corridor.\n\nAn optional inline ``incident`` expedites the run via the reserved\nemergency concurrency headroom.\n\n``sim_end=None`` means \"use the server default\" (1800 s, applied by the\nworker); when given it must be a realistic horizon (30..7200 s).\n\n``stage_mode`` / ``search_cycle`` / ``cycle_min_s`` / ``cycle_max_s`` /\n``flow_source`` / ``counts_source`` / ``seed_from_scenario_programs`` go\nstraight to the optimization config, which validates them against each\nother (e.g. min < max). ``None`` means \"server default\", so a\nscheduled-config entry can supply them. A corridor_id request with\n``counts_source=\"scenario_routes\"`` needs no buffered snapshots, but then\n``base_sumocfg`` and the corridor's ``tls_ids`` are required.\n\n``traffic_model`` (``None`` = ``\"sumo\"``, the deployment's configured driver\nmodel) may be ``\"cnde\"``: every candidate of this run is then simulated with\nthe CNDE learned driver behavior, much slower and GPU only, and ``n_workers``\nis capped at the deployment's CNDE worker limit (422 where the CNDE runtime\nis not installed)."
+      },
+      "OptimizationRunSummary": {
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "corridor_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Corridor Id"
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "scheduled",
+              "api",
+              "direct"
+            ],
+            "title": "Origin",
+            "description": "scheduled: the cadence scheduler; api: POST /v1/city/optimizations; direct: the synchronous POST /v1/city/optimize."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "completed",
+              "failed",
+              "lost"
+            ],
+            "title": "Status",
+            "description": "lost: queued or running, but its worker stopped without recording an outcome."
+          },
+          "submitted_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submitted At",
+            "description": "ISO-8601 UTC."
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At",
+            "description": "ISO-8601 UTC; null until the run completed or failed."
+          },
+          "intersection_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Intersection Ids",
+            "description": "The run's intersections: those of its resolved corridor once completed, else those the request named."
+          },
+          "traffic_model": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "sumo",
+                  "cnde"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Traffic Model",
+            "description": "The traffic model every candidate plan was simulated with: sumo (the deployment's default driver model) or cnde (the CNDE learned driver behavior, requested per run). Null for runs recorded before it was kept."
+          },
+          "kpis": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RunKpiSummary"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null until completed."
+          },
+          "nema_exported": {
+            "type": "boolean",
+            "title": "Nema Exported",
+            "description": "Whether /nema serves a plan."
+          },
+          "has_report": {
+            "type": "boolean",
+            "title": "Has Report",
+            "description": "Whether report.pdf can be served (rendered or renderable)."
+          },
+          "sim_metrics": {
+            "type": "string",
+            "enum": [
+              "ready",
+              "pending",
+              "unavailable"
+            ],
+            "title": "Sim Metrics",
+            "description": "State of the run's simulated signal metrics (/sim_metrics)."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "run_id",
+          "origin",
+          "status",
+          "intersection_ids",
+          "nema_exported",
+          "has_report",
+          "sim_metrics"
+        ],
+        "title": "OptimizationRunSummary",
+        "description": "One optimization run of the listing."
+      },
+      "RunKpiSummary": {
+        "properties": {
+          "baseline": {
+            "$ref": "#/components/schemas/RunKpis"
+          },
+          "optimized": {
+            "$ref": "#/components/schemas/RunKpis"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "baseline",
+          "optimized"
+        ],
+        "title": "RunKpiSummary",
+        "description": "Baseline versus optimized (the exported plan) KPIs of a completed run."
+      },
+      "RunKpis": {
+        "properties": {
+          "cost": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost",
+            "description": "Weighted cost; the baseline is 1.0."
+          },
+          "control_delay_s_per_veh": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Control Delay S Per Veh"
+          },
+          "stops_per_veh": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stops Per Veh"
+          },
+          "vehicles_total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vehicles Total"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "RunKpis",
+        "description": "One side of a run's KPI summary (from the run's result, like the synchronous answer)."
+      },
+      "SimMetricsDocument": {
+        "properties": {
+          "schema": {
+            "type": "string",
+            "title": "Schema",
+            "description": "corridor_ui.sim_metrics.v1"
+          },
+          "corridor_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Corridor Id"
+          },
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "generated_at": {
+            "type": "string",
+            "title": "Generated At"
+          },
+          "method": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Method",
+            "description": "How the measures were computed."
+          },
+          "corridor_order": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Corridor Order",
+            "description": "Signals in corridor order."
+          },
+          "mainline": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Mainline",
+            "description": "Mainline directions (NB/SB or EB/WB)."
+          },
+          "plans": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Plans",
+            "description": "\"optimized\" and \"baseline\": corridor, intersections, phase0_starts_s."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "schema",
+          "run_id",
+          "generated_at",
+          "method",
+          "corridor_order",
+          "mainline",
+          "plans"
+        ],
+        "title": "SimMetricsDocument",
+        "description": "Simulated signal-performance measures of a run (schema corridor_ui.sim_metrics.v1).\n\nThe run's baseline and optimized trials re-simulated with virtual lane-area\ndetectors: per approach, per signal and per corridor arrivals on green / red,\noccupancy, split failures, queues, delay, stops, phase utilization and degree of\nsaturation. Simulated estimates of the plans under the run's demand, not field\nmeasurements."
+      },
+      "SimMetricsPending": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Always \"pending\".",
+            "default": "pending"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "SimMetricsPending",
+        "description": "The simulated signal metrics of the run are still being computed."
+      },
+      "SimulationCommand": {
+        "properties": {
+          "command": {
+            "type": "string",
+            "title": "Command",
+            "description": "Control command for the simulation (e.g., 'pause', 'resume', 'stop')"
+          }
+        },
+        "type": "object",
+        "required": [
+          "command"
+        ],
+        "title": "SimulationCommand"
+      },
+      "SimulationConfig": {
+        "properties": {
+          "config_file": {
+            "type": "string",
+            "title": "Config File",
+            "description": "Path to the simulation configuration file"
+          },
+          "auto_run": {
+            "type": "boolean",
+            "title": "Auto Run",
+            "description": "Whether to automatically run the simulation or wait for manual control",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "config_file"
+        ],
+        "title": "SimulationConfig"
+      },
+      "SimulationStatus": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Unique identifier for the simulation"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Current status of the simulation"
+          },
+          "progress": {
+            "type": "number",
+            "title": "Progress",
+            "description": "Progress of the simulation as a percentage",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "status"
+        ],
+        "title": "SimulationStatus"
+      },
+      "StallItem": {
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Longitude"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "latitude",
+          "longitude"
+        ],
+        "title": "StallItem",
+        "description": "One stalled-vehicle geometry as reported by the video analytics."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "simulations",
+      "description": "Operations with simulations. You can start, stop, and control simulations."
+    }
+  ]
+}

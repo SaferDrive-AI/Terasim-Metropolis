@@ -1,0 +1,117 @@
+# Camera inventory: 32 cameras on the eight signals of a synthetic arterial (Arterial Blvd,
+# Oak St to Walnut St), a load-test corridor built from four recorded camera feeds.
+#   python3 camcfg.py generate examples/arterial_32.yaml -o out/arterial_32
+# Paths are relative to this file. Every input is synthetic (inputs/build_synthetic_inputs.py).
+#
+# Four cameras per signal, one per leg, named cam1..cam32; cam1-cam4 at Pine St replay their
+# own recorded feeds. Every other camera replays the recorded feed of the Pine St camera
+# facing the same way (test_feed) and copies that camera's calibration. 26 cameras count an
+# approach. Six legs carry no inbound traffic (one-way Cedar, Maple, Birch and Ash St, the
+# pedestrian mall north of Elm St and the plaza south of Walnut St): their cameras have
+# approach: none, so they count nothing but are still VSS streams.
+version: 1
+
+corridor:
+  id: arterial_blvd
+  name: Arterial Blvd
+  description: Oak St to Walnut St
+  city: {id: example, name: Example City}
+  observation_interval: 10m
+
+map:
+  # An OpenStreetMap extract of the corridor, stored in TeraSim with POST /v1/city/maps
+  # (register-map.sh); base_sumocfg then points at the stored map, whose id is the first
+  # 12 hex digits of the file's SHA-256. The generator converts it the way the service does.
+  osm_extract: inputs/arterial_8.osm
+
+road_graph:
+  # The road graph VSS map-matches against; here the same extract.
+  osm: inputs/arterial_8.osm
+  headings_radius_m: 125
+
+optimization:
+  sim_end: 1800
+  max_trials: 24
+  patience: 16
+  n_workers: 4
+
+intersections:
+  - id: oak
+    name: Oak St & Arterial Blvd
+    lat: 37.355
+    lon: -121.9115
+    cameras:
+      - {sensor: cam5, approach: South, test_feed: cam1, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam1}}
+      - {sensor: cam6, approach: West, test_feed: cam2, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam2}}
+      - {sensor: cam7, approach: North, test_feed: cam3, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam3}}
+      - {sensor: cam8, approach: East, test_feed: cam4, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam4}}
+
+  - id: elm
+    name: Elm St & Arterial Blvd
+    lat: 37.355
+    lon: -121.9086751
+    cameras:
+      - {sensor: cam9, approach: none, test_feed: cam1, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam1}, note: no inbound traffic from the north (pedestrian mall)}
+      - {sensor: cam10, approach: West, test_feed: cam2, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam2}}
+      - {sensor: cam11, approach: North, test_feed: cam3, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam3}}
+      - {sensor: cam12, approach: East, test_feed: cam4, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam4}}
+
+  - id: pine
+    name: Pine St & Arterial Blvd
+    lat: 37.355
+    lon: -121.9058503
+    cameras:
+      - {sensor: cam1, approach: South, test_feed: cam1, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam1}}
+      - {sensor: cam2, approach: West, test_feed: cam2, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam2}}
+      - {sensor: cam3, approach: North, test_feed: cam3, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam3}}
+      - {sensor: cam4, approach: East, test_feed: cam4, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam4}}
+
+  - id: cedar
+    name: Cedar St & Arterial Blvd
+    lat: 37.355
+    lon: -121.9030254
+    cameras:
+      - {sensor: cam13, approach: none, test_feed: cam1, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam1}, note: outbound leg of one-way Cedar St}
+      - {sensor: cam14, approach: West, test_feed: cam2, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam2}}
+      - {sensor: cam15, approach: North, test_feed: cam3, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam3}}
+      - {sensor: cam16, approach: East, test_feed: cam4, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam4}}
+
+  - id: maple
+    name: Maple St & Arterial Blvd
+    lat: 37.355
+    lon: -121.9002006
+    cameras:
+      - {sensor: cam17, approach: South, test_feed: cam1, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam1}}
+      - {sensor: cam18, approach: West, test_feed: cam2, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam2}}
+      - {sensor: cam19, approach: none, test_feed: cam3, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam3}, note: outbound leg of one-way Maple St}
+      - {sensor: cam20, approach: East, test_feed: cam4, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam4}}
+
+  - id: birch
+    name: Birch St & Arterial Blvd
+    lat: 37.355
+    lon: -121.8973757
+    cameras:
+      - {sensor: cam21, approach: none, test_feed: cam1, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam1}, note: outbound leg of one-way Birch St}
+      - {sensor: cam22, approach: West, test_feed: cam2, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam2}}
+      - {sensor: cam23, approach: North, test_feed: cam3, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam3}}
+      - {sensor: cam24, approach: East, test_feed: cam4, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam4}}
+
+  - id: ash
+    name: Ash St & Arterial Blvd
+    lat: 37.355
+    lon: -121.8945508
+    cameras:
+      - {sensor: cam25, approach: South, test_feed: cam1, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam1}}
+      - {sensor: cam26, approach: West, test_feed: cam2, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam2}}
+      - {sensor: cam27, approach: none, test_feed: cam3, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam3}, note: outbound leg of one-way Ash St}
+      - {sensor: cam28, approach: East, test_feed: cam4, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam4}}
+
+  - id: walnut
+    name: Walnut St & Arterial Blvd
+    lat: 37.355
+    lon: -121.891726
+    cameras:
+      - {sensor: cam29, approach: South, test_feed: cam1, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam1}}
+      - {sensor: cam30, approach: West, test_feed: cam2, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam2}}
+      - {sensor: cam31, approach: none, test_feed: cam3, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam3}, note: no inbound traffic from the south (plaza)}
+      - {sensor: cam32, approach: East, test_feed: cam4, calibration: {copy_from: inputs/calibration.sample.json, sensor: cam4}}

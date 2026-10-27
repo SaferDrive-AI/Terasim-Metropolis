@@ -1,0 +1,12 @@
+# Corridor entry of the Neural NDE check (check-neural-nde.sh): the demo corridor on its
+# OpenStreetMap map package, which carries the Neural NDE map artifacts. A traffic_model="cnde"
+# request runs at most TERASIM_CITY_CNDE_MAX_TRIALS / _MAX_WORKERS of this budget.
+corridors:
+  neural_nde_check:
+    base_sumocfg: /data/input/cnde_demo/base.sumocfg
+    corridor:
+      tls_ids: ["1002", "1007", "1012"]
+    sim_end: 300
+    max_trials: 6
+    patience: 6
+    n_workers: 4

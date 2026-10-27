@@ -1,0 +1,91 @@
+[project]
+name = "terasim-metropolis"
+version = "0.1.0"
+description = "TeraSim Metropolis - corridor traffic simulation, KPI evaluation and signal timing optimization for NVIDIA Metropolis VSS"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.10,<3.13"
+# Workspace meta-package: the installable components are the packages under packages/.
+dependencies = []
+
+[tool.uv.workspace]
+members = [
+    "packages/terasim",
+    "packages/terasim-nde-nade",
+    "packages/terasim-city",
+    "packages/terasim-service",
+    "packages/terasim-agent-skill",
+    "packages/terasim-tmc-service",
+    "packages/terasim-plugin-sdk",
+]
+
+[tool.uv.sources]
+terasim = { workspace = true }
+terasim-nde-nade = { workspace = true }
+terasim-city = { workspace = true }
+terasim-service = { workspace = true }
+terasim-agent-skill = { workspace = true }
+terasim-tmc-service = { workspace = true }
+terasim-plugin-sdk = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.7.0",
+    "ruff>=0.1.0",
+    "mypy>=1.5.1",
+    "isort>=5.12.0",
+]
+docs = [
+    "mkdocs>=1.6",
+    "mkdocs-material>=9.5",
+]
+
+[tool.black]
+line-length = 100
+target-version = ['py310']
+include = '\.pyi?$'
+# Vendored reference file (nv_generate_tmc.py): never reformat, so diffs against the
+# provider's version stay reviewable.
+force-exclude = "nv_generate_tmc\\.py"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+select = ["E", "F", "W", "C90", "I"]
+extend-exclude = ["packages/terasim-tmc-service/terasim_tmc_service/nv_generate_tmc.py"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v"
+markers = [
+    "integration: marks tests as integration tests (deselect with '-m \"not integration\"')",
+    "requires_sumo: marks tests as requiring SUMO installation",
+    "requires_gui: marks tests as requiring GUI (skipped in CI)",
+    "slow: marks tests as slow running"
+]
+
+[tool.coverage.run]
+source = ["packages/"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/.venv/*"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:"
+]

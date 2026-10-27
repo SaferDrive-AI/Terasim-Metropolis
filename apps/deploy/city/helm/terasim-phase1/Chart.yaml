@@ -1,0 +1,27 @@
+apiVersion: v2
+name: terasim-phase1
+description: >
+  TeraSim Metropolis: OpenShift-ready Helm chart for the traffic-signal
+  optimization stack that NVIDIA Metropolis VSS (Video Search and
+  Summarization) calls over MCP. One image, three services (terasim-service
+  REST API + embedded evaluator, terasim-mcp streamable-http MCP server +
+  /files download route, terasim-tmc periodic TMC collector) plus a bundled
+  Redis; VSS itself is deployed separately by the operator.
+  OpenShift specifics: Route (edge TLS) instead of Ingress, no hardcoded
+  namespace, runs under the default `restricted-v2` SCC (non-root image with
+  an arbitrary uid, read-only root filesystem; see values.yaml and README).
+  Redis requires a password held in a Secret (generated or operator-provided)
+  and per-component NetworkPolicies limit ingress (Redis only from the
+  TeraSim service pod; MCP from this namespace, the VSS namespace and the
+  router for the /files Route). The corridor (intersections, cameras, signals) is
+  set through values (corridorConfig) or a ConfigMap you manage, without rebuilding
+  the chart or the image.
+type: application
+version: 0.6.0
+appVersion: "0.1.0"
+keywords:
+  - terasim
+  - traffic-signal
+  - nema
+  - openshift
+maintainers: []

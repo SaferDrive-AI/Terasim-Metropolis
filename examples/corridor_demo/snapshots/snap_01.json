@@ -1,0 +1,88 @@
+{
+  "corridor_id": "demo_arterial",
+  "observation_interval": "10min",
+  "timestamp_start": "2026-07-01T08:00:00",
+  "intersections": [
+    {
+      "intersection_id": "i1",
+      "lat": 37.335,
+      "lon": -121.90339,
+      "counts": {
+        "East": {
+          "Left": 8,
+          "Straight": 79,
+          "Right": 13
+        },
+        "West": {
+          "Left": 7,
+          "Straight": 57,
+          "Right": 12
+        },
+        "North": {
+          "Left": 6,
+          "Straight": 17,
+          "Right": 10
+        },
+        "South": {
+          "Left": 6,
+          "Straight": 16,
+          "Right": 9
+        }
+      }
+    },
+    {
+      "intersection_id": "i2",
+      "lat": 37.335,
+      "lon": -121.9,
+      "counts": {
+        "East": {
+          "Left": 10,
+          "Straight": 84,
+          "Right": 12
+        },
+        "West": {
+          "Left": 8,
+          "Straight": 61,
+          "Right": 10
+        },
+        "North": {
+          "Left": 7,
+          "Straight": 20,
+          "Right": 12
+        },
+        "South": {
+          "Left": 6,
+          "Straight": 18,
+          "Right": 9
+        }
+      }
+    },
+    {
+      "intersection_id": "i3",
+      "lat": 37.335,
+      "lon": -121.89661,
+      "counts": {
+        "East": {
+          "Left": 8,
+          "Straight": 74,
+          "Right": 15
+        },
+        "West": {
+          "Left": 8,
+          "Straight": 54,
+          "Right": 13
+        },
+        "North": {
+          "Left": 6,
+          "Straight": 14,
+          "Right": 9
+        },
+        "South": {
+          "Left": 7,
+          "Straight": 21,
+          "Right": 11
+        }
+      }
+    }
+  ]
+}

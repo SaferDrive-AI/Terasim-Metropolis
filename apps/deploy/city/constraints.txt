@@ -1,0 +1,13 @@
+# Version bounds for the terasim-metropolis image build (pip -c). Kept here
+# because they span several packages:
+#  - starlette >= 1.3.1: closes CVE-2025-62727, CVE-2026-48818, CVE-2026-54283
+#    (HIGH) and the 2025/2026 MEDIUM/LOW advisories in <= 1.3.0. fastapi 0.141
+#    itself only requires starlette >= 0.46, so the floor must be explicit.
+#  - fastapi >= 0.141.1: the release line built for starlette 1.x
+#    (terasim_service.api uses the lifespan pattern; on_event() is gone).
+#  - mcp < 2: mcp 2.x renamed FastMCP and changes the server API.
+#  - httpx < 0.28: the agent-skill client/tests use the 0.27 transport API.
+mcp>=1.0,<2
+fastapi>=0.141.1,<1
+starlette>=1.3.1,<2
+httpx<0.28

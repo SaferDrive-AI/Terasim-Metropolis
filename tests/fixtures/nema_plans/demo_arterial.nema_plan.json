@@ -1,0 +1,749 @@
+{
+  "schema": "terasim.nema_plan.v1",
+  "corridor_id": "demo_arterial",
+  "intersections": [
+    {
+      "intersection_id": "i1",
+      "name": "DEMO ARTERIAL @ 1ST ST",
+      "lat": 37.335,
+      "lon": -121.90339,
+      "phases": [
+        {
+          "phase": 1,
+          "movements": [
+            "WB-left"
+          ],
+          "min_green_s": 5,
+          "min_green_src": "read",
+          "yellow_s": 3.0,
+          "yellow_src": "read",
+          "all_red_s": 1.0,
+          "all_red_src": "read"
+        },
+        {
+          "phase": 2,
+          "movements": [
+            "EB-through",
+            "EB-right"
+          ],
+          "min_green_s": 10,
+          "min_green_src": "read",
+          "yellow_s": 4.0,
+          "yellow_src": "read",
+          "all_red_s": 1.5,
+          "all_red_src": "read"
+        },
+        {
+          "phase": 3,
+          "movements": [
+            "SB-left"
+          ],
+          "min_green_s": 5,
+          "min_green_src": "read",
+          "yellow_s": 3.0,
+          "yellow_src": "read",
+          "all_red_s": 1.0,
+          "all_red_src": "read"
+        },
+        {
+          "phase": 4,
+          "movements": [
+            "NB-through",
+            "NB-right"
+          ],
+          "min_green_s": 8,
+          "min_green_src": "read",
+          "yellow_s": 3.5,
+          "yellow_src": "read",
+          "all_red_s": 1.5,
+          "all_red_src": "read"
+        },
+        {
+          "phase": 5,
+          "movements": [
+            "EB-left"
+          ],
+          "min_green_s": 5,
+          "min_green_src": "read",
+          "yellow_s": 3.0,
+          "yellow_src": "read",
+          "all_red_s": 1.0,
+          "all_red_src": "read"
+        },
+        {
+          "phase": 6,
+          "movements": [
+            "WB-through",
+            "WB-right"
+          ],
+          "min_green_s": 10,
+          "min_green_src": "read",
+          "yellow_s": 4.0,
+          "yellow_src": "read",
+          "all_red_s": 1.5,
+          "all_red_src": "read"
+        },
+        {
+          "phase": 7,
+          "movements": [
+            "NB-left"
+          ],
+          "min_green_s": 5,
+          "min_green_src": "read",
+          "yellow_s": 3.0,
+          "yellow_src": "read",
+          "all_red_s": 1.0,
+          "all_red_src": "read"
+        },
+        {
+          "phase": 8,
+          "movements": [
+            "SB-through",
+            "SB-right"
+          ],
+          "min_green_s": 8,
+          "min_green_src": "read",
+          "yellow_s": 3.5,
+          "yellow_src": "read",
+          "all_red_s": 1.5,
+          "all_red_src": "read"
+        }
+      ],
+      "rings": {
+        "ring1": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "ring2": [
+          5,
+          6,
+          7,
+          8
+        ],
+        "barrier_phases": [
+          4,
+          8
+        ],
+        "barrier2_phases": [
+          2,
+          6
+        ],
+        "coordinated_phases": [
+          2,
+          6
+        ]
+      },
+      "patterns": [
+        {
+          "pattern_id": "am_peak",
+          "description": "AM PEAK",
+          "cycle_s": 100,
+          "cycle_src": "read",
+          "offset_s": 0,
+          "offset_src": "read",
+          "coordinated": true,
+          "splits": {
+            "1": 14,
+            "2": 42,
+            "3": 12,
+            "4": 32,
+            "5": 12,
+            "6": 44,
+            "7": 13,
+            "8": 31
+          }
+        },
+        {
+          "pattern_id": "midday",
+          "description": "MIDDAY",
+          "cycle_s": 90,
+          "cycle_src": "read",
+          "offset_s": 0,
+          "offset_src": "read",
+          "coordinated": true,
+          "splits": {
+            "1": 12,
+            "2": 38,
+            "3": 10,
+            "4": 30,
+            "5": 11,
+            "6": 39,
+            "7": 11,
+            "8": 29
+          }
+        },
+        {
+          "pattern_id": "pm_peak",
+          "description": "PM PEAK",
+          "cycle_s": 110,
+          "cycle_src": "read",
+          "offset_s": 0,
+          "offset_src": "read",
+          "coordinated": true,
+          "splits": {
+            "1": 15,
+            "2": 47,
+            "3": 13,
+            "4": 35,
+            "5": 14,
+            "6": 48,
+            "7": 14,
+            "8": 34
+          }
+        },
+        {
+          "pattern_id": "weekend_day",
+          "description": "WEEKEND DAY",
+          "cycle_s": 90,
+          "cycle_src": "read",
+          "offset_s": 0,
+          "offset_src": "read",
+          "coordinated": true,
+          "splits": {
+            "1": 12,
+            "2": 36,
+            "3": 11,
+            "4": 31,
+            "5": 12,
+            "6": 36,
+            "7": 12,
+            "8": 30
+          }
+        },
+        {
+          "pattern_id": "weekend_evening",
+          "description": "WEEKEND EVENING",
+          "cycle_s": 100,
+          "cycle_src": "read",
+          "offset_s": 0,
+          "offset_src": "read",
+          "coordinated": true,
+          "splits": {
+            "1": 13,
+            "2": 43,
+            "3": 12,
+            "4": 32,
+            "5": 13,
+            "6": 43,
+            "7": 12,
+            "8": 32
+          }
+        }
+      ],
+      "schedule": [
+        {
+          "days": [
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri"
+          ],
+          "start": "06:30",
+          "pattern_id": "am_peak"
+        },
+        {
+          "days": [
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri"
+          ],
+          "start": "09:30",
+          "pattern_id": "midday"
+        },
+        {
+          "days": [
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri"
+          ],
+          "start": "15:30",
+          "pattern_id": "pm_peak"
+        },
+        {
+          "days": [
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri"
+          ],
+          "start": "19:00",
+          "pattern_id": "free"
+        },
+        {
+          "days": [
+            "Sat",
+            "Sun"
+          ],
+          "start": "08:00",
+          "pattern_id": "weekend_day"
+        },
+        {
+          "days": [
+            "Sat",
+            "Sun"
+          ],
+          "start": "16:00",
+          "pattern_id": "weekend_evening"
+        },
+        {
+          "days": [
+            "Sat",
+            "Sun"
+          ],
+          "start": "21:00",
+          "pattern_id": "free"
+        }
+      ]
+    },
+    {
+      "intersection_id": "i2",
+      "name": "DEMO ARTERIAL @ 2ND ST",
+      "lat": 37.335,
+      "lon": -121.9,
+      "phases": [
+        {
+          "phase": 1,
+          "movements": [
+            "WB-left"
+          ],
+          "min_green_s": 5,
+          "min_green_src": "read",
+          "yellow_s": 3.0,
+          "yellow_src": "read",
+          "all_red_s": 1.0,
+          "all_red_src": "read"
+        },
+        {
+          "phase": 2,
+          "movements": [
+            "EB-through",
+            "EB-right"
+          ],
+          "min_green_s": 10,
+          "min_green_src": "read",
+          "yellow_s": 4.0,
+          "yellow_src": "read",
+          "all_red_s": 1.5,
+          "all_red_src": "read"
+        },
+        {
+          "phase": 4,
+          "movements": [
+            "NB-through",
+            "NB-right",
+            "NB-left",
+            "SB-through",
+            "SB-right",
+            "SB-left"
+          ],
+          "min_green_s": 8,
+          "min_green_src": "read",
+          "yellow_s": 3.5,
+          "yellow_src": "read",
+          "all_red_s": 1.5,
+          "all_red_src": "read"
+        },
+        {
+          "phase": 5,
+          "movements": [
+            "EB-left"
+          ],
+          "min_green_s": 5,
+          "min_green_src": "read",
+          "yellow_s": 3.0,
+          "yellow_src": "read",
+          "all_red_s": 1.0,
+          "all_red_src": "read"
+        },
+        {
+          "phase": 6,
+          "movements": [
+            "WB-through",
+            "WB-right"
+          ],
+          "min_green_s": 10,
+          "min_green_src": "read",
+          "yellow_s": 4.0,
+          "yellow_src": "read",
+          "all_red_s": 1.5,
+          "all_red_src": "read"
+        }
+      ],
+      "rings": {
+        "ring1": [
+          1,
+          2,
+          4
+        ],
+        "ring2": [
+          5,
+          6
+        ],
+        "barrier_phases": [
+          4
+        ],
+        "barrier2_phases": [
+          2,
+          6
+        ],
+        "coordinated_phases": [
+          2,
+          6
+        ]
+      },
+      "patterns": [
+        {
+          "pattern_id": "am_peak",
+          "description": "AM PEAK",
+          "cycle_s": 100,
+          "cycle_src": "read",
+          "offset_s": 24,
+          "offset_src": "read",
+          "coordinated": true,
+          "splits": {
+            "1": 14,
+            "2": 50,
+            "4": 36,
+            "5": 12,
+            "6": 52
+          }
+        },
+        {
+          "pattern_id": "midday",
+          "description": "MIDDAY",
+          "cycle_s": 90,
+          "cycle_src": "read",
+          "offset_s": 18,
+          "offset_src": "read",
+          "coordinated": true,
+          "splits": {
+            "1": 12,
+            "2": 46,
+            "4": 32,
+            "5": 12,
+            "6": 46
+          }
+        },
+        {
+          "pattern_id": "pm_peak",
+          "description": "PM PEAK",
+          "cycle_s": 110,
+          "cycle_src": "read",
+          "offset_s": 30,
+          "offset_src": "read",
+          "coordinated": true,
+          "splits": {
+            "1": 16,
+            "2": 54,
+            "4": 40,
+            "5": 14,
+            "6": 56
+          }
+        }
+      ],
+      "schedule": [
+        {
+          "days": [
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri"
+          ],
+          "start": "06:30",
+          "pattern_id": "am_peak"
+        },
+        {
+          "days": [
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri"
+          ],
+          "start": "09:30",
+          "pattern_id": "midday"
+        },
+        {
+          "days": [
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri"
+          ],
+          "start": "15:30",
+          "pattern_id": "pm_peak"
+        },
+        {
+          "days": [
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri"
+          ],
+          "start": "19:00",
+          "pattern_id": "free"
+        },
+        {
+          "days": [
+            "Sat",
+            "Sun"
+          ],
+          "start": "09:00",
+          "pattern_id": "midday"
+        },
+        {
+          "days": [
+            "Sat",
+            "Sun"
+          ],
+          "start": "20:00",
+          "pattern_id": "free"
+        }
+      ]
+    },
+    {
+      "intersection_id": "i3",
+      "name": "DEMO ARTERIAL @ 3RD ST",
+      "lat": 37.335,
+      "lon": -121.89661,
+      "phases": [
+        {
+          "phase": 1,
+          "movements": [
+            "WB-left"
+          ],
+          "min_green_s": 5,
+          "min_green_src": "read",
+          "yellow_s": 3.0,
+          "yellow_src": "read",
+          "all_red_s": 1.0,
+          "all_red_src": "read"
+        },
+        {
+          "phase": 2,
+          "movements": [
+            "EB-through",
+            "EB-right"
+          ],
+          "min_green_s": 10,
+          "min_green_src": "read",
+          "yellow_s": 4.0,
+          "yellow_src": "read",
+          "all_red_s": 1.5,
+          "all_red_src": "read"
+        },
+        {
+          "phase": 3,
+          "movements": [
+            "SB-through",
+            "SB-right",
+            "SB-left"
+          ],
+          "min_green_s": 8,
+          "min_green_src": "read",
+          "yellow_s": 3.5,
+          "yellow_src": "read",
+          "all_red_s": 1.5,
+          "all_red_src": "read"
+        },
+        {
+          "phase": 4,
+          "movements": [
+            "NB-through",
+            "NB-right",
+            "NB-left"
+          ],
+          "min_green_s": 8,
+          "min_green_src": "read",
+          "yellow_s": 3.5,
+          "yellow_src": "read",
+          "all_red_s": 1.5,
+          "all_red_src": "read"
+        },
+        {
+          "phase": 5,
+          "movements": [
+            "EB-left"
+          ],
+          "min_green_s": 5,
+          "min_green_src": "read",
+          "yellow_s": 3.0,
+          "yellow_src": "read",
+          "all_red_s": 1.0,
+          "all_red_src": "read"
+        },
+        {
+          "phase": 6,
+          "movements": [
+            "WB-through",
+            "WB-right"
+          ],
+          "min_green_s": 10,
+          "min_green_src": "read",
+          "yellow_s": 4.0,
+          "yellow_src": "read",
+          "all_red_s": 1.5,
+          "all_red_src": "read"
+        }
+      ],
+      "rings": {
+        "ring1": [
+          2,
+          1,
+          3,
+          4
+        ],
+        "ring2": [
+          5,
+          6
+        ],
+        "barrier_phases": [
+          4
+        ],
+        "barrier2_phases": [
+          1,
+          6
+        ],
+        "coordinated_phases": [
+          2,
+          6
+        ]
+      },
+      "patterns": [
+        {
+          "pattern_id": "am_peak",
+          "description": "AM PEAK",
+          "cycle_s": 100,
+          "cycle_src": "read",
+          "offset_s": 48,
+          "offset_src": "read",
+          "coordinated": true,
+          "splits": {
+            "1": 14,
+            "2": 44,
+            "3": 20,
+            "4": 22,
+            "5": 12,
+            "6": 46
+          }
+        },
+        {
+          "pattern_id": "midday",
+          "description": "MIDDAY",
+          "cycle_s": 90,
+          "cycle_src": "read",
+          "offset_s": 36,
+          "offset_src": "read",
+          "coordinated": true,
+          "splits": {
+            "1": 12,
+            "2": 40,
+            "3": 18,
+            "4": 20,
+            "5": 11,
+            "6": 41
+          }
+        },
+        {
+          "pattern_id": "pm_peak",
+          "description": "PM PEAK",
+          "cycle_s": 110,
+          "cycle_src": "read",
+          "offset_s": 60,
+          "offset_src": "read",
+          "coordinated": true,
+          "splits": {
+            "1": 16,
+            "2": 48,
+            "3": 22,
+            "4": 24,
+            "5": 14,
+            "6": 50
+          }
+        }
+      ],
+      "schedule": [
+        {
+          "days": [
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri"
+          ],
+          "start": "06:30",
+          "pattern_id": "am_peak"
+        },
+        {
+          "days": [
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri"
+          ],
+          "start": "09:30",
+          "pattern_id": "midday"
+        },
+        {
+          "days": [
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri"
+          ],
+          "start": "15:30",
+          "pattern_id": "pm_peak"
+        },
+        {
+          "days": [
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri"
+          ],
+          "start": "19:00",
+          "pattern_id": "free"
+        },
+        {
+          "days": [
+            "Sat",
+            "Sun"
+          ],
+          "start": "09:00",
+          "pattern_id": "midday"
+        },
+        {
+          "days": [
+            "Sat",
+            "Sun"
+          ],
+          "start": "20:00",
+          "pattern_id": "free"
+        }
+      ]
+    }
+  ],
+  "provenance": {
+    "source_files": [
+      "demo_arterial_timing_report.pdf"
+    ],
+    "generated_by": "synthetic test fixture",
+    "generated_at": "2026-07-01",
+    "handoff_ready": true,
+    "gaps": []
+  }
+}

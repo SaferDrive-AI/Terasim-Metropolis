@@ -1,0 +1,287 @@
+# TeraSim Metropolis — chart defaults (OpenShift-ready).
+#
+# These are CHART DEFAULTS, not environment-specific overrides. For a real
+# install (a site's cluster) put overrides in a separate values file, e.g.
+#   helm upgrade --install terasim . -f values-site.yaml -n <ns>
+# The values you MUST set per environment are marked "REQUIRED" below.
+
+nameOverride: ""
+fullnameOverride: ""
+
+# ---------------------------------------------------------------------------
+# global: shared across the three services. Follows the convention of the
+# NVIDIA VSS chart, so both charts can share one values pattern.
+# ---------------------------------------------------------------------------
+global:
+  # REQUIRED for the download Route: the external host the reader opens, e.g.
+  # terasim.apps.<cluster-domain>. Empty -> Route is not rendered (no external
+  # download links; MCP still reachable in-cluster).
+  externalHost: ""
+  # https so the download URLs in the chat answer are not blocked as mixed
+  # content when the chat UI is served over HTTPS.
+  externalScheme: https
+  # Registry pull secrets (names of Secrets that already exist in the namespace,
+  # or created by pullSecret below). e.g. [{name: terasim-pull}]
+  imagePullSecrets: []
+  # StorageClass for all PVCs. Empty -> cluster default StorageClass.
+  storageClass: ""
+
+# One image, three commands. Point repository at the registry the cluster can
+# pull from (see pullSecret / global.imagePullSecrets).
+image:
+  # e.g. <registry>/terasim-metropolis
+  repository: terasim-metropolis
+  # The release image (the chart's appVersion).
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+# Optionally have the chart create a docker-registry pull Secret from inline
+# credentials. Prefer referencing an existing Secret via global.imagePullSecrets.
+pullSecret:
+  create: false
+  name: terasim-pull
+  registry: ""
+  username: ""
+  password: ""
+
+serviceAccount:
+  create: true
+  name: ""
+
+# SCC: this chart targets OpenShift's default `restricted-v2` SCC. The image
+# runs as a non-root user with an arbitrary uid in group 0, so NO SCC grant is
+# needed. An `anyuid` grant keeps working too (the image's own uid 1001 is used
+# then).
+# Plain Kubernetes: if your StorageClass does not make new PVCs group-writable,
+# set podSecurityContext.fsGroup (e.g. 1001) so the pods can write them.
+
+# ---------------------------------------------------------------------------
+# terasim-service: REST /v1/city/* + embedded SUMO/Bayesian evaluator. :8000
+# ---------------------------------------------------------------------------
+service:
+  port: 8000
+  windowS: 3600        # TERASIM_CITY_WINDOW_S: snapshot aggregation window
+  # TERASIM_CITY_MAX_CONCURRENCY: worker slots (one SUMO process each) all
+  # optimization runs together may hold. A request's n_workers must be <= this
+  # value or it is rejected with 422; size resources.limits.cpu to match.
+  maxConcurrency: 8
+  # Root of the read-only inputs baked into the image: the demo corridor's map
+  # (map/demo.sumocfg) and the demo scenario (demo_scenario/). Not a volume.
+  inputRoot: /data/input
+  # TERASIM_CITY_OSM_DOWNLOAD. When a request names no map and no shipped or
+  # registered map (POST /v1/city/maps, the image's own) covers its area, the
+  # service downloads OpenStreetMap data for it from Overpass (the only outbound
+  # call the service makes). false: never downloaded; such a request gets 422
+  # naming this setting, and shipped/registered maps keep working. Set false when
+  # the maps ship as files.
+  osmDownload:
+    enabled: true       # true / false (a YAML boolean)
+  storage:
+    size: 5Gi
+    accessMode: ReadWriteOnce
+  resources:
+    requests: { cpu: "1", memory: 1Gi }
+    limits: { cpu: "4", memory: 4Gi }
+
+# Built-in scheduler of terasim-service (TERASIM_CITY_SCHEDULER_ENABLED /
+# TERASIM_CITY_CADENCE_S). Enabled, the service optimizes every corridor of
+# configs/scheduled_config.yaml once per cadence when it has recent traffic counts
+# for it (a corridor whose counts come from its own scenario routes runs when its
+# inputs changed). Off by default: runs then start on request (the synchronous
+# optimize call, which the VSS agent also invokes on its own cadence, or the
+# asynchronous API).
+scheduler:
+  enabled: false        # true / false (a YAML boolean)
+  cadenceSeconds: 3600  # seconds between two scheduling passes (> 0); hourly
+
+# Simulated signal-performance measures (TERASIM_CITY_SIM_METRICS). Enabled, every
+# completed run is re-simulated in the background with virtual detectors on each
+# signalized approach, baseline and optimized plan (two extra SUMO runs holding one
+# of the service.maxConcurrency worker slots while they run), and the measures are
+# served at /v1/city/optimizations/<run_id>/sim_metrics. false: not computed (that
+# endpoint answers 404).
+simMetrics:
+  enabled: true         # true / false (a YAML boolean)
+
+# Audit log (TERASIM_CITY_AUDIT_ENABLED): operator feedback on plans (accept /
+# reject / needs changes + comment), plan views, downloads and client sessions,
+# posted by an operator UI to /v1/city/audit/events and kept as JSON Lines on the
+# output PVC (<output>/audit/events-YYYY-MM.jsonl), so it survives restarts;
+# reviewed and exported at /v1/city/audit/events(.csv) and /v1/city/audit/summary.
+# false: those endpoints answer 404.
+audit:
+  enabled: true         # true / false (a YAML boolean)
+
+# Corridor definition, mounted at /config in the service and tmc pods:
+#   Metadata.json          the tmc collector's spec: per intersection its location, the
+#                          OSM edge -> travel direction table (Headings), the turn table
+#                          (Movements) and the approach -> camera table (Assignments)
+#   scheduled_config.yaml  the service's corridors: map, signals, optimization budget
+# All empty (the default) = the files shipped in the chart (configs/: the synthetic
+# demo corridor demo_arterial, intersections i1-i3, cameras i1-cam1 ... i3-cam4).
+# Generate both from a camera inventory with apps/deploy/city/camera-config/camcfg.py,
+# which also writes them as a values file (values-corridor.yaml) and as a ConfigMap
+# (corridor-configmap.yaml).
+corridorConfig:
+  # The two files' text, e.g. -f values-corridor.yaml, or
+  #   --set-file corridorConfig.metadataJson=Metadata.json
+  #   --set-file corridorConfig.scheduledConfigYaml=scheduled_config.yaml
+  # Each one left empty keeps the shipped file. The service and tmc pods restart when
+  # either changes (pod annotation checksum/corridor-config).
+  metadataJson: ""
+  scheduledConfigYaml: ""
+  # Or the name of a ConfigMap you manage in this namespace (keys Metadata.json and
+  # scheduled_config.yaml), mounted instead of the chart's own; then leave the two
+  # values above empty. The chart cannot see its content: after changing it, restart
+  # the service and tmc Deployments (the install notes print the command).
+  existingConfigMap: ""
+
+# ---------------------------------------------------------------------------
+# terasim-mcp: FastMCP streamable-http (/mcp) + /files download route. :9911
+# ---------------------------------------------------------------------------
+mcp:
+  port: 9911
+  heartbeatS: "2.0"
+  # Public base URL for download links. Empty -> derived from global.externalScheme
+  # + global.externalHost (the Route). Set explicitly only for a non-default path.
+  publicUrl: ""
+  artifacts:
+    size: 2Gi
+    accessMode: ReadWriteOnce
+  resources:
+    requests: { cpu: 250m, memory: 512Mi }
+    limits: { cpu: "2", memory: 2Gi }
+
+# ---------------------------------------------------------------------------
+# terasim-tmc: periodic TMC generator (pulls VSS behavior, injects snapshots). :8200
+# ---------------------------------------------------------------------------
+tmc:
+  port: 8200
+  settleLagS: 180
+  # Detector labels (VSS behavior object.type) counted as traffic, comma-separated;
+  # case-insensitive, "-" and "_" are the same. Empty = Vehicle,two_wheeler (the
+  # Smart City blueprint's labels). A detector labelling vehicles car / bicycle
+  # needs countedObjectTypes: "car,bicycle", otherwise every count is zero.
+  countedObjectTypes: ""
+  # REQUIRED: the in-cluster URL of the VSS behavior / VA-API endpoint the TMC
+  # collector pulls, e.g. http://vss-video-analytics-api.<vss-namespace>.svc:8081
+  # (the VSS video-analytics-api Service; NOT vss-vios-ingress, which is the VST
+  # proxy on 30888).
+  vssBehaviorUrl: ""
+  storage:
+    size: 1Gi
+    accessMode: ReadWriteOnce
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { cpu: "1", memory: 1Gi }
+
+# Bundled Redis: the shared snapshot buffer / job store of terasim-service
+# (TERASIM_REDIS_HOST points at it, so the image's embedded Redis is not
+# started). terasim-mcp / terasim-tmc reach that data through the service's
+# REST API, not through Redis.
+redis:
+  # Empty -> the redis-server shipped in the TeraSim image itself (same
+  # non-root, arbitrary-uid image; no second registry pull; scanned with the
+  # release). Set e.g. "redis:7-alpine" to use an external Redis image; that
+  # image has no numeric USER, so outside restricted-v2 (plain Kubernetes, or
+  # an `anyuid` grant) also set runAsUser below (999 for the official image).
+  image: ""
+  # Only honoured when set; restricted-v2 assigns the uid itself.
+  runAsUser: ""
+  # Redis authentication (requirepass). The password lives in a Kubernetes
+  # Secret and reaches the pods only through secretKeyRef env vars: the Redis
+  # launcher writes it into a 0600 config file on its /tmp emptyDir (never on
+  # the command line or in the pod spec) and terasim-service reads
+  # TERASIM_REDIS_PASSWORD. Only terasim-service holds a Redis client;
+  # terasim-mcp / terasim-tmc talk to it over its REST API and get no password.
+  auth:
+    enabled: true
+    # Use a Secret you manage (recommended for GitOps): its name here, the
+    # password under `secretKey`. Empty -> the chart creates
+    # <release>-redis-auth with a generated password.
+    existingSecret: ""
+    secretKey: redis-password
+    # Explicit password for the chart-created Secret (no newlines). Empty ->
+    # 32 random alphanumerics generated at the first install and reused on
+    # every upgrade (the chart looks the existing Secret up); the Secret is
+    # kept on `helm uninstall` so a re-install keeps the same password.
+    # Rotation: change the value (or the existing Secret), then restart the
+    # redis and service Deployments together — see README "Redis auth".
+    password: ""
+  resources:
+    requests: { cpu: 50m, memory: 64Mi }
+    limits: { cpu: 500m, memory: 256Mi }
+
+# OpenShift Route exposing terasim-mcp's /files download path (edge TLS,
+# HTTP->HTTPS redirect). Rendered only on clusters with route.openshift.io/v1
+# AND when global.externalHost is set.
+route:
+  enabled: true
+  # OpenShift Route has NO path rewrite (unlike ingress-nginx). The MCP serves
+  # downloads at /files, so this chart gives TeraSim its own host and exposes
+  # /files at the root: download URLs are <scheme>://<externalHost>/files/<id>/<file>.
+  # Keep pathPrefix empty on OpenShift; a non-empty prefix would need the MCP to
+  # serve under it (it does not) since the Route cannot strip the prefix.
+  pathPrefix: ""
+
+# NetworkPolicies (one per component, ingress only). Rendered when
+# networking.k8s.io/v1 is available and enabled=true; enforcement needs a CNI
+# that implements NetworkPolicy (OVN-Kubernetes / OpenShift SDN do).
+#   redis   <- only the pods listed in redisClients (TCP 6379)
+#   service <- pods in this namespace (TCP service.port)
+#   tmc     <- pods in this namespace (TCP tmc.port)
+#   mcp     <- pods in this namespace, the VSS agent's namespace(s) and, for the
+#              /files Route, the OpenShift router (TCP mcp.port)
+# Egress is deliberately left open (no Egress policyType): terasim-tmc pulls
+# the VSS behavior API in the operator's VSS namespace, terasim-service may
+# fetch OSM extracts from Overpass when a map is not baked in, and all pods
+# need cluster DNS; the egress targets differ per environment.
+networkPolicy:
+  enabled: true
+  # Components allowed to reach Redis. Only terasim-service has a Redis client
+  # (see redis.auth); add "mcp"/"tmc" only if a future image needs it.
+  redisClients: ["service"]
+  # Namespaces (by name, matched on kubernetes.io/metadata.name) whose pods may
+  # call terasim-mcp:<mcp.port> — the VSS agent's namespace. Empty -> derived
+  # from tmc.vssBehaviorUrl when it is an in-cluster Service URL
+  # (http://<svc>.<namespace>.svc[.cluster.local]:<port>), i.e. the namespace
+  # the VSS chart is installed in; otherwise no cross-namespace access.
+  mcpClientNamespaces: []
+  # Namespace selectors identifying the OpenShift router (Ingress Controller)
+  # pods that terminate the /files Route; used only when route.enabled.
+  # (host-network Ingress Controllers on OVN-Kubernetes match the second one.)
+  routerNamespaceSelectors:
+    - matchLabels: { network.openshift.io/policy-group: ingress }
+    - matchLabels: { policy-group.network.openshift.io/host-network: "" }
+  # Extra `from` peers (NetworkPolicyPeer objects) appended per component, e.g.
+  # a monitoring namespace: service: [{namespaceSelector: {matchLabels: {...}}}]
+  extraIngressFrom:
+    redis: []
+    service: []
+    mcp: []
+    tmc: []
+
+# terasim-service (RW) and terasim-mcp (RO) share the output PVC. On RWO storage
+# the two pods must land on the same node; this pins them together. Set false
+# only if global.storageClass provides ReadWriteMany.
+coScheduleServiceAndMcp: true
+
+# Applied to all pods / containers (restricted-v2 compatible: non-root, no
+# capabilities, no privilege escalation, RuntimeDefault seccomp, read-only root
+# filesystem). Everything the services write goes to the PVCs or to the
+# emptyDir volumes mounted at /tmp and $HOME (/home/terasim). Do not set
+# runAsUser/fsGroup here for OpenShift: the SCC assigns them per namespace.
+podSecurityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  capabilities:
+    drop: ["ALL"]
+  seccompProfile:
+    type: RuntimeDefault
+nodeSelector: {}
+tolerations: []

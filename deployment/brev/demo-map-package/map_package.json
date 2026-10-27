@@ -1,0 +1,55 @@
+{
+  "schema": "terasim.map_package.v1",
+  "root": ".",
+  "net_file": "net.net.xml",
+  "base_sumocfg": "base.sumocfg",
+  "tls_files": [],
+  "geo_referenced": true,
+  "source": "osm",
+  "metadata": {
+    "source_filename": "demo_corridor.osm",
+    "source_sha256": "915769d2af4e89433be56ce380ab8847d49000c162220c744b1c9befc9f39bb1",
+    "created_at": "2026-10-23T00:13:48+00:00",
+    "orig_boundary": [
+      -121.910169,
+      37.329592,
+      -121.889831,
+      37.340408
+    ],
+    "has_tls": true,
+    "osm_file": "source.osm",
+    "netconvert_flags": [
+      "--geometry.remove",
+      "--junctions.join",
+      "--tls.guess-signals",
+      "--tls.discard-simple",
+      "--ramps.guess",
+      "--tls.default-type",
+      "static",
+      "--output.street-names"
+    ],
+    "conversion": {
+      "format": "osm",
+      "edges": 164,
+      "lanes": 196,
+      "junctions": 83,
+      "intersections": 39,
+      "signalized_junctions": 3,
+      "traffic_lights": 3,
+      "dead_ends": 0,
+      "drivable_edges": 164,
+      "components": 1,
+      "largest_component_share": 1.0,
+      "largest_strong_component_share": 1.0,
+      "geo_referenced": true,
+      "proj": "+proj=utm +zone=10 +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
+      "tls_source": "osm",
+      "conversion_seconds": 0.14,
+      "netconvert_warnings": {
+        "count": 0,
+        "top": []
+      },
+      "warnings": []
+    }
+  }
+}

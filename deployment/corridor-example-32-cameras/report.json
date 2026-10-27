@@ -1,0 +1,805 @@
+{
+ "inventory": "arterial_32.yaml",
+ "corridor_id": "arterial_blvd",
+ "intersections_count": 8,
+ "cameras_count": 32,
+ "counting_cameras": 26,
+ "signals_bound": 8,
+ "map": {
+  "sumocfg": "/data/output/store/maps/ed0947a56fee/base.sumocfg",
+  "sumo_net": "converted from inputs/arterial_8.osm with TeraSim's OpenStreetMap import",
+  "osm_extract": "inputs/arterial_8.osm",
+  "map_id": "ed0947a56fee"
+ },
+ "road_graph": "inputs/arterial_8.osm",
+ "intersections": [
+  {
+   "id": "oak",
+   "name": "Oak St & Arterial Blvd",
+   "lat": 37.355,
+   "lon": -121.9115,
+   "tls_id": "1001",
+   "tls_distance_m": 0.01,
+   "headings_source": "osm",
+   "osm_junction": "1001",
+   "streets": [
+    "Arterial Blvd",
+    "Oak St"
+   ],
+   "edges_per_heading": {
+    "North": 4,
+    "East": 2,
+    "South": 4,
+    "West": 2
+   },
+   "approaches_osm": [
+    "North",
+    "East",
+    "South",
+    "West"
+   ],
+   "exits_osm": [
+    "North",
+    "East",
+    "South",
+    "West"
+   ],
+   "approaches_sumo": {
+    "North": [
+     "Right",
+     "Straight",
+     "Left"
+    ],
+    "East": [
+     "Right",
+     "Straight",
+     "Left"
+    ],
+    "South": [
+     "Right",
+     "Straight",
+     "Left"
+    ],
+    "West": [
+     "Right",
+     "Straight",
+     "Left"
+    ]
+   },
+   "movements": 12,
+   "cameras": [
+    {
+     "sensor": "cam5",
+     "approach": "South",
+     "feed": "cam1"
+    },
+    {
+     "sensor": "cam6",
+     "approach": "West",
+     "feed": "cam2"
+    },
+    {
+     "sensor": "cam7",
+     "approach": "North",
+     "feed": "cam3"
+    },
+    {
+     "sensor": "cam8",
+     "approach": "East",
+     "feed": "cam4"
+    }
+   ]
+  },
+  {
+   "id": "elm",
+   "name": "Elm St & Arterial Blvd",
+   "lat": 37.355,
+   "lon": -121.9086751,
+   "tls_id": "1002",
+   "tls_distance_m": 0.01,
+   "headings_source": "osm",
+   "osm_junction": "1002",
+   "streets": [
+    "Arterial Blvd",
+    "Elm St"
+   ],
+   "edges_per_heading": {
+    "North": 2,
+    "East": 2,
+    "South": 2,
+    "West": 2
+   },
+   "approaches_osm": [
+    "North",
+    "East",
+    "West"
+   ],
+   "exits_osm": [
+    "East",
+    "South",
+    "West"
+   ],
+   "approaches_sumo": {
+    "North": [
+     "Right",
+     "Left"
+    ],
+    "East": [
+     "Right",
+     "Straight"
+    ],
+    "West": [
+     "Straight",
+     "Left"
+    ]
+   },
+   "movements": 6,
+   "cameras": [
+    {
+     "sensor": "cam9",
+     "approach": null,
+     "feed": "cam1"
+    },
+    {
+     "sensor": "cam10",
+     "approach": "West",
+     "feed": "cam2"
+    },
+    {
+     "sensor": "cam11",
+     "approach": "North",
+     "feed": "cam3"
+    },
+    {
+     "sensor": "cam12",
+     "approach": "East",
+     "feed": "cam4"
+    }
+   ]
+  },
+  {
+   "id": "pine",
+   "name": "Pine St & Arterial Blvd",
+   "lat": 37.355,
+   "lon": -121.9058503,
+   "tls_id": "1003",
+   "tls_distance_m": 0.0,
+   "headings_source": "osm",
+   "osm_junction": "1003",
+   "streets": [
+    "Arterial Blvd",
+    "Pine St"
+   ],
+   "edges_per_heading": {
+    "North": 4,
+    "East": 2,
+    "South": 4,
+    "West": 2
+   },
+   "approaches_osm": [
+    "North",
+    "East",
+    "South",
+    "West"
+   ],
+   "exits_osm": [
+    "North",
+    "East",
+    "South",
+    "West"
+   ],
+   "approaches_sumo": {
+    "North": [
+     "Right",
+     "Straight",
+     "Left"
+    ],
+    "East": [
+     "Right",
+     "Straight",
+     "Left"
+    ],
+    "South": [
+     "Right",
+     "Straight",
+     "Left"
+    ],
+    "West": [
+     "Right",
+     "Straight",
+     "Left"
+    ]
+   },
+   "movements": 12,
+   "cameras": [
+    {
+     "sensor": "cam1",
+     "approach": "South",
+     "feed": "cam1"
+    },
+    {
+     "sensor": "cam2",
+     "approach": "West",
+     "feed": "cam2"
+    },
+    {
+     "sensor": "cam3",
+     "approach": "North",
+     "feed": "cam3"
+    },
+    {
+     "sensor": "cam4",
+     "approach": "East",
+     "feed": "cam4"
+    }
+   ]
+  },
+  {
+   "id": "cedar",
+   "name": "Cedar St & Arterial Blvd",
+   "lat": 37.355,
+   "lon": -121.9030254,
+   "tls_id": "1004",
+   "tls_distance_m": 0.0,
+   "headings_source": "osm",
+   "osm_junction": "1004",
+   "streets": [
+    "Arterial Blvd",
+    "Cedar St"
+   ],
+   "edges_per_heading": {
+    "North": 4,
+    "East": 2,
+    "South": 0,
+    "West": 2
+   },
+   "approaches_osm": [
+    "North",
+    "East",
+    "West"
+   ],
+   "exits_osm": [
+    "North",
+    "East",
+    "West"
+   ],
+   "approaches_sumo": {
+    "North": [
+     "Right",
+     "Straight",
+     "Left"
+    ],
+    "East": [
+     "Straight",
+     "Left"
+    ],
+    "West": [
+     "Right",
+     "Straight"
+    ]
+   },
+   "movements": 7,
+   "cameras": [
+    {
+     "sensor": "cam13",
+     "approach": null,
+     "feed": "cam1"
+    },
+    {
+     "sensor": "cam14",
+     "approach": "West",
+     "feed": "cam2"
+    },
+    {
+     "sensor": "cam15",
+     "approach": "North",
+     "feed": "cam3"
+    },
+    {
+     "sensor": "cam16",
+     "approach": "East",
+     "feed": "cam4"
+    }
+   ]
+  },
+  {
+   "id": "maple",
+   "name": "Maple St & Arterial Blvd",
+   "lat": 37.355,
+   "lon": -121.9002006,
+   "tls_id": "1005",
+   "tls_distance_m": 0.0,
+   "headings_source": "osm",
+   "osm_junction": "1005",
+   "streets": [
+    "Arterial Blvd",
+    "Maple St"
+   ],
+   "edges_per_heading": {
+    "North": 0,
+    "East": 2,
+    "South": 4,
+    "West": 2
+   },
+   "approaches_osm": [
+    "East",
+    "South",
+    "West"
+   ],
+   "exits_osm": [
+    "East",
+    "South",
+    "West"
+   ],
+   "approaches_sumo": {
+    "East": [
+     "Right",
+     "Straight"
+    ],
+    "South": [
+     "Right",
+     "Straight",
+     "Left"
+    ],
+    "West": [
+     "Straight",
+     "Left"
+    ]
+   },
+   "movements": 7,
+   "cameras": [
+    {
+     "sensor": "cam17",
+     "approach": "South",
+     "feed": "cam1"
+    },
+    {
+     "sensor": "cam18",
+     "approach": "West",
+     "feed": "cam2"
+    },
+    {
+     "sensor": "cam19",
+     "approach": null,
+     "feed": "cam3"
+    },
+    {
+     "sensor": "cam20",
+     "approach": "East",
+     "feed": "cam4"
+    }
+   ]
+  },
+  {
+   "id": "birch",
+   "name": "Birch St & Arterial Blvd",
+   "lat": 37.355,
+   "lon": -121.8973757,
+   "tls_id": "1006",
+   "tls_distance_m": 0.0,
+   "headings_source": "osm",
+   "osm_junction": "1006",
+   "streets": [
+    "Arterial Blvd",
+    "Birch St"
+   ],
+   "edges_per_heading": {
+    "North": 4,
+    "East": 2,
+    "South": 0,
+    "West": 2
+   },
+   "approaches_osm": [
+    "North",
+    "East",
+    "West"
+   ],
+   "exits_osm": [
+    "North",
+    "East",
+    "West"
+   ],
+   "approaches_sumo": {
+    "North": [
+     "Right",
+     "Straight",
+     "Left"
+    ],
+    "East": [
+     "Straight",
+     "Left"
+    ],
+    "West": [
+     "Right",
+     "Straight"
+    ]
+   },
+   "movements": 7,
+   "cameras": [
+    {
+     "sensor": "cam21",
+     "approach": null,
+     "feed": "cam1"
+    },
+    {
+     "sensor": "cam22",
+     "approach": "West",
+     "feed": "cam2"
+    },
+    {
+     "sensor": "cam23",
+     "approach": "North",
+     "feed": "cam3"
+    },
+    {
+     "sensor": "cam24",
+     "approach": "East",
+     "feed": "cam4"
+    }
+   ]
+  },
+  {
+   "id": "ash",
+   "name": "Ash St & Arterial Blvd",
+   "lat": 37.355,
+   "lon": -121.8945508,
+   "tls_id": "1007",
+   "tls_distance_m": 0.01,
+   "headings_source": "osm",
+   "osm_junction": "1007",
+   "streets": [
+    "Arterial Blvd",
+    "Ash St"
+   ],
+   "edges_per_heading": {
+    "North": 0,
+    "East": 2,
+    "South": 4,
+    "West": 2
+   },
+   "approaches_osm": [
+    "East",
+    "South",
+    "West"
+   ],
+   "exits_osm": [
+    "East",
+    "South",
+    "West"
+   ],
+   "approaches_sumo": {
+    "East": [
+     "Right",
+     "Straight"
+    ],
+    "South": [
+     "Right",
+     "Straight",
+     "Left"
+    ],
+    "West": [
+     "Straight",
+     "Left"
+    ]
+   },
+   "movements": 7,
+   "cameras": [
+    {
+     "sensor": "cam25",
+     "approach": "South",
+     "feed": "cam1"
+    },
+    {
+     "sensor": "cam26",
+     "approach": "West",
+     "feed": "cam2"
+    },
+    {
+     "sensor": "cam27",
+     "approach": null,
+     "feed": "cam3"
+    },
+    {
+     "sensor": "cam28",
+     "approach": "East",
+     "feed": "cam4"
+    }
+   ]
+  },
+  {
+   "id": "walnut",
+   "name": "Walnut St & Arterial Blvd",
+   "lat": 37.355,
+   "lon": -121.891726,
+   "tls_id": "1008",
+   "tls_distance_m": 0.0,
+   "headings_source": "osm",
+   "osm_junction": "1008",
+   "streets": [
+    "Arterial Blvd",
+    "Walnut St"
+   ],
+   "edges_per_heading": {
+    "North": 2,
+    "East": 2,
+    "South": 2,
+    "West": 2
+   },
+   "approaches_osm": [
+    "East",
+    "South",
+    "West"
+   ],
+   "exits_osm": [
+    "North",
+    "East",
+    "West"
+   ],
+   "approaches_sumo": {
+    "East": [
+     "Straight",
+     "Left"
+    ],
+    "South": [
+     "Right",
+     "Left"
+    ],
+    "West": [
+     "Right",
+     "Straight"
+    ]
+   },
+   "movements": 6,
+   "cameras": [
+    {
+     "sensor": "cam29",
+     "approach": "South",
+     "feed": "cam1"
+    },
+    {
+     "sensor": "cam30",
+     "approach": "West",
+     "feed": "cam2"
+    },
+    {
+     "sensor": "cam31",
+     "approach": null,
+     "feed": "cam3"
+    },
+    {
+     "sensor": "cam32",
+     "approach": "East",
+     "feed": "cam4"
+    }
+   ]
+  }
+ ],
+ "calibration": [
+  {
+   "sensor": "cam5",
+   "intersection": "oak",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam1",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at oak"
+  },
+  {
+   "sensor": "cam6",
+   "intersection": "oak",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam2",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at oak"
+  },
+  {
+   "sensor": "cam7",
+   "intersection": "oak",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam3",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at oak"
+  },
+  {
+   "sensor": "cam8",
+   "intersection": "oak",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam4",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at oak"
+  },
+  {
+   "sensor": "cam9",
+   "intersection": "elm",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam1",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at elm"
+  },
+  {
+   "sensor": "cam10",
+   "intersection": "elm",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam2",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at elm"
+  },
+  {
+   "sensor": "cam11",
+   "intersection": "elm",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam3",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at elm"
+  },
+  {
+   "sensor": "cam12",
+   "intersection": "elm",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam4",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at elm"
+  },
+  {
+   "sensor": "cam1",
+   "intersection": "pine",
+   "status": "copied",
+   "source": "calibration.sample.json:cam1",
+   "note": ""
+  },
+  {
+   "sensor": "cam2",
+   "intersection": "pine",
+   "status": "copied",
+   "source": "calibration.sample.json:cam2",
+   "note": ""
+  },
+  {
+   "sensor": "cam3",
+   "intersection": "pine",
+   "status": "copied",
+   "source": "calibration.sample.json:cam3",
+   "note": ""
+  },
+  {
+   "sensor": "cam4",
+   "intersection": "pine",
+   "status": "copied",
+   "source": "calibration.sample.json:cam4",
+   "note": ""
+  },
+  {
+   "sensor": "cam13",
+   "intersection": "cedar",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam1",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at cedar"
+  },
+  {
+   "sensor": "cam14",
+   "intersection": "cedar",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam2",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at cedar"
+  },
+  {
+   "sensor": "cam15",
+   "intersection": "cedar",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam3",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at cedar"
+  },
+  {
+   "sensor": "cam16",
+   "intersection": "cedar",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam4",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at cedar"
+  },
+  {
+   "sensor": "cam17",
+   "intersection": "maple",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam1",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at maple"
+  },
+  {
+   "sensor": "cam18",
+   "intersection": "maple",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam2",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at maple"
+  },
+  {
+   "sensor": "cam19",
+   "intersection": "maple",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam3",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at maple"
+  },
+  {
+   "sensor": "cam20",
+   "intersection": "maple",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam4",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at maple"
+  },
+  {
+   "sensor": "cam21",
+   "intersection": "birch",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam1",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at birch"
+  },
+  {
+   "sensor": "cam22",
+   "intersection": "birch",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam2",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at birch"
+  },
+  {
+   "sensor": "cam23",
+   "intersection": "birch",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam3",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at birch"
+  },
+  {
+   "sensor": "cam24",
+   "intersection": "birch",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam4",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at birch"
+  },
+  {
+   "sensor": "cam25",
+   "intersection": "ash",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam1",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at ash"
+  },
+  {
+   "sensor": "cam26",
+   "intersection": "ash",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam2",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at ash"
+  },
+  {
+   "sensor": "cam27",
+   "intersection": "ash",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam3",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at ash"
+  },
+  {
+   "sensor": "cam28",
+   "intersection": "ash",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam4",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at ash"
+  },
+  {
+   "sensor": "cam29",
+   "intersection": "walnut",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam1",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at walnut"
+  },
+  {
+   "sensor": "cam30",
+   "intersection": "walnut",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam2",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at walnut"
+  },
+  {
+   "sensor": "cam31",
+   "intersection": "walnut",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam3",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at walnut"
+  },
+  {
+   "sensor": "cam32",
+   "intersection": "walnut",
+   "status": "copied from another intersection",
+   "source": "calibration.sample.json:cam4",
+   "note": "image<->geo points still describe pine: detections are placed at pine, not at walnut"
+  }
+ ],
+ "issues": [],
+ "ready": true
+}

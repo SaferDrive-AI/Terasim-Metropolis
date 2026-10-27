@@ -1,0 +1,13 @@
+{
+  "corridor_id": "demo_scenario",
+  "timestamp_start": "2026-01-01T08:00:00",
+  "observation_interval": "1h",
+  "intersections": [
+    {
+      "intersection_id": "placeholder",
+      "lat": 0.0,
+      "lon": 0.0,
+      "counts": {}
+    }
+  ]
+}

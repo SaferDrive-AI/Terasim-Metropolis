@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        enable-cache: true
+
+    - name: Install Redis
+      run: sudo apt-get update && sudo apt-get install -y --no-install-recommends redis-server
+
+    # The repository is a uv workspace (see [tool.uv.workspace] in pyproject.toml).
+    - name: Install the workspace packages
+      run: uv sync --all-packages
+
+    - name: Build the NADE Cython extensions
+      run: cd packages/terasim-nde-nade && uv run python setup.py build_ext --inplace
+
+    - name: Lint (advisory)
+      continue-on-error: true
+      run: uv run ruff check packages tests
+
+    - name: Tests
+      run: uv run pytest tests -q -m "not slow"
+
+    - name: End-to-end acceptance check (synthetic data)
+      run: uv run python examples/acceptance/run_acceptance.py --out acceptance-out-ci --sim-end 600 --max-trials 6
+
+    - name: Upload the acceptance report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: acceptance-report
+        path: acceptance-out-ci/acceptance_report.*

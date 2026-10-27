@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <input>
+    <net-file value="demo.net.xml"/>
+    <route-files value="demo_routes.rou.xml"/>
+    <additional-files value="demo.tls.xml"/>
+  </input>
+  <time>
+    <begin value="0"/>
+    <end value="600"/>
+  </time>
+</configuration>

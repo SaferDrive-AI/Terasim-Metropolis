@@ -1,0 +1,151 @@
+{
+  "schema": "terasim.nema_plan.v1",
+  "corridor_id": "park_ave",
+  "intersections": [
+    {
+      "intersection_id": "park_oak",
+      "name": "PARK AVE @ OAK ST",
+      "controller": {
+        "id": "102",
+        "type": "NEMA TS2"
+      },
+      "lat": 37.335,
+      "lon": -121.89661,
+      "phases": [
+        {
+          "phase": 2,
+          "movements": [
+            "EB-through",
+            "EB-right",
+            "EB-left"
+          ],
+          "min_green_s": 10,
+          "min_green_src": "read",
+          "yellow_s": 4.0,
+          "yellow_src": "read",
+          "all_red_s": 1.5,
+          "all_red_src": "read"
+        },
+        {
+          "phase": 4,
+          "movements": [
+            "NB-through",
+            "NB-right",
+            "NB-left"
+          ],
+          "min_green_s": 8,
+          "min_green_src": "read",
+          "yellow_s": 3.5,
+          "yellow_src": "read",
+          "all_red_s": 1.5,
+          "all_red_src": "read"
+        },
+        {
+          "phase": 6,
+          "movements": [
+            "WB-through",
+            "WB-right",
+            "WB-left"
+          ],
+          "min_green_s": 10,
+          "min_green_src": "read",
+          "yellow_s": 4.0,
+          "yellow_src": "read",
+          "all_red_s": 1.5,
+          "all_red_src": "read"
+        },
+        {
+          "phase": 8,
+          "movements": [
+            "SB-through",
+            "SB-right",
+            "SB-left"
+          ],
+          "min_green_s": 8,
+          "min_green_src": "read",
+          "yellow_s": 3.5,
+          "yellow_src": "read",
+          "all_red_s": 1.5,
+          "all_red_src": "read"
+        }
+      ],
+      "rings": {
+        "ring1": [
+          2,
+          4
+        ],
+        "ring2": [
+          6,
+          8
+        ],
+        "barrier_phases": [
+          4,
+          8
+        ],
+        "barrier2_phases": [
+          2,
+          6
+        ],
+        "coordinated_phases": [
+          2,
+          6
+        ],
+        "src": "read"
+      },
+      "patterns": [
+        {
+          "pattern_id": "day",
+          "description": "DAY",
+          "cycle_s": 80,
+          "cycle_src": "read",
+          "offset_s": 0,
+          "offset_src": "read",
+          "coordinated": true,
+          "splits": {
+            "2": 46,
+            "4": 34,
+            "6": 46,
+            "8": 34
+          }
+        }
+      ],
+      "schedule": [
+        {
+          "days": [
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat",
+            "Sun"
+          ],
+          "start": "07:00",
+          "pattern_id": "day"
+        },
+        {
+          "days": [
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat",
+            "Sun"
+          ],
+          "start": "20:00",
+          "pattern_id": "free"
+        }
+      ]
+    }
+  ],
+  "provenance": {
+    "source_files": [
+      "park_oak_timing_report.pdf"
+    ],
+    "generated_by": "synthetic test fixture",
+    "generated_at": "2026-07-01",
+    "handoff_ready": true,
+    "gaps": []
+  }
+}

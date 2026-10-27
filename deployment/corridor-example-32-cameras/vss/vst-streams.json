@@ -1,0 +1,130 @@
+[
+ {
+  "name": "cam5",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam5"
+ },
+ {
+  "name": "cam6",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam6"
+ },
+ {
+  "name": "cam7",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam7"
+ },
+ {
+  "name": "cam8",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam8"
+ },
+ {
+  "name": "cam9",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam9"
+ },
+ {
+  "name": "cam10",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam10"
+ },
+ {
+  "name": "cam11",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam11"
+ },
+ {
+  "name": "cam12",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam12"
+ },
+ {
+  "name": "cam1",
+  "sensorUrl": "rtsp://rtsp-test-source-cam1.vss.svc.cluster.local:8554/test"
+ },
+ {
+  "name": "cam2",
+  "sensorUrl": "rtsp://rtsp-test-source-cam2.vss.svc.cluster.local:8554/test"
+ },
+ {
+  "name": "cam3",
+  "sensorUrl": "rtsp://rtsp-test-source-cam3.vss.svc.cluster.local:8554/test"
+ },
+ {
+  "name": "cam4",
+  "sensorUrl": "rtsp://rtsp-test-source-cam4.vss.svc.cluster.local:8554/test"
+ },
+ {
+  "name": "cam13",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam13"
+ },
+ {
+  "name": "cam14",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam14"
+ },
+ {
+  "name": "cam15",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam15"
+ },
+ {
+  "name": "cam16",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam16"
+ },
+ {
+  "name": "cam17",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam17"
+ },
+ {
+  "name": "cam18",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam18"
+ },
+ {
+  "name": "cam19",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam19"
+ },
+ {
+  "name": "cam20",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam20"
+ },
+ {
+  "name": "cam21",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam21"
+ },
+ {
+  "name": "cam22",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam22"
+ },
+ {
+  "name": "cam23",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam23"
+ },
+ {
+  "name": "cam24",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam24"
+ },
+ {
+  "name": "cam25",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam25"
+ },
+ {
+  "name": "cam26",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam26"
+ },
+ {
+  "name": "cam27",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam27"
+ },
+ {
+  "name": "cam28",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam28"
+ },
+ {
+  "name": "cam29",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam29"
+ },
+ {
+  "name": "cam30",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam30"
+ },
+ {
+  "name": "cam31",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam31"
+ },
+ {
+  "name": "cam32",
+  "sensorUrl": "rtsp://rtsp-fanout.vss.svc.cluster.local:8554/cam32"
+ }
+]

@@ -1,0 +1,122 @@
+# TeraSim Metropolis on one host: one image, three containers, plus an optional
+# stand-in for the VSS behavior API.
+#   terasim-service   : REST /v1/city/* + embedded Redis      -> 127.0.0.1:8100
+#   terasim-mcp       : MCP streamable-http (/mcp) + /files   -> 127.0.0.1:9911
+#   terasim-tmc       : registry + periodic TMC generator     -> 127.0.0.1:8200
+#   vss-behavior-stub : profile "stub" only; synthetic GET /behavior for the demo
+#                       corridor's sensors (stub_behavior_server.py), in-network only
+# The services publish on loopback only. A VSS agent container with host networking
+# on the same machine reaches the MCP server at 127.0.0.1:9911; from another machine,
+# tunnel (ssh -L 9911:127.0.0.1:9911 <host>) or put a reverse proxy in front.
+#
+# Usage (repository root):
+#   docker compose -f apps/deploy/city/phase1/compose.yml build
+#   # offline, against the stub (the TMC collector's VSS_BEHAVIOR_URL defaults to it):
+#   docker compose -f apps/deploy/city/phase1/compose.yml --profile stub up -d
+#   # against a VSS deployment (a VSS on this host: http://host.docker.internal:8081):
+#   VSS_BEHAVIOR_URL=http://<vss-host>:8081 docker compose -f apps/deploy/city/phase1/compose.yml up -d
+#
+# Environment overrides (all optional): VSS_BEHAVIOR_URL, TMC_SETTLE_LAG_S,
+# TMC_COUNTED_OBJECT_TYPES, TERASIM_MCP_PUBLIC_URL, TERASIM_CITY_OSM_DOWNLOAD,
+# TERASIM_CITY_SCHEDULER_ENABLED, TERASIM_CITY_CADENCE_S.
+services:
+  terasim-service:
+    image: terasim-metropolis:0.1.0
+    build:
+      context: ../../../..
+      dockerfile: apps/deploy/city/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8100:8000"
+    volumes:
+      # The corridor configuration (the demo corridor on the map baked at /data/input/map).
+      - ./scheduled_config.yaml:/config/scheduled_config.yaml:ro
+      - terasim-output:/data/output
+    environment:
+      TERASIM_CITY_SCHEDULED_CONFIG: /config/scheduled_config.yaml
+      # Snapshot aggregation window of an optimization (seconds).
+      TERASIM_CITY_WINDOW_S: "3600"
+      # Worker slots (one SUMO process each) all runs together may hold. A
+      # request's n_workers must be <= this value (else 422).
+      TERASIM_CITY_MAX_CONCURRENCY: "8"
+      # 0: never download OpenStreetMap data (maps shipped as files); a request no
+      # stored map covers then gets 422 naming this setting. Default 1: download when needed.
+      TERASIM_CITY_OSM_DOWNLOAD: ${TERASIM_CITY_OSM_DOWNLOAD:-1}
+      # Optional built-in scheduler: optimize every corridor of scheduled_config.yaml once
+      # per cadence (seconds) from its recent snapshots. Off: runs start on request only.
+      TERASIM_CITY_SCHEDULER_ENABLED: ${TERASIM_CITY_SCHEDULER_ENABLED:-false}
+      TERASIM_CITY_CADENCE_S: ${TERASIM_CITY_CADENCE_S:-3600}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/openapi.json', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  terasim-mcp:
+    image: terasim-metropolis:0.1.0
+    command: ["terasim-agent-skill"]
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9911:9911"
+    volumes:
+      # The service's asset volume, read-only: the PDF report prints the city's
+      # current plan (plan store) next to the optimized one.
+      - terasim-output:/data/output:ro
+      # Optimized plans + PDF reports, served at /files/<artifact_id>/<name>.
+      - terasim-artifacts:/data/artifacts
+    environment:
+      TERASIM_REDIS_HOST: terasim-service   # entrypoint: skip the embedded Redis
+      TERASIM_CITY_URL: http://terasim-service:8000
+      TERASIM_TMC_URL: http://terasim-tmc:8200
+      TERASIM_MCP_TRANSPORT: streamable-http
+      TERASIM_MCP_HOST: 0.0.0.0
+      TERASIM_MCP_PORT: "9911"
+      TERASIM_ARTIFACT_ROOT: /data/artifacts
+      # The address a reader can open for the download links in the chat answer:
+      # a reverse proxy that forwards <public>/files/ to 127.0.0.1:9911/files/.
+      TERASIM_MCP_PUBLIC_URL: ${TERASIM_MCP_PUBLIC_URL:-http://127.0.0.1:9911}
+    depends_on:
+      terasim-service:
+        condition: service_healthy
+      terasim-tmc:
+        condition: service_started
+
+  terasim-tmc:
+    image: terasim-metropolis:0.1.0
+    command: ["terasim-tmc-service"]
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8200:8200"
+    volumes:
+      # The corridor spec: the demo corridor's intersections, cameras and edges.
+      - ./Metadata.json:/config/Metadata.json:ro
+      - tmc-data:/data/tmc
+    environment:
+      TERASIM_REDIS_HOST: terasim-service   # entrypoint: skip the embedded Redis
+      TMC_SPEC_FILE: /config/Metadata.json
+      TMC_REGISTRY_FILE: /data/tmc/tmc_registry.json
+      # The VSS behavior API; defaults to the stub of the "stub" profile.
+      VSS_BEHAVIOR_URL: ${VSS_BEHAVIOR_URL:-http://vss-behavior-stub:8081}
+      TERASIM_CITY_URL: http://terasim-service:8000
+      TMC_SETTLE_LAG_S: ${TMC_SETTLE_LAG_S:-180}
+      # detector labels counted as traffic (comma-separated; empty = Vehicle,two_wheeler)
+      TMC_COUNTED_OBJECT_TYPES: ${TMC_COUNTED_OBJECT_TYPES:-}
+      TMC_PORT: "8200"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      terasim-service:
+        condition: service_healthy
+
+  vss-behavior-stub:
+    profiles: ["stub"]
+    image: terasim-metropolis:0.1.0
+    # Standard library only; bypasses the image entrypoint (no Redis needed).
+    entrypoint: ["python", "apps/deploy/city/phase1/stub_behavior_server.py"]
+    command: ["--port", "8081"]
+    restart: unless-stopped
+
+volumes:
+  terasim-output:
+  tmc-data:
+  terasim-artifacts:

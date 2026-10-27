@@ -1,0 +1,154 @@
+{{- $svc := printf "%s-service" (include "terasim-phase1.fullname" .) }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $svc }}
+  labels:
+    {{- include "terasim-phase1.labels" (dict "root" . "component" "service") | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "terasim-phase1.selectorLabels" (dict "root" . "component" "service") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "terasim-phase1.selectorLabels" (dict "root" . "component" "service") | nindent 8 }}
+      annotations:
+        # Changes with the corridor files (corridorConfig): an upgrade that changes them
+        # restarts this pod, which reads them at start-up.
+        checksum/corridor-config: {{ include "terasim-phase1.corridorChecksum" . }}
+    spec:
+      serviceAccountName: {{ include "terasim-phase1.serviceAccountName" . }}
+      {{- include "terasim-phase1.imagePullSecrets" . | nindent 6 }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: service
+          image: {{ include "terasim-phase1.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          # default entrypoint -> terasim-service
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+          env:
+            - name: TERASIM_ENABLE_CITY_API
+              value: "true"
+            - name: TERASIM_CITY_INPUT_ROOT
+              value: {{ .Values.service.inputRoot | quote }}
+            - name: TERASIM_CITY_OUTPUT_ROOT
+              value: /data/output
+            - name: TERASIM_CITY_DATA_ROOT
+              value: /data/output/store
+            - name: TERASIM_CITY_SCHEDULED_CONFIG
+              value: /config/scheduled_config.yaml
+            - name: TERASIM_CITY_WINDOW_S
+              value: {{ .Values.service.windowS | quote }}
+            - name: TERASIM_CITY_MAX_CONCURRENCY
+              value: {{ .Values.service.maxConcurrency | quote }}
+            # values.yaml scheduler / simMetrics / audit / service.osmDownload. Their kinds
+            # are checked by the validate helper (a clear error); toString keeps this
+            # from failing first.
+            - name: TERASIM_CITY_SCHEDULER_ENABLED
+              value: {{ ternary "true" "false" (eq (toString .Values.scheduler.enabled) "true") | quote }}
+            - name: TERASIM_CITY_CADENCE_S
+              value: {{ .Values.scheduler.cadenceSeconds | quote }}
+            - name: TERASIM_CITY_SIM_METRICS
+              value: {{ ternary "1" "0" (eq (toString .Values.simMetrics.enabled) "true") | quote }}
+            - name: TERASIM_CITY_AUDIT_ENABLED
+              value: {{ ternary "1" "0" (eq (toString .Values.audit.enabled) "true") | quote }}
+            - name: TERASIM_CITY_OSM_DOWNLOAD
+              value: {{ ternary "1" "0" (eq (toString (include "terasim-phase1.osmDownload" .)) "true") | quote }}
+            - name: TERASIM_REDIS_HOST
+              value: {{ include "terasim-phase1.redisHost" . | quote }}
+            - name: TERASIM_REDIS_PORT
+              value: "6379"
+            {{- if .Values.redis.auth.enabled }}
+            # requirepass of the bundled Redis (terasim_service.utils.base:
+            # redis_connection_kwargs_from_env). Only this pod holds a Redis
+            # client; terasim-mcp / terasim-tmc use the REST API.
+            - name: TERASIM_REDIS_PASSWORD
+              {{- include "terasim-phase1.redisAuthSecretKeyRef" . | nindent 14 }}
+            {{- end }}
+          readinessProbe:
+            httpGet: { path: /openapi.json, port: http }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 30
+          livenessProbe:
+            httpGet: { path: /openapi.json, port: http }
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            failureThreshold: 6
+          {{- with .Values.service.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: output
+              mountPath: /data/output
+            - name: config
+              mountPath: /config
+              readOnly: true
+            # Read-only root filesystem: scratch (OSM download staging, SUMO
+            # temp files) and $HOME are emptyDirs.
+            - name: tmp
+              mountPath: /tmp
+            - name: home
+              mountPath: /home/terasim
+      volumes:
+        - name: output
+          persistentVolumeClaim:
+            claimName: {{ $svc }}-output
+        - name: config
+          configMap:
+            name: {{ include "terasim-phase1.corridorConfigMapName" . }}
+        - name: tmp
+          emptyDir: {}
+        - name: home
+          emptyDir: {}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $svc }}
+  labels:
+    {{- include "terasim-phase1.labels" (dict "root" . "component" "service") | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "terasim-phase1.selectorLabels" (dict "root" . "component" "service") | nindent 4 }}
+  ports:
+    - name: http
+      port: {{ .Values.service.port }}
+      targetPort: http
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $svc }}-output
+  labels:
+    {{- include "terasim-phase1.labels" (dict "root" . "component" "service") | nindent 4 }}
+spec:
+  accessModes:
+    - {{ .Values.service.storage.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.service.storage.size }}
+  {{- if .Values.global.storageClass }}
+  storageClassName: {{ .Values.global.storageClass | quote }}
+  {{- end }}

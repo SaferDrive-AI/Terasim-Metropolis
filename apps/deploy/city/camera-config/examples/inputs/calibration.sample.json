@@ -1,0 +1,395 @@
+{
+ "version": "1.0",
+ "osmURL": "",
+ "calibrationType": "geo",
+ "sensors": [
+  {
+   "id": "cam1",
+   "type": "camera",
+   "imageCoordinates": [
+    {
+     "x": 120.0,
+     "y": 400.0
+    },
+    {
+     "x": 220.0,
+     "y": 320.0
+    },
+    {
+     "x": 320.0,
+     "y": 240.0
+    },
+    {
+     "x": 420.0,
+     "y": 160.0
+    }
+   ],
+   "globalCoordinates": [
+    {
+     "x": -121.9057599,
+     "y": 37.3550721
+    },
+    {
+     "x": -121.9057599,
+     "y": 37.354982
+    },
+    {
+     "x": -121.9057599,
+     "y": 37.3548918
+    },
+    {
+     "x": -121.9057599,
+     "y": 37.3548017
+    }
+   ],
+   "origin": {
+    "lat": 37.355,
+    "lng": -121.9058503
+   },
+   "geoLocation": {
+    "lat": 37.3551622,
+    "lng": -121.9057599
+   },
+   "rois": [
+    {
+     "id": "cam1-roi-1",
+     "roiCoordinates": [
+      {
+       "x": -121.9057599,
+       "y": 37.3550721
+      },
+      {
+       "x": -121.9057599,
+       "y": 37.3548017
+      },
+      {
+       "x": -121.9058503,
+       "y": 37.355
+      }
+     ]
+    }
+   ],
+   "place": [
+    {
+     "name": "city",
+     "value": "example"
+    },
+    {
+     "name": "intersection",
+     "value": "pine"
+    }
+   ],
+   "tripwires": [],
+   "attributes": [
+    {
+     "name": "fps",
+     "value": "15"
+    },
+    {
+     "name": "direction",
+     "value": "180"
+    },
+    {
+     "name": "source",
+     "value": "vst"
+    }
+   ],
+   "coordinates": {
+    "x": 0,
+    "y": 0
+   },
+   "scaleFactor": 1
+  },
+  {
+   "id": "cam2",
+   "type": "camera",
+   "imageCoordinates": [
+    {
+     "x": 120.0,
+     "y": 400.0
+    },
+    {
+     "x": 220.0,
+     "y": 320.0
+    },
+    {
+     "x": 320.0,
+     "y": 240.0
+    },
+    {
+     "x": 420.0,
+     "y": 160.0
+    }
+   ],
+   "globalCoordinates": [
+    {
+     "x": -121.9057599,
+     "y": 37.3549279
+    },
+    {
+     "x": -121.9058729,
+     "y": 37.3549279
+    },
+    {
+     "x": -121.9059859,
+     "y": 37.3549279
+    },
+    {
+     "x": -121.9060989,
+     "y": 37.3549279
+    }
+   ],
+   "origin": {
+    "lat": 37.355,
+    "lng": -121.9058503
+   },
+   "geoLocation": {
+    "lat": 37.3549279,
+    "lng": -121.9056469
+   },
+   "rois": [
+    {
+     "id": "cam2-roi-1",
+     "roiCoordinates": [
+      {
+       "x": -121.9057599,
+       "y": 37.3549279
+      },
+      {
+       "x": -121.9060989,
+       "y": 37.3549279
+      },
+      {
+       "x": -121.9058503,
+       "y": 37.355
+      }
+     ]
+    }
+   ],
+   "place": [
+    {
+     "name": "city",
+     "value": "example"
+    },
+    {
+     "name": "intersection",
+     "value": "pine"
+    }
+   ],
+   "tripwires": [],
+   "attributes": [
+    {
+     "name": "fps",
+     "value": "15"
+    },
+    {
+     "name": "direction",
+     "value": "270"
+    },
+    {
+     "name": "source",
+     "value": "vst"
+    }
+   ],
+   "coordinates": {
+    "x": 0,
+    "y": 0
+   },
+   "scaleFactor": 1
+  },
+  {
+   "id": "cam3",
+   "type": "camera",
+   "imageCoordinates": [
+    {
+     "x": 120.0,
+     "y": 400.0
+    },
+    {
+     "x": 220.0,
+     "y": 320.0
+    },
+    {
+     "x": 320.0,
+     "y": 240.0
+    },
+    {
+     "x": 420.0,
+     "y": 160.0
+    }
+   ],
+   "globalCoordinates": [
+    {
+     "x": -121.9059407,
+     "y": 37.3549279
+    },
+    {
+     "x": -121.9059407,
+     "y": 37.355018
+    },
+    {
+     "x": -121.9059407,
+     "y": 37.3551082
+    },
+    {
+     "x": -121.9059407,
+     "y": 37.3551983
+    }
+   ],
+   "origin": {
+    "lat": 37.355,
+    "lng": -121.9058503
+   },
+   "geoLocation": {
+    "lat": 37.3548378,
+    "lng": -121.9059407
+   },
+   "rois": [
+    {
+     "id": "cam3-roi-1",
+     "roiCoordinates": [
+      {
+       "x": -121.9059407,
+       "y": 37.3549279
+      },
+      {
+       "x": -121.9059407,
+       "y": 37.3551983
+      },
+      {
+       "x": -121.9058503,
+       "y": 37.355
+      }
+     ]
+    }
+   ],
+   "place": [
+    {
+     "name": "city",
+     "value": "example"
+    },
+    {
+     "name": "intersection",
+     "value": "pine"
+    }
+   ],
+   "tripwires": [],
+   "attributes": [
+    {
+     "name": "fps",
+     "value": "15"
+    },
+    {
+     "name": "direction",
+     "value": "0"
+    },
+    {
+     "name": "source",
+     "value": "vst"
+    }
+   ],
+   "coordinates": {
+    "x": 0,
+    "y": 0
+   },
+   "scaleFactor": 1
+  },
+  {
+   "id": "cam4",
+   "type": "camera",
+   "imageCoordinates": [
+    {
+     "x": 120.0,
+     "y": 400.0
+    },
+    {
+     "x": 220.0,
+     "y": 320.0
+    },
+    {
+     "x": 320.0,
+     "y": 240.0
+    },
+    {
+     "x": 420.0,
+     "y": 160.0
+    }
+   ],
+   "globalCoordinates": [
+    {
+     "x": -121.9059407,
+     "y": 37.3550721
+    },
+    {
+     "x": -121.9058277,
+     "y": 37.3550721
+    },
+    {
+     "x": -121.9057147,
+     "y": 37.3550721
+    },
+    {
+     "x": -121.9056017,
+     "y": 37.3550721
+    }
+   ],
+   "origin": {
+    "lat": 37.355,
+    "lng": -121.9058503
+   },
+   "geoLocation": {
+    "lat": 37.3550721,
+    "lng": -121.9060537
+   },
+   "rois": [
+    {
+     "id": "cam4-roi-1",
+     "roiCoordinates": [
+      {
+       "x": -121.9059407,
+       "y": 37.3550721
+      },
+      {
+       "x": -121.9056017,
+       "y": 37.3550721
+      },
+      {
+       "x": -121.9058503,
+       "y": 37.355
+      }
+     ]
+    }
+   ],
+   "place": [
+    {
+     "name": "city",
+     "value": "example"
+    },
+    {
+     "name": "intersection",
+     "value": "pine"
+    }
+   ],
+   "tripwires": [],
+   "attributes": [
+    {
+     "name": "fps",
+     "value": "15"
+    },
+    {
+     "name": "direction",
+     "value": "90"
+    },
+    {
+     "name": "source",
+     "value": "vst"
+    }
+   ],
+   "coordinates": {
+    "x": 0,
+    "y": 0
+   },
+   "scaleFactor": 1
+  }
+ ]
+}
