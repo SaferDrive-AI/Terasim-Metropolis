@@ -12,8 +12,13 @@
 # and the CNDE map artifacts (cnde_map.pkl, cnde_id_mapping.pkl) travel with the map package
 # (the conversion tooling is not installed here).
 #
-# Build from the repository root, after the release image:
-#   docker build -f apps/deploy/city/Dockerfile -t terasim-metropolis:0.1.0 .
+# The runtime module ships CPython 3.10 extension modules (the attention and knn CUDA ops of the
+# cnde model package), so this image derives from the Python 3.10 variant of the release image
+# (the release image itself runs Python 3.11). Build from the repository root:
+#   docker build -f apps/deploy/city/Dockerfile \
+#     --build-arg PYTHON_VERSION=3.10 \
+#     --build-arg BASE_DIGEST=sha256:2559be987fd64d61badbdafd303ea58a9ccab36d6c3c08bce219e762177d2eca \
+#     -t terasim-metropolis:0.1.0-py3.10 .
 #   docker build -f apps/deploy/city/Dockerfile.cnde \
 #     --build-context neural-nde=<path of the Neural NDE runtime module> \
 #     -t terasim-metropolis:0.1.0-cnde .
@@ -26,11 +31,13 @@
 # The release image runs as uid 1001 without pip: this file switches to root, restores pip
 # with ensurepip for its install steps, removes pip again and ends as uid 1001 like the base
 # (the runtime user and the group-0 layout are unchanged).
-ARG BASE_IMAGE=terasim-metropolis:0.1.0
+ARG BASE_IMAGE=terasim-metropolis:0.1.0-py3.10
 FROM ${BASE_IMAGE}
 
 USER 0
 WORKDIR /app/TeraSim
+# Stop before the downloads when the base is not the Python 3.10 variant.
+RUN python -c "import sys; v = sys.version_info[:2]; assert v == (3, 10), 'base image runs Python %d.%d; the Neural NDE runtime needs the Python 3.10 variant of the release image (see the header)' % v"
 # ensurepip installs pip3 / pip3.10 but no `pip` script, hence `python -m pip` below.
 RUN python -m ensurepip --upgrade
 

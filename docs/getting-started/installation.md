@@ -8,7 +8,7 @@ development. Both contain the same code.
 | Component | Version | Notes |
 | --- | --- | --- |
 | Operating system | Linux x86-64 | The container image is `linux/amd64`. |
-| Python | 3.10 to 3.12 | The image uses Python 3.10. |
+| Python | 3.10 to 3.12 | The image uses Python 3.11; the Neural NDE image, Python 3.10. |
 | SUMO | 1.23.1 | Installed with the Python packages as the `eclipse-sumo`, `libsumo`, `traci` and `sumolib` wheels; no system package is needed. |
 | Redis | server | Snapshot buffer and job store of `terasim-service`. Included in the image; for a local setup install `redis-server` (for example `sudo apt-get install redis-server`). |
 | C/C++ compiler | gcc / g++ | Builds the Cython extensions of `terasim-nde-nade` (source installs only). |

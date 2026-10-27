@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10"]
+        python-version: ["3.10", "3.11"]
 
     steps:
     - uses: actions/checkout@v4
@@ -50,5 +50,5 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: acceptance-report
+        name: acceptance-report-py${{ matrix.python-version }}
         path: acceptance-out-ci/acceptance_report.*

@@ -98,13 +98,16 @@ the two files, and a corridor's `base_sumocfg` points at such a package's base s
 
 ## Neural NDE image
 
-`apps/deploy/city/Dockerfile.cnde` derives an image from the release image: PyTorch with CUDA,
-the runtime's dependencies, and the runtime module from a second build context named
-`neural-nde`. The checkpoint is mounted at run time at
+`apps/deploy/city/Dockerfile.cnde` derives an image from the Python 3.10 variant of the release
+image (the runtime module ships CPython 3.10 extension modules; the release image itself runs
+Python 3.11): PyTorch with CUDA, the runtime's dependencies, and the runtime module from a second
+build context named `neural-nde`. The checkpoint is mounted at run time at
 `/app/TeraSim/packages/cnde/assets/nn_weights.pth`, never baked in.
 
 ```bash
-docker build -f apps/deploy/city/Dockerfile -t terasim-metropolis:0.1.0 .
+docker build -f apps/deploy/city/Dockerfile --build-arg PYTHON_VERSION=3.10 \
+  --build-arg BASE_DIGEST=sha256:2559be987fd64d61badbdafd303ea58a9ccab36d6c3c08bce219e762177d2eca \
+  -t terasim-metropolis:0.1.0-py3.10 .
 docker build -f apps/deploy/city/Dockerfile.cnde \
   --build-context neural-nde=<path of the runtime module> -t terasim-metropolis:0.1.0-cnde .
 ```

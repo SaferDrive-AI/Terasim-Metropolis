@@ -30,18 +30,34 @@
 # `python -m ensurepip --upgrade` before their install steps, then end with
 # `USER 1001`.
 #
+# Python 3.11: Pillow, which reportlab (the PDF renderer of the timing report)
+# requires, fixes its CRITICAL advisories CVE-2026-96639, CVE-2026-112393,
+# CVE-2026-112398, CVE-2026-112403 and CVE-2026-112900 only in 13.0.0, and Pillow
+# 13 needs Python 3.11 or newer.
 # Base pinned by digest for reproducible rebuilds; refresh with
-#   docker pull python:3.10-slim-bookworm && docker image inspect --format '{{index .RepoDigests 0}}' python:3.10-slim-bookworm
-ARG BASE_IMAGE=python:3.10-slim-bookworm@sha256:2559be987fd64d61badbdafd303ea58a9ccab36d6c3c08bce219e762177d2eca
+#   docker pull python:3.11-slim-bookworm && docker image inspect --format '{{index .RepoDigests 0}}' python:3.11-slim-bookworm
+# PYTHON_VERSION names the base image's Python (the build checks it). The Neural NDE
+# image (Dockerfile.cnde) derives from the Python 3.10 variant of this image, built with
+#   --build-arg PYTHON_VERSION=3.10 \
+#   --build-arg BASE_DIGEST=sha256:2559be987fd64d61badbdafd303ea58a9ccab36d6c3c08bce219e762177d2eca
+ARG PYTHON_VERSION=3.11
+ARG BASE_DIGEST=sha256:90d117a7f1ef6535dc75831e1a9184725757fede0d4d424d7977fb5429d50610
+ARG BASE_IMAGE=python:${PYTHON_VERSION}-slim-bookworm@${BASE_DIGEST}
 
 # ---------------------------------------------------------------------------
 # Stage 1: builder
 # ---------------------------------------------------------------------------
 FROM ${BASE_IMAGE} AS builder
+ARG PYTHON_VERSION
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1
+
+# The paths of the runtime stage contain PYTHON_VERSION: stop here when it does not
+# match the base image.
+RUN v="$(python -c 'import sys; print("%d.%d" % sys.version_info[:2])')" \
+    && if [ "$v" != "$PYTHON_VERSION" ]; then echo "ERROR: the base image runs Python $v, PYTHON_VERSION is $PYTHON_VERSION"; exit 1; fi
 
 # Only the C/C++ toolchain: every third-party native dependency (numpy, scipy,
 # shapely/GEOS, pyproj/PROJ, rtree/libspatialindex, lxml/libxml2, pillow, SUMO)
@@ -82,6 +98,8 @@ RUN pip install -c apps/deploy/city/constraints.txt --upgrade pip setuptools whe
 # Stage 2: runtime
 # ---------------------------------------------------------------------------
 FROM ${BASE_IMAGE} AS runtime
+ARG PYTHON_VERSION
+ARG BASE_DIGEST
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
@@ -103,8 +121,8 @@ RUN apt-get update \
 # absolute paths as in the builder, same interpreter build). The base image's
 # own site-packages (pip/setuptools/wheel) is removed first so the copy does
 # not leave a second, older dist-info next to the builder's versions.
-RUN rm -rf /usr/local/lib/python3.10/site-packages
-COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
+RUN rm -rf /usr/local/lib/python${PYTHON_VERSION}/site-packages
+COPY --from=builder /usr/local/lib/python${PYTHON_VERSION}/site-packages /usr/local/lib/python${PYTHON_VERSION}/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 COPY --from=builder /app/TeraSim /app/TeraSim
 COPY apps/deploy/city/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
@@ -160,7 +178,7 @@ RUN useradd --uid 1001 --gid 0 --home-dir /home/terasim --create-home \
     && chmod 0755 /usr/local/bin/docker-entrypoint.sh \
     && python -m pip uninstall -y wheel pip \
     && python -m compileall -q -j 0 /app/TeraSim/packages \
-    && (python -m compileall -q -j 0 -x '/site-packages/sumo/' /usr/local/lib/python3.10/site-packages \
+    && (python -m compileall -q -j 0 -x '/site-packages/sumo/' /usr/local/lib/python${PYTHON_VERSION}/site-packages \
         || echo 'WARN: some third-party files did not byte-compile (Python 2 tool scripts); continuing')
 
 # No timezone configuration exists: signal schedules are LOCAL wall-clock
@@ -168,7 +186,7 @@ RUN useradd --uid 1001 --gid 0 --home-dir /home/terasim --create-home \
 # (terasim_city.geo_timezone) — a knob would only add a way to silently run
 # another city's clock.
 ENV HOME=/home/terasim \
-    SUMO_HOME=/usr/local/lib/python3.10/site-packages/sumo \
+    SUMO_HOME=/usr/local/lib/python${PYTHON_VERSION}/site-packages/sumo \
     TERASIM_ENABLE_CITY_API=true \
     TERASIM_CITY_INPUT_ROOT=/data/input \
     TERASIM_CITY_OUTPUT_ROOT=/data/output \
@@ -199,7 +217,7 @@ RUN python -c "import libsumo, traci, sumolib, terasim_city, terasim_service, te
  && test -f /licenses/LICENSES/EPL-2.0.txt \
  && test ! -w /licenses && test ! -w /licenses/LICENSE \
  && if python -m pip --version >/dev/null 2>&1; then echo 'ERROR: pip still present'; exit 1; fi \
- && if ls /usr/local/lib/python3.10/site-packages | grep -qiE '^(pip|wheel)-[0-9].*\.dist-info$'; then echo 'ERROR: pip/wheel dist-info still present'; exit 1; fi \
+ && if ls /usr/local/lib/python${PYTHON_VERSION}/site-packages | grep -qiE '^(pip|wheel)-[0-9].*\.dist-info$'; then echo 'ERROR: pip/wheel dist-info still present'; exit 1; fi \
  && python -c "from importlib.metadata import distributions; import collections; c = collections.Counter(d.metadata['Name'].lower() for d in distributions()); dup = [n for n, k in c.items() if k > 1]; assert not dup, f'duplicate distributions: {dup}'; print(len(c), 'distributions, no duplicates')" \
  && echo 'runtime verified: non-root, imports + libsumo backend active + cython + sumo binary + no missing libs + redis + writable data trees + read-only inputs + demo map loads + license texts + no pip'
 
@@ -207,8 +225,8 @@ LABEL org.opencontainers.image.title="terasim-metropolis" \
       org.opencontainers.image.version="0.1.0" \
       org.opencontainers.image.licenses="Apache-2.0" \
       org.opencontainers.image.description="TeraSim Metropolis signal-optimization service (terasim-service / terasim-agent-skill MCP server / terasim-tmc-service TMC collector) with embedded Redis; non-root, multi-stage" \
-      org.opencontainers.image.base.name="docker.io/library/python:3.10-slim-bookworm" \
-      org.opencontainers.image.base.digest="sha256:2559be987fd64d61badbdafd303ea58a9ccab36d6c3c08bce219e762177d2eca"
+      org.opencontainers.image.base.name="docker.io/library/python:${PYTHON_VERSION}-slim-bookworm" \
+      org.opencontainers.image.base.digest="${BASE_DIGEST}"
 
 EXPOSE 8000 9911 8200
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

@@ -12,7 +12,11 @@ license files):
 docker build -f apps/deploy/city/Dockerfile -t terasim-metropolis:0.1.0 .
 ```
 
-The image targets linux/amd64; on an arm64 machine add `--platform linux/amd64`.
+The image targets linux/amd64; on an arm64 machine add `--platform linux/amd64`. It runs
+Python 3.11 (`python:3.11-slim-bookworm`, pinned by digest), the oldest Python of Pillow 13;
+reportlab, the PDF renderer of the timing report, requires Pillow. The build arguments
+`PYTHON_VERSION` and `BASE_DIGEST` select another Python of the same base image; the build
+stops when `PYTHON_VERSION` does not match the base image.
 
 The Dockerfile has two stages:
 
@@ -57,12 +61,18 @@ baked map, counts every intersection of the spec).
 An image that adds packages on top switches back with `USER 0`, restores pip with
 `python -m ensurepip --upgrade` before its install steps, and ends with `USER 1001`.
 
-`Dockerfile.cnde` is such an image: the optional Neural NDE (CNDE) GPU runtime on top of the
-release image. It installs PyTorch 2.11.0 (CUDA 12.8 wheels), `torch-cluster` and the runtime's
-other dependencies, and copies the Neural NDE runtime module from a second build context
-named `neural-nde` (the module is not part of this repository):
+`Dockerfile.cnde` is such an image: the optional Neural NDE (CNDE) GPU runtime. It installs
+PyTorch 2.11.0 (CUDA 12.8 wheels), `torch-cluster` and the runtime's other dependencies, and
+copies the Neural NDE runtime module from a second build context named `neural-nde` (the module
+is not part of this repository). The module ships CPython 3.10 extension modules, so the image
+derives from the Python 3.10 variant of the release image, not from the Python 3.11 release
+image; its first build step stops on any other Python:
 
 ```bash
+docker build -f apps/deploy/city/Dockerfile \
+  --build-arg PYTHON_VERSION=3.10 \
+  --build-arg BASE_DIGEST=sha256:2559be987fd64d61badbdafd303ea58a9ccab36d6c3c08bce219e762177d2eca \
+  -t terasim-metropolis:0.1.0-py3.10 .
 docker build -f apps/deploy/city/Dockerfile.cnde \
   --build-context neural-nde=<path of the Neural NDE runtime module> \
   -t terasim-metropolis:0.1.0-cnde .
