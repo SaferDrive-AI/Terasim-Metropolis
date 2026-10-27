@@ -85,7 +85,9 @@ tests/                   test suites
 ## Versioning and releases
 
 Releases follow semantic versioning and are tagged `vMAJOR.MINOR.PATCH`; see CHANGELOG.md.
-Container images are published as `terasim-metropolis:<version>`.
+For each tag, `.github/workflows/images.yml` publishes the container image as
+`ghcr.io/<owner>/terasim-metropolis:<version>` (`<owner>` is a placeholder until the public
+repository is set up).
 
 ## License
 

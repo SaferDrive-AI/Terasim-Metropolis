@@ -1,0 +1,162 @@
+# Container image: build the release image (apps/deploy/city/Dockerfile), stop on a CRITICAL
+# vulnerability that has a fix, and push it to the GitHub Container Registry as
+#   ghcr.io/<owner>/terasim-metropolis:<version>
+#   ghcr.io/<owner>/terasim-metropolis:latest      (not for a version with a suffix, such as 0.2.0-beta.1)
+# Runs for a version tag (v*) or by hand, never for an ordinary push or a pull request.
+# Authenticates with GITHUB_TOKEN (packages: write). A new package is private until an owner of
+# the organization changes its visibility (package settings > Danger Zone > Change visibility).
+name: Images
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Image version, for example 0.1.0 (must equal the version label of apps/deploy/city/Dockerfile)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: images-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  IMAGE_NAME: terasim-metropolis
+  # Vulnerability scanner, pinned by digest.
+  TRIVY_IMAGE: ghcr.io/aquasecurity/trivy:0.74.0@sha256:62b1e65e8869bc4b4c6aa4fa2b21595256c7c2f6018a9d9ad61caf87187c1969
+
+jobs:
+  release-image:
+    name: Release image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      repository: ${{ steps.meta.outputs.repository }}
+      version: ${{ steps.meta.outputs.version }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Image name and version
+        id: meta
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then version="${GITHUB_REF_NAME#v}"; else version="${INPUT_VERSION#v}"; fi
+          if ! printf '%s\n' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
+            echo "::error::not a version: '$version'"
+            exit 1
+          fi
+          label="$(sed -n 's/.*org\.opencontainers\.image\.version="\([^"]*\)".*/\1/p' apps/deploy/city/Dockerfile)"
+          if [ "$label" != "$version" ]; then
+            echo "::error::version $version differs from the version label of apps/deploy/city/Dockerfile ($label)"
+            exit 1
+          fi
+          # Registry paths are lowercase; the owner name may not be.
+          echo "repository=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/${IMAGE_NAME}" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Build
+        env:
+          REPOSITORY: ${{ steps.meta.outputs.repository }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          docker build -f apps/deploy/city/Dockerfile \
+            --label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+            --label "org.opencontainers.image.licenses=Apache-2.0" \
+            --label "org.opencontainers.image.version=$VERSION" \
+            --label "org.opencontainers.image.revision=$GITHUB_SHA" \
+            -t "$REPOSITORY:$VERSION" .
+
+      - name: Log in to the GitHub Container Registry
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: printf '%s' "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+
+      - name: Vulnerability scan (fails on a CRITICAL vulnerability that has a fix)
+        env:
+          IMAGE: ${{ steps.meta.outputs.repository }}:${{ steps.meta.outputs.version }}
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock "$TRIVY_IMAGE" \
+            image --severity CRITICAL --ignore-unfixed --exit-code 1 --no-progress "$IMAGE"
+
+      - name: Push
+        env:
+          REPOSITORY: ${{ steps.meta.outputs.repository }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          docker push "$REPOSITORY:$VERSION"
+          case "$VERSION" in
+            *-*) echo "$VERSION has a suffix: latest is not moved" ;;
+            *) docker tag "$REPOSITORY:$VERSION" "$REPOSITORY:latest" && docker push "$REPOSITORY:latest" ;;
+          esac
+
+      - name: Log out
+        if: always()
+        run: docker logout ghcr.io
+
+  # Neural NDE image (<repository>:<version>-cnde). Off: enable it only once the license of the
+  # Neural NDE runtime is settled and the runtime's code is in this repository. To enable, set
+  # NEURAL_NDE_DIR below and the repository variable PUBLISH_NEURAL_NDE_IMAGE to "true"
+  # (Settings > Secrets and variables > Actions > Variables); while the variable is unset the
+  # job is skipped. It builds the Python 3.10 variant of the release image and Dockerfile.cnde
+  # on top of it (see the header of Dockerfile.cnde); the image keeps the license label
+  # NOASSERTION of Dockerfile.cnde until that license is set there. The same vulnerability scan
+  # applies: on Python 3.10 the image gets Pillow 12 (Pillow 13 needs Python 3.11), so it passes
+  # only once the runtime's compiled extensions are built for Python 3.11 and the image moves to
+  # it. The image is about 14 GB: free disk space on the runner first, or use a larger runner.
+  neural-nde-image:
+    name: Neural NDE image (off)
+    if: vars.PUBLISH_NEURAL_NDE_IMAGE == 'true'
+    needs: release-image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      REPOSITORY: ${{ needs.release-image.outputs.repository }}
+      VERSION: ${{ needs.release-image.outputs.version }}
+      NEURAL_NDE_DIR: "<directory of the Neural NDE runtime module in this repository>"
+      PY310_DIGEST: sha256:2559be987fd64d61badbdafd303ea58a9ccab36d6c3c08bce219e762177d2eca
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Build the Python 3.10 variant of the release image
+        run: |
+          docker build -f apps/deploy/city/Dockerfile \
+            --build-arg PYTHON_VERSION=3.10 --build-arg "BASE_DIGEST=$PY310_DIGEST" \
+            -t "terasim-metropolis:$VERSION-py3.10" .
+
+      - name: Build the Neural NDE image
+        run: |
+          docker build -f apps/deploy/city/Dockerfile.cnde \
+            --build-arg "BASE_IMAGE=terasim-metropolis:$VERSION-py3.10" \
+            --build-context "neural-nde=$NEURAL_NDE_DIR" \
+            --label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+            --label "org.opencontainers.image.version=$VERSION-cnde" \
+            --label "org.opencontainers.image.revision=$GITHUB_SHA" \
+            -t "$REPOSITORY:$VERSION-cnde" .
+
+      - name: Log in to the GitHub Container Registry
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: printf '%s' "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+
+      - name: Vulnerability scan (fails on a CRITICAL vulnerability that has a fix)
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock "$TRIVY_IMAGE" \
+            image --severity CRITICAL --ignore-unfixed --exit-code 1 --no-progress "$REPOSITORY:$VERSION-cnde"
+
+      - name: Push
+        run: docker push "$REPOSITORY:$VERSION-cnde"
+
+      - name: Log out
+        if: always()
+        run: docker logout ghcr.io
