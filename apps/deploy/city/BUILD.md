@@ -89,9 +89,9 @@ package mounts).
 
 For a version tag `v*`, the workflow `.github/workflows/images.yml` builds the release image,
 stops on a CRITICAL vulnerability that has a fix, and pushes
-`ghcr.io/<owner>/terasim-metropolis:<version>` and `:latest` (`<owner>`: the GitHub
-organization of the repository). By hand, tag and push to the registry the deployment pulls
-from:
+`ghcr.io/saferdrive-ai/terasim-metropolis:<version>` and `:latest` (a fork publishes under its own
+owner), then publishes the GitHub release. By hand, tag and push to the registry the deployment
+pulls from:
 
 ```bash
 docker tag terasim-metropolis:0.1.0 <registry>/terasim-metropolis:0.1.0

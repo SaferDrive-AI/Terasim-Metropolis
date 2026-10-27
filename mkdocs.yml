@@ -7,14 +7,12 @@
 #
 # The reference pages under docs/reference/ (http-api.md, mcp-tools.md, openapi*.json) are
 # generated from the code: python docs/_scripts/gen_reference.py
-#
-# For the published site, add the repository keys (the build stays strict-clean with them):
-#   site_url: https://<github-org>.github.io/terasim-metropolis/
-#   repo_url: https://github.com/<github-org>/terasim-metropolis
-#   repo_name: <github-org>/terasim-metropolis
-#   edit_uri: edit/main/docs/
 
 site_name: TeraSim Metropolis
+site_url: https://saferdrive-ai.github.io/Terasim-Metropolis/
+repo_url: https://github.com/SaferDrive-AI/Terasim-Metropolis
+repo_name: SaferDrive-AI/Terasim-Metropolis
+edit_uri: edit/main/docs/
 site_description: >-
   Simulation-based traffic signal timing optimization for NVIDIA Metropolis VSS:
   turning-movement counts in, an optimized NEMA timing plan and its KPIs out.

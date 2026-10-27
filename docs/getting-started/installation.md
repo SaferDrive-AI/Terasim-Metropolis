@@ -18,7 +18,7 @@ development. Both contain the same code.
 ## Option 1: container image
 
 The release image is `terasim-metropolis:0.1.0`. Pull it from the GitHub Container Registry as
-`ghcr.io/<owner>/terasim-metropolis:0.1.0` (see
+`ghcr.io/saferdrive-ai/terasim-metropolis:0.1.0` (see
 [Get the image](../deployment/docker-compose.md#get-the-image)), load it from an image archive
 (`docker load -i <archive>`), or build it from a checkout: run from the repository root (the
 build context must be the root so `packages/` and `examples/` resolve):

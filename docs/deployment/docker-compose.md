@@ -22,11 +22,11 @@ Run every command below from the repository root.
 ## Get the image
 
 Either pull the published image from the GitHub Container Registry and tag it with the name the
-compose file uses (`<owner>` is a placeholder until the public repository is set up):
+compose file uses:
 
 ```bash
-docker pull ghcr.io/<owner>/terasim-metropolis:0.1.0
-docker tag ghcr.io/<owner>/terasim-metropolis:0.1.0 terasim-metropolis:0.1.0
+docker pull ghcr.io/saferdrive-ai/terasim-metropolis:0.1.0
+docker tag ghcr.io/saferdrive-ai/terasim-metropolis:0.1.0 terasim-metropolis:0.1.0
 ```
 
 or build it from the checkout:

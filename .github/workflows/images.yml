@@ -1,7 +1,8 @@
 # Container image: build the release image (apps/deploy/city/Dockerfile), stop on a CRITICAL
 # vulnerability that has a fix, and push it to the GitHub Container Registry as
-#   ghcr.io/<owner>/terasim-metropolis:<version>
-#   ghcr.io/<owner>/terasim-metropolis:latest      (not for a version with a suffix, such as 0.2.0-beta.1)
+#   ghcr.io/saferdrive-ai/terasim-metropolis:<version>
+#   ghcr.io/saferdrive-ai/terasim-metropolis:latest      (not for a version with a suffix, such as 0.2.0-beta.1)
+# (a fork publishes under its own owner), then publish the GitHub release of the tag.
 # Runs for a version tag (v*) or by hand, never for an ordinary push or a pull request.
 # Authenticates with GITHUB_TOKEN (packages: write). A new package is private until an owner of
 # the organization changes its visibility (package settings > Danger Zone > Change visibility).
@@ -101,7 +102,40 @@ jobs:
         if: always()
         run: docker logout ghcr.io
 
-  # Neural NDE image (<repository>:<version>-cnde). Off: enable it only once the license of the
+  # GitHub release of a version tag, once its image is published. The body is the section
+  # "## v<version>" of docs/release-notes.md; a version with a suffix becomes a pre-release.
+  release:
+    name: GitHub release
+    if: github.event_name == 'push'
+    needs: release-image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ needs.release-image.outputs.version }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Create or update the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          awk -v head="## v$VERSION" '$0 == head {on = 1; next} /^## / {on = 0} on' docs/release-notes.md > "$RUNNER_TEMP/notes.md"
+          if ! grep -q '[^[:space:]]' "$RUNNER_TEMP/notes.md"; then
+            echo "::error::docs/release-notes.md has no section '## v$VERSION'"
+            exit 1
+          fi
+          title="TeraSim Metropolis $GITHUB_REF_NAME"
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release edit "$GITHUB_REF_NAME" --title "$title" --notes-file "$RUNNER_TEMP/notes.md"
+          else
+            case "$VERSION" in *-*) kind=--prerelease ;; *) kind=--latest ;; esac
+            gh release create "$GITHUB_REF_NAME" --verify-tag "$kind" --title "$title" --notes-file "$RUNNER_TEMP/notes.md"
+          fi
+
+  # Neural NDE image (ghcr.io/saferdrive-ai/terasim-metropolis:<version>-cnde). Off: enable it only once the license of the
   # Neural NDE runtime is settled and the runtime's code is in this repository. To enable, set
   # NEURAL_NDE_DIR below and the repository variable PUBLISH_NEURAL_NDE_IMAGE to "true"
   # (Settings > Secrets and variables > Actions > Variables); while the variable is unset the

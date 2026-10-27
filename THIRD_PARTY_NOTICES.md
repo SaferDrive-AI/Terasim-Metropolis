@@ -141,6 +141,7 @@ container image includes these libraries under their own licenses.
 | --- | --- | --- |
 | Time-zone boundaries (tzf-dist, derived from timezone-boundary-builder and OpenStreetMap) | bundled inside the `tzfpy` package; used to derive a corridor's local time from its coordinates | ODbL-1.0; attribution: (c) OpenStreetMap contributors |
 | OpenStreetMap extracts | downloaded at run time from an Overpass endpoint when a request names no stored map and `TERASIM_CITY_OSM_DOWNLOAD` is on (the default) | ODbL-1.0; maps derived from them carry the attribution "(c) OpenStreetMap contributors" |
+| Reference map package (`deployment/brev/demo-map-package/`: `source.osm` and the SUMO network and Neural NDE map files derived from it) | an OpenStreetMap extract of a downtown San José area, used by `deployment/brev/check-neural-nde.sh` | ODbL-1.0; (c) OpenStreetMap contributors, https://www.openstreetmap.org/copyright |
 | Demo corridor (`examples/corridor_demo`) and acceptance-test inputs | generated, synthetic | Apache-2.0 (this project) |
 
 ## 5. Container image (`terasim-metropolis`)

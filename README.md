@@ -1,5 +1,9 @@
 # TeraSim Metropolis
 
+[![CI](https://github.com/SaferDrive-AI/Terasim-Metropolis/actions/workflows/ci.yml/badge.svg)](https://github.com/SaferDrive-AI/Terasim-Metropolis/actions/workflows/ci.yml)
+[![Docs](https://github.com/SaferDrive-AI/Terasim-Metropolis/actions/workflows/docs.yml/badge.svg)](https://saferdrive-ai.github.io/Terasim-Metropolis/)
+[![Images](https://github.com/SaferDrive-AI/Terasim-Metropolis/actions/workflows/images.yml/badge.svg)](https://github.com/SaferDrive-AI/Terasim-Metropolis/pkgs/container/terasim-metropolis)
+
 TeraSim Metropolis is an open-source traffic simulation and traffic-operations platform for
 city corridors. It turns a corridor map, live turning-movement counts and the city's current
 signal timing into an optimized, NEMA-format signal timing plan, scored on standard
@@ -8,6 +12,10 @@ traffic-engineering measures of effectiveness. It integrates with NVIDIA Metropo
 pulls traffic-state data from VSS on its own schedule.
 
 Release: **v0.1.0** (Phase 1, open-source MVP). License: Apache-2.0.
+
+- Documentation: https://saferdrive-ai.github.io/Terasim-Metropolis/
+- Container image: `ghcr.io/saferdrive-ai/terasim-metropolis:0.1.0`
+- Release notes: [docs/release-notes.md](docs/release-notes.md); all changes: [CHANGELOG.md](CHANGELOG.md)
 
 ## What is inside
 
@@ -30,8 +38,23 @@ through the city's ATCMS.
 
 ## Quick start
 
-Requirements: Linux x86_64, Python 3.10-3.12, a C compiler (for the NADE extensions) and
-`redis-server` for the service. SUMO 1.23.1 is installed from PyPI with the packages.
+```bash
+git clone https://github.com/SaferDrive-AI/Terasim-Metropolis.git && cd Terasim-Metropolis
+```
+
+With Docker, run the published image with the offline behavior stub
+([Docker Compose guide](https://saferdrive-ai.github.io/Terasim-Metropolis/deployment/docker-compose/)):
+
+```bash
+docker pull ghcr.io/saferdrive-ai/terasim-metropolis:0.1.0
+docker tag ghcr.io/saferdrive-ai/terasim-metropolis:0.1.0 terasim-metropolis:0.1.0
+docker compose -f apps/deploy/city/phase1/compose.yml --profile stub up -d
+curl -s http://127.0.0.1:8100/health
+```
+
+From source. Requirements: Linux x86_64, Python 3.10-3.12, a C compiler (for the NADE
+extensions) and `redis-server` for the service. SUMO 1.23.1 is installed from PyPI with the
+packages.
 
 ```bash
 python3.10 -m venv .venv && . .venv/bin/activate
@@ -56,9 +79,10 @@ Deploy:
 
 ## Documentation
 
-The documentation site is built from `docs/` with MkDocs (`mkdocs.yml`): overview and
-architecture, developer guide, deployment guides, HTTP API and MCP tool reference, KPI
-definitions, supported map formats, the Plugin SDK and runnable examples.
+The documentation site, https://saferdrive-ai.github.io/Terasim-Metropolis/, is built from `docs/` with MkDocs
+(`mkdocs.yml`) on every change to `main`: overview and architecture, developer guide,
+deployment guides, HTTP API and MCP tool reference, KPI definitions, supported map formats,
+the Plugin SDK and runnable examples. To preview it locally:
 
 ```bash
 pip install -r docs/requirements.txt && mkdocs serve
@@ -85,9 +109,9 @@ tests/                   test suites
 ## Versioning and releases
 
 Releases follow semantic versioning and are tagged `vMAJOR.MINOR.PATCH`; see CHANGELOG.md.
-For each tag, `.github/workflows/images.yml` publishes the container image as
-`ghcr.io/<owner>/terasim-metropolis:<version>` (`<owner>` is a placeholder until the public
-repository is set up).
+For each tag, `.github/workflows/images.yml` publishes the container image
+`ghcr.io/saferdrive-ai/terasim-metropolis:<version>` (also `latest`) and the GitHub release, with the notes in
+`docs/release-notes.md`.
 
 ## License
 

@@ -33,13 +33,13 @@ W=$PWD PKG=$PWD/terasim-metropolis-phase1-0.1.0 SJ=$PWD/sj-reference-corridor-0.
 CORRIDOR=$(python3 -c "import json; print(json.load(open('$SJ/terasim/Metadata.json'))['corridor_id'])")
 ```
 
-Or, from the public repository and image, in place of the `unzip` and `docker load` lines
-(`<owner>` and `<repository>` are placeholders until the public repository is set up):
+Or, from the public repository and image, in place of `terasim-metropolis-phase1-0.1.0.zip` and
+the `docker load` line:
 
 ```bash
-git clone https://github.com/<owner>/<repository>.git terasim-metropolis
-docker pull ghcr.io/<owner>/terasim-metropolis:0.1.0
-docker tag ghcr.io/<owner>/terasim-metropolis:0.1.0 terasim-metropolis:0.1.0
+git clone https://github.com/SaferDrive-AI/Terasim-Metropolis.git terasim-metropolis
+docker pull ghcr.io/saferdrive-ai/terasim-metropolis:0.1.0
+docker tag ghcr.io/saferdrive-ai/terasim-metropolis:0.1.0 terasim-metropolis:0.1.0
 ```
 
 In the steps below, `$PKG/source/terasim-metropolis` is then the clone and `$PKG/deployment`

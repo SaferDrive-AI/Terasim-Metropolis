@@ -4,7 +4,7 @@ All notable changes to this project are documented in this file. The format foll
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] - 2026-10-23
+## [0.1.0] - 2026-10-27
 
 First public release of TeraSim Metropolis: the Phase 1 open-source MVP.
 
@@ -46,7 +46,8 @@ First public release of TeraSim Metropolis: the Phase 1 open-source MVP.
   ConfigMap through `corridorConfig`).
 - Image publishing: for a version tag, `.github/workflows/images.yml` builds the image, stops on
   a CRITICAL vulnerability that has a fix, and pushes
-  `ghcr.io/<owner>/terasim-metropolis:<version>` and `latest` to the GitHub Container Registry.
+  `ghcr.io/saferdrive-ai/terasim-metropolis:<version>` and `latest` to the GitHub Container Registry, then
+  publishes the GitHub release with the notes in `docs/release-notes.md`.
 - Corridor and camera configuration (`apps/deploy/city/camera-config/camcfg.py`): one camera
   inventory (corridor, intersections, cameras) generates the TMC spec, the corridor
   configuration, the Helm values or ConfigMap, the registration scripts, the VSS stream list and
@@ -85,3 +86,4 @@ First public release of TeraSim Metropolis: the Phase 1 open-source MVP.
 | terasim-plugin-sdk | 0.1.0 |
 | Helm chart terasim-phase1 | 0.6.0 (appVersion 0.1.0) |
 
+[0.1.0]: https://github.com/SaferDrive-AI/Terasim-Metropolis/releases/tag/v0.1.0
