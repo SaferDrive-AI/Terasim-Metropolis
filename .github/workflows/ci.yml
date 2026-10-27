@@ -29,9 +29,10 @@ jobs:
     - name: Install Redis
       run: sudo apt-get update && sudo apt-get install -y --no-install-recommends redis-server
 
-    # The repository is a uv workspace (see [tool.uv.workspace] in pyproject.toml).
+    # The repository is a uv workspace (see [tool.uv.workspace] in pyproject.toml). The extras
+    # bring the MCP server and PDF report dependencies the tests and the acceptance check use.
     - name: Install the workspace packages
-      run: uv sync --all-packages
+      run: uv sync --all-packages --all-extras
 
     - name: Build the NADE Cython extensions
       run: cd packages/terasim-nde-nade && uv run python setup.py build_ext --inplace
