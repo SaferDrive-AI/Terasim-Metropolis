@@ -23,6 +23,8 @@ All notable changes to this project are documented in this file. The format foll
 - The reference deployment on NVIDIA Brev (`deployment/brev/README.md`) runs from public inputs
   and the sample data (available on request) with VSS 3.3.0, in two modes: SUMO, and MTR (Neural
   NDE traffic on the open runtime).
+- README and the documentation pages on installing, running and deploying shortened to
+  prerequisites, steps, settings and expected results; the README leads with how to reproduce.
 
 ## [0.1.0] - 2026-10-27
 

@@ -1,7 +1,6 @@
 # Behavior models (NADE and Neural NDE)
 
-Module A1 of the simulation core provides the driving-behavior models of the background
-traffic. Two families are available:
+Module A1 of the simulation core: the driving-behavior models of the background traffic.
 
 | Model | What it is | Where |
 | --- | --- | --- |
@@ -10,7 +9,7 @@ traffic. Two families are available:
 
 The signal-timing optimization evaluates every candidate plan with SUMO's built-in driver
 model (`sumo_passive`), which needs no GPU. A deployment with a GPU and the Neural NDE runtime
-offers two more uses of the Neural NDE model:
+can also use the Neural NDE model:
 
 - **per request:** an optimization request (or an MCP optimize tool call) with
   `traffic_model="cnde"` simulates every candidate plan of that one run under Neural NDE;
@@ -55,22 +54,22 @@ A `traffic_model="cnde"` run:
   (`GET /v1/city/optimizations`), the result JSON, the synchronous response, and in the MCP
   answer both the JSON block and the facts line of the markdown block
   (`Traffic model: CNDE (Neural NDE, learned driver behavior) simulated every candidate plan.`);
-- is refused with HTTP 422 before any slot is reserved when this deployment lacks the runtime
+- is refused with HTTP 422, before any slot is reserved, when this deployment lacks the runtime
   module or the checkpoint, or when the run's map is not a stored map package that holds its
-  Neural NDE map artifacts (or can generate them); the detail names what is missing. A
-  refused request never runs SUMO instead.
+  Neural NDE map artifacts (or can generate them). The detail names what is missing; a refused
+  request never runs SUMO instead.
 
 Scheduled runs never set it. The VSS agent sets it only when a user explicitly asks for Neural
 NDE traffic (STEP 3 of the agent prompt, see [VSS integration](../deployment/vss-integration.md)).
 A Neural NDE run takes minutes per candidate plan instead of seconds: the timeouts of the
 synchronous chain (`TERASIM_CITY_TIMEOUT_S` of the MCP server, the agent's
-`tool_call_timeout`, any proxy in front of the chat) have to cover it.
+`tool_call_timeout`, any proxy in front of the chat) have to cover it; values in
+[VSS integration](../deployment/vss-integration.md#neural-nde-traffic-on-request).
 
 ## Inference interface
 
-The interface keeps `terasim-city` free of GPU dependencies: `torch` and the runtime module
-are imported only inside the functions that use them, so importing the registry never loads a
-GPU runtime.
+`terasim-city` has no GPU dependency: `torch` and the runtime module are imported only inside
+the functions that use them, so importing the registry never loads a GPU runtime.
 
 | Function / class | Contract |
 | --- | --- |
@@ -84,25 +83,25 @@ GPU runtime.
 | `terasim_city.factories.resolve_vehicle_factory("cnde")` | Resolves the behavior by name in the evaluation process |
 
 The runtime module provides `csim`, `cutils`, the `cnde` model package and `tools.dataset`.
-Its root directory, its `network/cnde` directory and the two planner trees it carries
-(`nuplan-devkit`, `tuplan-garage`) go on `PYTHONPATH`, and the checkpoint sits in the runtime's
-`assets/` directory as `nn_weights.pth`. A CUDA GPU is required; one process holds the
+Put its root directory, its `network/cnde` directory and its two planner trees
+(`nuplan-devkit`, `tuplan-garage`) on `PYTHONPATH`; the checkpoint sits in the runtime's
+`assets/` directory as `nn_weights.pth`. A CUDA GPU is required: one process holds the
 checkpoint (about 1 GB) plus a CUDA context, about 1.5 GB of GPU memory at the start, growing
 to about 6 GB over a long run.
 
-Evaluations under the Neural NDE model need a map that lives in the map store as a package
-with its own network (maps uploaded as OpenStreetMap, OpenDRIVE or Lanelet2 files, see
-[Map formats](../reference/map-formats.md)): the model's map artifacts sit next to it. The
-converter needs TensorFlow and the Waymo Open Dataset protocol buffers besides the runtime; an
+Neural NDE evaluations need a map stored in the map store as a package with its own network
+(maps uploaded as OpenStreetMap, OpenDRIVE or Lanelet2 files, see
+[Map formats](../reference/map-formats.md)); the model's map artifacts sit next to it. The
+converter needs TensorFlow and the Waymo Open Dataset protocol buffers besides the runtime. An
 environment without them (such as the Neural NDE image) uses map packages that already hold
 the two files, and a corridor's `base_sumocfg` points at such a package's base sumocfg.
 
 ## Neural NDE image
 
 `apps/deploy/city/Dockerfile.cnde` derives an image from the Python 3.10 variant of the release
-image (the runtime module ships CPython 3.10 extension modules; the release image itself runs
-Python 3.11): PyTorch with CUDA, the runtime's dependencies, and the runtime module from a second
-build context named `neural-nde`. The checkpoint is mounted at run time at
+image (the runtime module ships CPython 3.10 extension modules; the release image runs Python
+3.11): PyTorch with CUDA, the runtime's dependencies, and the runtime module from a second build
+context named `neural-nde`. The checkpoint is mounted at run time at
 `/app/TeraSim/packages/cnde/assets/nn_weights.pth`, never baked in.
 
 ```bash
@@ -113,21 +112,21 @@ docker build -f apps/deploy/city/Dockerfile.cnde \
   --build-context neural-nde=<path of the runtime module> -t terasim-metropolis:0.1.0-cnde .
 ```
 
-`apps/deploy/city/phase1/compose.cnde.yml`, layered on the Compose stack, runs
-`terasim-service` from that image on one GPU with the checkpoint and a map package mounted
-read-only and sets the two limits below; the MCP server's `TERASIM_CITY_TIMEOUT_S` goes to
-1800 s (see [Docker Compose](../deployment/docker-compose.md)).
+To run it, layer `apps/deploy/city/phase1/compose.cnde.yml` on the Compose stack: it runs
+`terasim-service` from this image on one GPU with the checkpoint and a map package mounted
+read-only, sets the two limits below and the MCP server's `TERASIM_CITY_TIMEOUT_S` (1800 s); see
+[Docker Compose](../deployment/docker-compose.md#neural-nde-traffic-on-a-gpu-host-optional).
 
 Without the runtime module, `Dockerfile.open-nnde` builds an image with the open runtime on the
-public MTR network for research. It takes an MTR checkpoint at the same mount point, so
+public MTR network, for research. It takes an MTR checkpoint at the same mount point, so
 `compose.cnde.yml` and `deployment/brev/check-neural-nde.sh` work with it unchanged (see
 [Open Neural NDE](open-neural-nde.md)).
 
 ## Re-evaluation stage
 
-After the simulation-based search, the optimizer can re-evaluate the current plan and the K
-best distinct candidates under another behavior, and export the best of them by the same KPI
-cost (control delay and stops, normalized against the current plan under the same behavior).
+After the search, the optimizer can re-evaluate the current plan and the K best distinct
+candidates under another behavior, and export the best of them by the same KPI cost (control
+delay and stops, normalized against the current plan under the same behavior).
 
 ```text
 search (sumo_passive, n_workers in parallel)  ->  K best candidates
@@ -135,27 +134,26 @@ re-evaluation (cnde): current plan + K candidates  ->  best re-evaluated plan  -
 ```
 
 - Every re-evaluated plan is simulated for the same horizon as the search (`sim_end`).
-- The current plan is always re-evaluated, so the costs of the stage compare plans under one
-  behavior.
+- The current plan is always re-evaluated.
 - `refine_max_collisions` optionally excludes candidates with more collisions from the
   selection.
-- One process evaluates the plans one after another by default (one model copy, one CUDA
+- By default one process evaluates the plans one after another (one model copy, one CUDA
   context); `refine_n_workers` runs several in parallel, each with its own copy. Every trial
   seeds its random generators and iterates in a fixed order, so a plan evaluates to the same
   result in either mode.
-- The result of a run (`GET /v1/city/optimizations/{run_id}/result`) carries a `refine` block
+- The run result (`GET /v1/city/optimizations/{run_id}/result`) carries a `refine` block
   (`behavior`, `top_k`, `candidates_evaluated`, `baseline` and `evaluations` with each plan's
   score and measures, `winner_plan_id`, `invalid` with the reasons) and `export_source`:
   `"refine"` when the exported plan comes from the stage, `"coarse"` when the stage produced no
-  usable result and the search winner is exported. The KPIs of the answer belong to the
-  exported plan.
+  usable result and the search winner is exported. The answer's KPIs belong to the exported
+  plan.
 - Without the runtime module, the stage reports why it could not evaluate (service log and
   `refine.invalid`) and the run completes with the search winner (`export_source: "coarse"`).
 
 ## Configuration
 
-These are deployment settings of `terasim-service`, validated when a request is submitted, on
-the synchronous and on the asynchronous path (the two `TERASIM_CITY_CNDE_*` limits when a
+Deployment settings of `terasim-service`, validated when a request is submitted, on the
+synchronous and the asynchronous path (the two `TERASIM_CITY_CNDE_*` limits when a
 `traffic_model="cnde"` request is submitted).
 
 | Variable | Default | Meaning |

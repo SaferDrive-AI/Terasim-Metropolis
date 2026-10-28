@@ -1,7 +1,6 @@
 # On-Demand mode
 
-In On-Demand mode an operator asks for an optimization and gets the result in the same
-conversation:
+An operator asks for an optimization and gets the result in the same conversation:
 
 ```text
 operator
@@ -23,16 +22,15 @@ terasim-agent-skill
 VSS agent ──► operator
 ```
 
-The examples below run against a local service started as in the
-[Quickstart](../getting-started/quickstart.md) (steps 1 to 3: service running, demo map
-registered, snapshots buffered).
+Prerequisite: a local service as in the [Quickstart](../getting-started/quickstart.md), steps 1
+to 3 (service running, demo map registered, snapshots buffered).
 
 ## Upload the current timing plan
 
-Without a stored plan, the corridor's timing sheet (or a Webster plan computed from the counts)
-is the baseline. With the city's current plan uploaded, that plan is the baseline and the seed
-of the search, and the result compares against it. A four-phase, 90 s coordinated plan for the
-three demo intersections:
+With the city's current plan uploaded, that plan is the baseline and the seed of the search, and
+the result compares against it. Without a stored plan, the baseline is the corridor's timing sheet
+(or a Webster plan computed from the counts). A four-phase, 90 s coordinated plan for the three
+demo intersections:
 
 ```python
 import json
@@ -89,7 +87,7 @@ with urllib.request.urlopen(request) as reply:
                "demo_arterial/i3: new"]}
 ```
 
-Through MCP the same document goes to `upload_signal_plan(plan)`. The format is described in
+Through MCP the same document goes to `upload_signal_plan(plan)`. Format:
 [NEMA plan formats](../reference/nema-plan-format.md).
 
 ## Optimize
@@ -120,9 +118,9 @@ The exported plan keeps the pattern's identity:
 ```
 
 Through MCP, `optimize_corridor` takes the same two endpoints (`from_intersection`,
-`to_intersection`); `optimize_intersection` takes one; `optimize_registered_intersection` takes
-only the id of an intersection registered with the TMC collector. The first text block of the
-answer is ready to show (abridged here):
+`to_intersection`), `optimize_intersection` takes one, and `optimize_registered_intersection`
+takes only the id of an intersection registered with the TMC collector. The first text block of
+the answer is ready to show (abridged):
 
 ```markdown
 **Signal timing optimization: Arterial Ave & 1st Cross St / Arterial Ave & 3rd Cross St**
@@ -168,7 +166,7 @@ The cost weights are part of the request (`cost.weights` on the REST call and th
 "cost": {"weights": {"control_delay": 0.5, "stops": 0.5}}
 ```
 
-The answer echoes them in `kpis.cost_weights`, and the baseline's cost is their sum. See
+The answer echoes them in `kpis.cost_weights`; the baseline's cost is their sum. See
 [KPIs](../reference/kpis.md#weighted-cost).
 
 ## The demo script
@@ -176,9 +174,8 @@ The answer echoes them in `kpis.cost_weights`, and the baseline's cost is their 
 `examples/corridor_demo/demo_on_demand.py` runs the same exchange against the asynchronous API,
 which exposes the search options. It starts a local `terasim-service` (port 8000, Redis on
 `localhost:6379`), pushes the six snapshots, submits one optimization of `demo_arterial` from
-`i1` to `i3` with the uncoordinated timing sheet as the current plan and the offset search
-(`bayes_offsets`), follows its progress and prints the ranking, the best offsets and the NEMA
-table:
+`i1` to `i3` (current plan: the uncoordinated timing sheet; offset search `bayes_offsets`),
+follows its progress and prints the ranking, the best offsets and the NEMA table:
 
 ```bash
 python examples/corridor_demo/demo_on_demand.py --max-trials 12 --sim-end 600

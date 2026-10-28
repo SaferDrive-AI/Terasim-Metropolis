@@ -1,9 +1,8 @@
 # Scheduled mode
 
-In Scheduled mode the timing is re-optimized on a cadence instead of on an operator's request.
-There is no separate scheduling logic in the optimization: the caller invokes the **same
-optimization tool** as in [On-Demand mode](on-demand.md) at its own rhythm, and every
-invocation optimizes on the counts buffered at that moment.
+Instead of an operator's request, the caller invokes the **same optimization tool** as in
+[On-Demand mode](on-demand.md) on its own cadence; every invocation optimizes on the counts
+buffered at that moment. The optimization has no scheduling logic of its own.
 
 ```text
 every N minutes:
@@ -13,8 +12,8 @@ every N minutes:
 
 ## The caller drives the cadence
 
-Any scheduler can be the caller: a VSS workflow, a cron job, an orchestration pipeline. A
-minimal Python caller that invokes the MCP tool twice, one minute apart:
+Any scheduler can be the caller: a VSS workflow, a cron job, an orchestration pipeline. A minimal
+Python caller that invokes the MCP tool twice, one minute apart:
 
 ```python
 import asyncio
@@ -54,9 +53,9 @@ for invocation in range(2):
 ```
 
 In production the TMC collector keeps the snapshot buffer current between invocations, so each
-call optimizes the snapshots of the last `TERASIM_CITY_WINDOW_S` seconds (one hour by default)
-at the time of the call. The acceptance run checks this mode with `--scheduled-invocations` and
-`--cadence-s` (see [Acceptance test](acceptance.md)).
+call optimizes the snapshots of the last `TERASIM_CITY_WINDOW_S` seconds (one hour by default).
+The acceptance run checks this mode with `--scheduled-invocations` and `--cadence-s` (see
+[Acceptance test](acceptance.md)).
 
 ## Built-in scheduler (optional)
 
@@ -88,18 +87,15 @@ curl -s 'http://localhost:8000/v1/city/optimizations?corridor_id=demo_arterial'
 curl -s http://localhost:8000/v1/city/optimizations/<run_id>/nema
 ```
 
-See step 7 of the [Quickstart](../getting-started/quickstart.md#7-optional-the-built-in-scheduler)
-for a walkthrough.
+Walkthrough: [Quickstart, step 7](../getting-started/quickstart.md#7-optional-the-built-in-scheduler).
 
 ## The demo script
 
 `examples/corridor_demo/demo_scheduled.py` starts a local `terasim-service` with the built-in
 scheduler on (30 s cadence, two-hour window, the demo corridor configuration), pushes the six
 snapshots, waits for the scheduler to submit a run and prints the winning plan and its NEMA
-table:
+table. It needs Redis on `localhost:6379` and port 8000 free.
 
 ```bash
 python examples/corridor_demo/demo_scheduled.py --cadence-s 30
 ```
-
-It needs Redis on `localhost:6379` and port 8000 free.

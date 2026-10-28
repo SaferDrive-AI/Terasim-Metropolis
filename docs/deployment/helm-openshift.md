@@ -2,7 +2,7 @@
 
 The Helm chart `apps/deploy/city/helm/terasim-phase1` (chart version 0.6.0, app version 0.1.0)
 deploys the TeraSim Metropolis side of a VSS integration on OpenShift or Kubernetes. VSS itself
-is deployed separately; the chart connects to it.
+is deployed separately.
 
 ## What it deploys
 
@@ -15,12 +15,10 @@ One image, three Deployments and a Redis:
 | `<release>-tmc` | `terasim-tmc-service` | 8200 | TMC collector pulling the VSS behavior API |
 | `<release>-redis` | `redis-server` (from the same image by default) | 6379 | Snapshot buffer and job store of the service, password-protected |
 
-Plus three PersistentVolumeClaims (service output, MCP artifacts, TMC data), a
-ConfigMap with the corridor configuration (`configs/scheduled_config.yaml`) and the TMC
-corridor specification (`configs/Metadata.json`), a Secret with the Redis password, one
-NetworkPolicy per component and, on OpenShift, a Route that exposes only `/files` (edge TLS,
-HTTP redirected to HTTPS). With release name `terasim-phase1` the objects are named
-`terasim-phase1-service`, `terasim-phase1-mcp`, and so on.
+Plus three PersistentVolumeClaims (service output, MCP artifacts, TMC data), a ConfigMap with
+the corridor configuration (`configs/scheduled_config.yaml`) and the TMC corridor specification
+(`configs/Metadata.json`), a Secret with the Redis password, one NetworkPolicy per component
+and, on OpenShift, a Route that exposes only `/files` (edge TLS, HTTP redirected to HTTPS).
 
 ## Prerequisites
 
@@ -30,12 +28,12 @@ HTTP redirected to HTTPS). With release name `terasim-phase1` the objects are na
    the chart sets a `restricted-v2` compatible security context on every pod: non-root, all
    capabilities dropped, no privilege escalation, `RuntimeDefault` seccomp, read-only root
    filesystem with `emptyDir` volumes at `/tmp` and `$HOME`.
-3. **The image** `<registry>/terasim-metropolis:0.1.0` must be pullable by the cluster. Give
-   pull access with `global.imagePullSecrets` (an existing Secret) or `pullSecret.create=true`
-   with inline credentials.
+3. **The image** `<registry>/terasim-metropolis:0.1.0`, pullable by the cluster: an existing
+   pull Secret in `global.imagePullSecrets`, or `pullSecret.create=true` with inline
+   credentials.
 4. **A StorageClass** for the PVCs (`global.storageClass`, empty for the cluster default).
-5. **NetworkPolicy enforcement** comes from the cluster network plugin (OVN-Kubernetes and
-   OpenShift SDN enforce it).
+5. **NetworkPolicy enforcement** by the cluster network plugin (OVN-Kubernetes and OpenShift SDN
+   enforce it).
 
 ## Install
 
@@ -52,19 +50,19 @@ helm upgrade --install terasim-phase1 apps/deploy/city/helm/terasim-phase1 \
   --set tmc.vssBehaviorUrl=http://vss-video-analytics-api.<vss-namespace>.svc:8081
 ```
 
-Two values are required per environment, and `helm template` / `helm lint` fail fast without
-them:
+Two values are required per environment; `helm template` / `helm lint` fail fast without them:
 
 - `tmc.vssBehaviorUrl`: the in-cluster URL of the VSS video-analytics API Service (port 8081)
-  that the TMC collector pulls. The `<vss-namespace>` in it also tells the NetworkPolicy which
+  that the TMC collector pulls. Its `<vss-namespace>` also tells the NetworkPolicy which
   namespace may call the MCP server.
 - `global.externalHost`: the host of the download Route, for example
-  `terasim.apps.<cluster-domain>`. Download links then read
+  `terasim.apps.<cluster-domain>`; download links then read
   `https://<externalHost>/files/<artifact_id>/<file>`. Without a Route, set
   `route.enabled=false` and, when readers need the download links, `mcp.publicUrl` (see
   [Plain Kubernetes](#plain-kubernetes)).
 
-Use the release name `terasim-phase1` (or set `fullnameOverride`) for short object names.
+Use the release name `terasim-phase1` (or set `fullnameOverride`) for short object names:
+`terasim-phase1-service`, `terasim-phase1-mcp`, and so on.
 
 Verify:
 
@@ -118,8 +116,7 @@ The ConfigMap mounted at `/config` carries the two corridor files:
 
 As shipped (`configs/` in the chart) they configure the synthetic demo corridor
 `demo_arterial` on the map baked into the image, with intersections `i1`, `i2`, `i3` and four
-cameras each. Another corridor needs neither a new chart nor a new image; set the files through
-values:
+cameras each. For another corridor, set the files through values (no new chart or image):
 
 | Value | Default | Meaning |
 | --- | --- | --- |
@@ -132,15 +129,14 @@ helm upgrade --install terasim-phase1 apps/deploy/city/helm/terasim-phase1 -n te
   -f values-site.yaml -f generated/terasim/values-corridor.yaml
 ```
 
-The service and TMC pods carry a checksum of the two files (`checksum/corridor-config`), so an
-upgrade that changes them restarts both. With `existingConfigMap`, restart both Deployments
-after changing the ConfigMap. The chart fails fast on files the services would refuse at
-start-up, and its notes print the corridor with its intersection and camera counts. The camera
-inventory generator `apps/deploy/city/camera-config/camcfg.py` writes the values file, the
-ConfigMap and the registration scripts from one inventory; see
-[Corridor and camera configuration](corridor-configuration.md). A map the image does not bake is
-registered at run time (`upload_map`, `POST /v1/city/maps`, or the generator's
-`register-map.sh`), and new intersections are registered with the TMC collector.
+An upgrade that changes the files restarts the service and TMC pods (pod annotation
+`checksum/corridor-config`); with `existingConfigMap`, restart both Deployments after changing
+the ConfigMap. The chart fails fast on files the services would refuse at start-up. A map the
+image does not bake is registered at run time (`upload_map`, `POST /v1/city/maps`, or the
+generator's `register-map.sh`), and new intersections are registered with the TMC collector.
+The camera inventory generator `apps/deploy/city/camera-config/camcfg.py` writes the values
+file, the ConfigMap and the registration scripts from one inventory; see
+[Corridor and camera configuration](corridor-configuration.md).
 
 ## Redis authentication
 
@@ -158,13 +154,12 @@ hold no Redis client.
 
 The chart-created Secret `<release>-redis-auth` is generated at the first install, reused on
 every upgrade and kept on uninstall, so a re-install keeps the password. To rotate it, change
-the value (or your Secret), then restart Redis and the service together:
+the value (or your Secret), then restart Redis and the service together (the snapshot buffer is
+ephemeral and refills with the next TMC window):
 
 ```bash
 oc rollout restart deploy/terasim-phase1-redis deploy/terasim-phase1-service -n terasim
 ```
-
-The snapshot buffer is ephemeral and refills with the next TMC window.
 
 ## NetworkPolicies
 
@@ -185,20 +180,19 @@ download OpenStreetMap data, and every pod needs DNS.
 
 ## Connect the VSS agent
 
-Point the VSS agent's MCP client at the in-cluster MCP Service:
+Point the VSS agent's MCP client at the in-cluster MCP Service, and configure the agent as in
+[VSS integration](vss-integration.md):
 
 ```text
 http://terasim-phase1-mcp.<terasim-namespace>.svc:9911/mcp
 ```
-
-The agent configuration is described in [VSS integration](vss-integration.md).
 
 ## Plain Kubernetes
 
 The chart renders the Route only on clusters that serve `route.openshift.io/v1`. On other
 clusters set `route.enabled=false` and, when readers need the download links, expose the MCP
 Service's `/files` path with your own ingress and set `mcp.publicUrl` to its address. The
-synchronous optimization can take minutes; give any proxy in front of the service or the MCP
-server read timeouts of at least 1,800 s. If new PVCs are not group-writable on your storage, set
-`podSecurityContext.fsGroup` (for example `1001`); do not set `runAsUser` or `fsGroup` on
-OpenShift, where the SCC assigns them.
+synchronous optimization can take minutes: give any proxy in front of the service or the MCP
+server read timeouts of at least 1,800 s. If new PVCs are not group-writable on your storage,
+set `podSecurityContext.fsGroup` (for example `1001`); on OpenShift, where the SCC assigns them,
+do not set `runAsUser` or `fsGroup`.

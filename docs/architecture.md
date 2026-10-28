@@ -1,8 +1,7 @@
 # Architecture
 
 TeraSim Metropolis is a signal-optimization service built on the TeraSim traffic simulation
-engine. It sits next to an NVIDIA Metropolis VSS (Video Search and Summarization) deployment:
-VSS sees the traffic, TeraSim Metropolis simulates the corridor and proposes better timing.
+engine. It runs next to an NVIDIA Metropolis VSS (Video Search and Summarization) deployment.
 
 ## Components
 
@@ -16,14 +15,13 @@ image by default or as a separate deployment.
 | TMC collector | `terasim-tmc-service` | 8200 | Intersection registry; every observation window pulls VSS behavior objects, counts turning movements and pushes a TMC snapshot |
 | Redis | `redis-server` | 6379 | Snapshot buffer and job store of `terasim-service` (only the service holds a Redis client) |
 
-The MCP server and the TMC collector reach the service through its REST API only. The service
-holds the traffic data, maps, plans and runs (in Redis and on its data volume); the TMC
-collector keeps its intersection registry and the MCP server its download files on their own
-volumes.
+The MCP server and the TMC collector reach the service only through its REST API. The service
+holds the traffic data, maps, plans and runs (in Redis and on its data volume); the TMC collector
+keeps its intersection registry, and the MCP server its download files, on their own volumes.
 
 ## Data flow
 
-Traffic data flows in continuously:
+Traffic data, continuously:
 
 ```text
 VSS cameras
@@ -40,7 +38,7 @@ terasim-tmc-service :8200
 terasim-service :8000 ──► Redis snapshot buffer (rolling two hours)
 ```
 
-An optimization runs on request:
+An optimization, on request:
 
 ```text
 operator ──► VSS agent
@@ -60,13 +58,10 @@ operator ──► VSS agent
        VSS agent ──► operator
 ```
 
-After the run, the service computes the simulated signal-performance measures in the
-background.
-
 ## One optimization run
 
-Every optimization, whatever started it, runs the same pipeline inside `terasim-service` and
-keeps its files under `TERASIM_CITY_OUTPUT_ROOT/<run_id>/`.
+Every optimization, whatever started it, runs this pipeline inside `terasim-service` and keeps its
+files under `TERASIM_CITY_OUTPUT_ROOT/<run_id>/`.
 
 | Step | What happens | Code |
 | --- | --- | --- |
@@ -81,20 +76,16 @@ keeps its files under `TERASIM_CITY_OUTPUT_ROOT/<run_id>/`.
 
 ## The skills
 
-The VSS agent works with TeraSim Metropolis through two skills, each a set of MCP tools backed
-by REST endpoints (see [MCP tools](reference/mcp-tools.md)):
+The VSS agent uses two skills, each a set of MCP tools backed by REST endpoints (see
+[MCP tools](reference/mcp-tools.md)), plus helper tools:
 
-1. **Map and timing-plan upload.** `upload_map` registers a map file from the shared asset volume
-   (OpenDRIVE, Lanelet2, OpenStreetMap or a SUMO scenario; HD maps are converted on upload).
-   `upload_signal_plan` stores the city's current timing plan as a `terasim.nema_plan.v1`
-   document; later optimizations use it as the baseline and as the seed of the search.
-2. **Optimization.** `optimize_registered_intersection`, `optimize_intersection`,
-   `optimize_intersection_by_id` and `optimize_corridor` run one synchronous optimization and
-   answer with a ready-to-show summary (plan, KPI table, NEMA splits, download links) followed by
-   the JSON payload.
-
-Two helper tools manage the TMC collection itself: `list_intersections` and
-`register_intersection`. `upload_traffic_snapshot` pushes a snapshot by hand.
+| Skill | Tools | Behavior |
+| --- | --- | --- |
+| 1. Map and timing-plan upload | `upload_map` | Registers a map file from the shared asset volume: OpenDRIVE, Lanelet2, OpenStreetMap or a SUMO scenario (HD maps are converted on upload) |
+| | `upload_signal_plan` | Stores the city's current timing plan as a `terasim.nema_plan.v1` document; later optimizations use it as the baseline and as the seed of the search |
+| 2. Optimization | `optimize_registered_intersection`, `optimize_intersection`, `optimize_intersection_by_id`, `optimize_corridor` | One synchronous optimization; answers with a ready-to-show summary (plan, KPI table, NEMA splits, download links) followed by the JSON payload |
+| Helpers | `list_intersections`, `register_intersection` | Manage the TMC collection |
+| | `upload_traffic_snapshot` | Pushes a snapshot by hand |
 
 ## Interfaces
 
@@ -106,14 +97,14 @@ Two helper tools manage the TMC collection itself: `list_intersections` and
 
 ## Operating modes
 
-- **On-Demand.** An operator asks the VSS agent to optimize an intersection or a corridor; the
-  agent calls an optimization tool and shows the result.
-- **Scheduled.** The caller invokes the same optimization tool on its own cadence (for example a
-  workflow that runs every hour). There is no separate scheduling logic in the tool: each call
-  optimizes on the latest buffered data.
-- **Built-in scheduler (optional).** With `TERASIM_CITY_SCHEDULER_ENABLED`, the service itself
-  optimizes every corridor of its scheduled configuration once per `TERASIM_CITY_CADENCE_S`
-  (default 3600 s) when it has recent counts. It is off by default; in Helm it is
+- **[On-Demand](examples/on-demand.md).** An operator asks the VSS agent to optimize an
+  intersection or a corridor; the agent calls an optimization tool and shows the result.
+- **[Scheduled](examples/scheduled.md).** The caller invokes the same optimization tool on its own
+  cadence (for example a workflow that runs every hour). The tool has no separate scheduling
+  logic: each call optimizes on the latest buffered data.
+- **Built-in scheduler (optional, off by default).** With `TERASIM_CITY_SCHEDULER_ENABLED`, the
+  service itself optimizes every corridor of its scheduled configuration once per
+  `TERASIM_CITY_CADENCE_S` (default 3600 s) when it has recent counts. In Helm:
   `scheduler.enabled` / `scheduler.cadenceSeconds`.
 
 ## State and storage
@@ -150,9 +141,9 @@ to keep.
 
 ## Spatial binding
 
-TMC counts, uploaded plans and optimization targets never have to agree on ids: each coordinate
-is bound to a signalized junction of the map on its own, and two records describe the same
-intersection when they bind to the same junction. One standard applies everywhere:
+TMC counts, uploaded plans and optimization targets never have to agree on ids: two records
+describe the same intersection when their coordinates bind to the same signalized junction of the
+map. The same rules apply everywhere:
 
 - a coordinate binds to signals within **60 m** (`terasim_city.binding.BINDING_RADIUS_M`);
 - a match is accepted only when the runner-up is at least **1.5 times** farther than the
@@ -165,4 +156,4 @@ Uploaded plans also use a 30 m radius to recognize a re-upload of the same inter
 
 Signal schedules are local wall-clock tables. The corridor's time zone is derived from its own
 coordinates (`terasim_city.geo_timezone`), so a stored plan's time-of-day pattern is selected for
-the local time of the observed traffic without any time-zone setting.
+the local time of the observed traffic; no time-zone setting is needed.

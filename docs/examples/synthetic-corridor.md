@@ -15,9 +15,6 @@ All examples, tests and the acceptance run use one fully synthetic corridor, in
              J1_S2         J2_S2         J3_S2
 ```
 
-The arterial runs east-west through the three signals; each signal has a north-south cross
-street.
-
 | | |
 | --- | --- |
 | Corridor id | `demo_arterial` |
@@ -44,8 +41,7 @@ street.
 | `demo_on_demand.py`, `demo_scheduled.py`, `demo_incident.py` | Demo scripts, see [On-Demand mode](on-demand.md) and [Scheduled mode](scheduled.md) |
 | `build_demo_map.py` | Regenerates the network, signal, count and sheet files and checks them |
 
-To regenerate the generated assets (needs `netconvert` and `sumo`, which the SUMO wheels
-provide):
+Regenerate the generated assets (needs `netconvert` and `sumo`, which the SUMO wheels provide):
 
 ```bash
 python examples/corridor_demo/build_demo_map.py
@@ -58,18 +54,18 @@ The script checks its output: the network loads in `sumolib`, every signal has i
 
 - **Container image**: `demo.sumocfg`, `demo.net.xml`, `demo.tls.xml` and `demo.rou.xml` are baked
   at `/data/input/map`; the complete scenario at `/data/input/demo_scenario`.
-- **Deployment assets**: `apps/deploy/city/phase1/scheduled_config.yaml` and
-  `Metadata.json` (and the copies in the Helm chart's `configs/`) configure `demo_arterial` on the
-  baked map and describe its twelve cameras for the TMC collector. The compose `stub` profile
-  serves synthetic behavior objects for these cameras.
+- **Deployment assets**: `apps/deploy/city/phase1/scheduled_config.yaml` and `Metadata.json` (and
+  the copies in the Helm chart's `configs/`) configure `demo_arterial` on the baked map and
+  describe its twelve cameras for the TMC collector. The compose `stub` profile serves synthetic
+  behavior objects for these cameras.
 - **Acceptance run** and **tests**: `examples/acceptance/run_acceptance.py` and the fixtures in
-  `tests/fixtures/` build on the same corridor.
+  `tests/fixtures/`.
 
 ## Optimizing a complete SUMO scenario
 
-A city that already has a calibrated SUMO scenario (network, route files and its own signal
-programs) can optimize it as it is. `demo_scenario.sumocfg` is such a scenario. The asynchronous
-API takes the switches that make the scenario the source of everything:
+A calibrated SUMO scenario (network, route files and its own signal programs) can be optimized as
+it is; `demo_scenario.sumocfg` is one. The asynchronous API takes the switches that make the
+scenario the source of everything:
 
 ```bash
 curl -s -X POST http://localhost:8000/v1/city/optimizations -H 'Content-Type: application/json' -d "{
@@ -96,7 +92,7 @@ curl -s -X POST http://localhost:8000/v1/city/optimizations -H 'Content-Type: ap
 | `search_cycle`, `cycle_min_s`, `cycle_max_s` | The search also varies the common cycle within the bounds |
 
 The answer is `{"run_id": ..., "status": "submitted"}`; follow the run with
-`/v1/city/optimizations/{run_id}/status`, then read `/result` and `/nema`. The result's
+`/v1/city/optimizations/{run_id}/status`, then read `/result` and `/nema`. In the result,
 `seed.source` is `sumo_tls` (the scenario's programs), `config.tmc_json` points at the
 `derived_tmc.json` the counts were written to, and `search` and `nema_export` report the search
 and the export.

@@ -4,120 +4,68 @@
 [![Docs](https://github.com/SaferDrive-AI/Terasim-Metropolis/actions/workflows/docs.yml/badge.svg)](https://saferdrive-ai.github.io/Terasim-Metropolis/)
 [![Images](https://github.com/SaferDrive-AI/Terasim-Metropolis/actions/workflows/images.yml/badge.svg)](https://github.com/SaferDrive-AI/Terasim-Metropolis/pkgs/container/terasim-metropolis)
 
-TeraSim Metropolis is an open-source traffic simulation and traffic-operations platform for
-city corridors. It turns a corridor map, live turning-movement counts and the city's current
-signal timing into an optimized, NEMA-format signal timing plan, scored on standard
-traffic-engineering measures of effectiveness. It integrates with NVIDIA Metropolis VSS
-(Video Search and Summarization): the VSS agent calls TeraSim through MCP tools, and TeraSim
-pulls traffic-state data from VSS on its own schedule.
+TeraSim Metropolis optimizes the signal timing of city corridors in simulation. From a corridor
+map, turning-movement counts and the city's current timing plan, it produces an optimized NEMA
+timing plan with its KPIs (control delay, stops per vehicle) and a PDF timing report, when the
+NVIDIA Metropolis VSS agent asks for it through MCP tools (On-Demand) or on a cadence (Scheduled).
+It collects the counts from VSS every 10 minutes.
 
-Release: **v0.1.0** (Phase 1, open-source MVP). License: Apache-2.0.
+v0.1.0 · Apache-2.0 · [documentation](https://saferdrive-ai.github.io/Terasim-Metropolis/) ·
+image `ghcr.io/saferdrive-ai/terasim-metropolis:0.1.0` · [release notes](docs/release-notes.md) ·
+[changelog](CHANGELOG.md)
 
-- Documentation: https://saferdrive-ai.github.io/Terasim-Metropolis/
-- Container image: `ghcr.io/saferdrive-ai/terasim-metropolis:0.1.0`
-- Release notes: [docs/release-notes.md](docs/release-notes.md); all changes: [CHANGELOG.md](CHANGELOG.md)
+## Reproduce
 
-## What is inside
-
-| Module | What it does | Package(s) |
+| Result | Guide | Needs |
 | --- | --- | --- |
-| A1 Behavior models | Naturalistic driving behavior (NDE) and the naturalistic-and-adversarial environment (NADE); the Neural NDE inference interface, Neural NDE traffic per request (`traffic_model="cnde"`) and an optional GPU re-evaluation stage (runtime module and checkpoint installed separately; image definition `apps/deploy/city/Dockerfile.cnde`; for research, an open runtime on the public MTR network: `packages/open-nnde`, `Dockerfile.open-nnde`) | `terasim-nde-nade`, `terasim-city` (`vehicle_behavior`) |
-| A2 Adversarial driving environment | Parameterized injection of safety-critical behaviors (red-light running, cut-ins, rear-end, VRU crossings, stalled objects, construction zones) | `terasim-nde-nade`, `configs/adversities/` |
-| A3 Simulation core | SUMO-based simulation kernel with a Python API and a configuration system | `terasim` |
-| A4 HD map adapter | Ingests OpenDRIVE, Lanelet2, OpenStreetMap and SUMO maps, converts them to geo-referenced SUMO networks | `terasim-city` (`terasim_city.maps`) |
-| B KPI evaluation | Control delay and stops per vehicle, normalized and combined under city-defined weights; simulated signal metrics | `terasim-city` (`terasim_city.evaluation`) |
-| C Signal timing optimization plug-in | Candidate plans seeded from the city's current plan, simulation-based search (1,800 s per candidate by default), corridor coordination, NEMA output and PDF timing report | `terasim-city` |
-| Interfaces | HTTP API, MCP server for the VSS agent, TMC collector that pulls VSS behavior data | `terasim-service`, `terasim-agent-skill`, `terasim-tmc-service` |
-| Plugin SDK | Interface for third-party traffic-operation modules | `terasim-plugin-sdk`, `examples/plugins/` |
-
-Two operating modes share the same components: **On-Demand** (an operator asks the VSS agent,
-the agent calls the optimization tool) and **Scheduled** (the caller invokes the same tool on
-its own cadence; an optional built-in scheduler is available for deployments without one).
-Each answer is a NEMA timing plan plus the measured KPIs, packaged for offline application
-through the city's ATCMS.
+| Both operating modes on a synthetic corridor, KPI and NEMA outputs checked | [Quick start](#quick-start) | Linux, Python 3.10 to 3.12 or Docker |
+| The full pipeline on recorded video: VSS counts four cameras of a San José intersection, TeraSim optimizes its timing with SUMO or Neural NDE traffic | [deployment/brev](deployment/brev/README.md) | NVIDIA Brev instance with 2 × RTX PRO 6000, NGC API key; the sample videos and data: email haotian@inchor.ai |
+| Neural NDE traffic on the public MTR network | [Open Neural NDE](docs/developer-guide/open-neural-nde.md) | NVIDIA GPU, an MTR checkpoint (research use) |
 
 ## Quick start
 
-```bash
-git clone https://github.com/SaferDrive-AI/Terasim-Metropolis.git && cd Terasim-Metropolis
-```
-
-With Docker, run the published image with the offline behavior stub
+Docker, with an offline stand-in for the VSS behavior API
 ([Docker Compose guide](https://saferdrive-ai.github.io/Terasim-Metropolis/deployment/docker-compose/)):
 
 ```bash
+git clone https://github.com/SaferDrive-AI/Terasim-Metropolis.git && cd Terasim-Metropolis
 docker pull ghcr.io/saferdrive-ai/terasim-metropolis:0.1.0
 docker tag ghcr.io/saferdrive-ai/terasim-metropolis:0.1.0 terasim-metropolis:0.1.0
 docker compose -f apps/deploy/city/phase1/compose.yml --profile stub up -d
 curl -s http://127.0.0.1:8100/health
 ```
 
-From source. Requirements: Linux x86_64, Python 3.10-3.12, a C compiler (for the NADE
-extensions) and `redis-server` for the service. SUMO 1.23.1 is installed from PyPI with the
-packages.
+From source (Linux x86_64, Python 3.10 to 3.12, a C compiler, `redis-server`; SUMO 1.23.1 is
+installed from PyPI), then the end-to-end acceptance check on synthetic data:
 
 ```bash
 python3.10 -m venv .venv && . .venv/bin/activate
 pip install ./packages/terasim ./packages/terasim-nde-nade ./packages/terasim-city \
     ./packages/terasim-service "./packages/terasim-agent-skill[mcp,report]" \
     ./packages/terasim-tmc-service ./packages/terasim-plugin-sdk
-```
-
-Run the end-to-end acceptance check on synthetic data (starts every service locally,
-exercises both operating modes and checks the KPI and NEMA outputs):
-
-```bash
 python examples/acceptance/run_acceptance.py --out /tmp/terasim-acceptance
 ```
 
-Deploy:
+Deployment: Docker Compose (`apps/deploy/city/phase1/compose.yml`), Helm for Kubernetes and
+OpenShift (`apps/deploy/city/helm/terasim-phase1`), and a generator that turns one camera
+inventory into the TMC spec, the corridor configuration and the Helm values
+(`apps/deploy/city/camera-config/camcfg.py`).
 
-- Docker Compose: `apps/deploy/city/phase1/compose.yml`
-- Kubernetes / OpenShift (Helm): `apps/deploy/city/helm/terasim-phase1`
-- A corridor's intersections and cameras: one camera inventory generates the TMC spec, the
-  corridor configuration and the Helm values (`apps/deploy/city/camera-config/camcfg.py`)
+## Components
 
-## Documentation
-
-The documentation site, https://saferdrive-ai.github.io/Terasim-Metropolis/, is built from `docs/` with MkDocs
-(`mkdocs.yml`) on every change to `main`: overview and architecture, developer guide,
-deployment guides, HTTP API and MCP tool reference, KPI definitions, supported map formats,
-the Plugin SDK and runnable examples. To preview it locally:
-
-```bash
-pip install -r docs/requirements.txt && mkdocs serve
-```
-
-## Repository layout
-
-```
-packages/
-  terasim/               simulation core (A3)
-  terasim-nde-nade/      behavior models and adversarial environment (A1, A2)
-  terasim-city/          corridor pipeline: maps (A4), KPIs (B), optimization and NEMA output (C)
-  terasim-service/       HTTP API
-  terasim-agent-skill/   MCP server and client for the VSS agent
-  terasim-tmc-service/   TMC collector (VSS behavior data -> traffic snapshots)
-  terasim-plugin-sdk/    Plugin Interface / SDK for traffic-operation modules
-apps/deploy/city/        container image, Docker Compose, Helm chart, camera-config generator
-configs/                 simulation and adversity parameter files
-examples/                synthetic demo corridor, acceptance check, example plug-in
-docs/                    documentation site sources
-tests/                   test suites
-```
-
-## Versioning and releases
-
-Releases follow semantic versioning and are tagged `vMAJOR.MINOR.PATCH`; see CHANGELOG.md.
-For each tag, `.github/workflows/images.yml` publishes the container image
-`ghcr.io/saferdrive-ai/terasim-metropolis:<version>` (also `latest`) and the GitHub release, with the notes in
-`docs/release-notes.md`.
+| Module | Package |
+| --- | --- |
+| A1 Behavior models: naturalistic (NDE), naturalistic and adversarial (NADE), Neural NDE traffic per request (`traffic_model="cnde"`); open runtime on the public MTR network in `packages/open-nnde` | `terasim-nde-nade`, `terasim-city` |
+| A2 Adversarial environment: red-light running, cut-ins, rear-end, VRU crossings, stalled objects, construction zones | `terasim-nde-nade`, `configs/adversities/` |
+| A3 Simulation core: SUMO kernel, Python API, configuration system | `terasim` |
+| A4 HD map adapter: OpenDRIVE, Lanelet2, OpenStreetMap and SUMO maps to geo-referenced SUMO networks | `terasim-city` |
+| B KPIs: control delay, stops per vehicle, weighted score, simulated signal metrics | `terasim-city` |
+| C Signal timing optimization: candidates seeded from the current plan, simulation-based search, corridor coordination, NEMA output, PDF report | `terasim-city` |
+| Interfaces: HTTP API, MCP server for the VSS agent, TMC collector of VSS behavior data | `terasim-service`, `terasim-agent-skill`, `terasim-tmc-service` |
+| Plugin SDK for third-party traffic-operation modules | `terasim-plugin-sdk`, `examples/plugins/` |
 
 ## License
 
-Apache License 2.0 (LICENSE). See NOTICE for attribution and THIRD_PARTY_NOTICES.md for the
-licenses of third-party components. The simulation engine builds on TeraSim
-(https://github.com/mcity/TeraSim), originally developed at Mcity, University of Michigan.
-
-Contributions are welcome; see CONTRIBUTING.md. Report security issues as described in
-SECURITY.md.
+Apache License 2.0 (LICENSE); attribution in NOTICE, third-party licenses in
+THIRD_PARTY_NOTICES.md. Built on TeraSim (https://github.com/mcity/TeraSim), originally developed
+at Mcity, University of Michigan. Contributing: CONTRIBUTING.md; security issues: SECURITY.md.

@@ -1,8 +1,8 @@
 # Configuration reference
 
-Every service reads its settings from environment variables. The tables list each variable with
-its default in the code, the value the container image or the deployment assets set, and the
-Helm value that renders it. Boolean switches accept `1`/`true`/`yes` (on) and, where noted,
+Every service reads its settings from environment variables. The tables give each variable's
+default in the code, the value the container image or the deployment assets set, and the Helm
+value that renders it. Boolean switches accept `1`/`true`/`yes` (on) and, where noted,
 `0`/`false`/`no`/`off`.
 
 ## Container image
@@ -20,9 +20,8 @@ The image sets these defaults (`apps/deploy/city/Dockerfile`):
 | `HOME` | the home directory of the image's `terasim` user (uid 1001) |
 
 The entrypoint starts an embedded Redis (no persistence, loopback only) when
-`TERASIM_REDIS_HOST` is `localhost`, `127.0.0.1`, `::1` or empty, then runs the command
-(`terasim-service` by default). Any other host means an external Redis and the embedded one is
-skipped.
+`TERASIM_REDIS_HOST` is `localhost`, `127.0.0.1`, `::1` or empty (any other host: an external
+Redis, no embedded one), then runs the command (`terasim-service` by default).
 
 ## terasim-service
 
@@ -76,10 +75,9 @@ skipped.
 
 ### Neural NDE runtime (optional)
 
-These settings select the behavior of the background vehicles in the candidate evaluations.
-They are deployment settings; a request can only ask for Neural NDE traffic for its own run
-(`traffic_model="cnde"`), within the two `TERASIM_CITY_CNDE_*` limits. Invalid values are
-rejected when a request is submitted (422).
+Behavior of the background vehicles in the candidate evaluations. A request can only ask for
+Neural NDE traffic for its own run (`traffic_model="cnde"`), within the two `TERASIM_CITY_CNDE_*`
+limits. Invalid values are rejected when a request is submitted (422).
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
@@ -100,7 +98,7 @@ rejected when a request is submitted (422).
 | Variable | Default | Helm | Meaning |
 | --- | --- | --- | --- |
 | `TERASIM_CITY_URL` | `http://127.0.0.1:8000` | the service's in-cluster URL | Base URL of `terasim-service` |
-| `TERASIM_CITY_TIMEOUT_S` | `1800` | | Timeout of a service call (positive number of seconds); a synchronous optimization with `traffic_model="cnde"` takes minutes per candidate plan, so a deployment that offers it raises this value (3600 with `compose.cnde.yml`) |
+| `TERASIM_CITY_TIMEOUT_S` | `1800` | | Timeout of a service call (positive number of seconds); 1800 covers a `traffic_model="cnde"` request in the Neural NDE fast mode (`compose.cnde.yml`), 3600 the default mode |
 | `TERASIM_TMC_URL` | unset | the TMC Service's in-cluster URL | URL of `terasim-tmc-service`; when set, the registry tools (`list_intersections`, `register_intersection`, `optimize_registered_intersection`) are offered |
 | `TERASIM_MCP_TRANSPORT` | `stdio` | `streamable-http` | `stdio`, `sse` or `streamable-http` |
 | `TERASIM_MCP_HOST` | `0.0.0.0` | `0.0.0.0` | Bind address (HTTP transports) |

@@ -1,8 +1,8 @@
 # Quickstart
 
-This walkthrough optimizes the synthetic demo corridor in `examples/corridor_demo`: an east-west
-arterial with three signals, `J1`, `J2` and `J3`, about 300 m apart. The corridor id is
-`demo_arterial`; its intersections are `i1`, `i2` and `i3`. Everything runs locally from a
+Optimize the synthetic demo corridor in `examples/corridor_demo`: an east-west arterial with
+three signals, `J1`, `J2` and `J3`, about 300 m apart, corridor id `demo_arterial`
+([Synthetic corridor](../examples/synthetic-corridor.md)). Everything runs locally from a
 [source installation](installation.md#option-2-python-packages-from-source), with no camera
 and no network access.
 
@@ -14,21 +14,17 @@ and no network access.
 
 ## One command: the acceptance run
 
-The acceptance script starts Redis, the three services and a stand-in for the VSS behavior API
-on free local ports, then exercises the whole chain on synthetic data: map and plan upload,
-TMC collection, one On-Demand optimization, Scheduled invocations, KPIs, NEMA output and the
-adversarial environment.
+The acceptance script starts Redis, the three services and a stand-in for the VSS behavior API on
+free local ports, then exercises the whole chain on synthetic data:
 
 ```bash
 python examples/acceptance/run_acceptance.py --out /tmp/terasim-acceptance
 ```
 
 It writes `acceptance_report.md` and `acceptance_report.json` into `--out` and exits with 0 when
-no criterion fails. See [Acceptance test](../examples/acceptance.md) for the options and
-the criteria.
+no criterion fails. Options and criteria: [Acceptance test](../examples/acceptance.md).
 
-The rest of this page does the same steps by hand against the REST API, so you can see each
-request and answer.
+The steps below do the same by hand against the REST API.
 
 ## 1. Start Redis and the service
 
@@ -46,17 +42,16 @@ terasim-service                         # serves http://localhost:8000
 ```
 
 `examples/corridor_demo/scheduled_config.yaml` declares the corridor `demo_arterial`: its map
-(`demo.sumocfg`), its signals `J1`, `J2`, `J3`, its current timing sheet (an uncoordinated
-90 s plan) and a small trial budget (`max_trials: 6`, `sim_end: 600`) so that the demo
-finishes in a few minutes. Requests for this corridor take these values as defaults.
+(`demo.sumocfg`), its signals `J1`, `J2`, `J3`, its current timing sheet (an uncoordinated 90 s
+plan) and a small trial budget (`max_trials: 6`, `sim_end: 600`) so that the demo finishes in a
+few minutes. Requests for this corridor take these values as defaults.
 
-Open a second terminal in the repository root for the next steps. `http://localhost:8000/docs`
-shows the interactive API.
+Run the next steps in a second terminal, also in the repository root. The interactive API is at
+`http://localhost:8000/docs`.
 
 ## 2. Register the map
 
-The map skill registers a map file that the service can read. The demo map is a prebuilt SUMO
-scenario:
+The demo map is a prebuilt SUMO scenario:
 
 ```bash
 curl -s -X POST http://localhost:8000/v1/city/maps \
@@ -78,9 +73,8 @@ The map id is a content hash: registering the same files again answers `"duplica
 
 ## 3. Send traffic counts
 
-The TMC collector normally pushes one snapshot per observation window. Here six recorded
-10-minute snapshots of the demo corridor are replayed, re-stamped so that they fall into the
-last hour:
+Replay six recorded 10-minute snapshots of the demo corridor, re-stamped into the last hour (the
+TMC collector normally pushes one snapshot per observation window):
 
 ```bash
 python - <<'EOF'
@@ -105,14 +99,14 @@ for index, path in enumerate(paths):
 EOF
 ```
 
-Each push answers `202` with the number of snapshots buffered for the corridor:
-`{"corridor_id":"demo_arterial","buffered":6}` after the last one. The format is described in
+Each push answers `202` with the number of snapshots buffered for the corridor;
+`{"corridor_id":"demo_arterial","buffered":6}` after the last one. Format:
 [TMC snapshot format](../reference/tmc-snapshot-format.md).
 
 ## 4. On-Demand: optimize the corridor
 
-This is the call the MCP optimization tools make for the VSS agent. It blocks until the
-optimization has finished:
+The call the MCP optimization tools make for the VSS agent; it blocks until the optimization has
+finished:
 
 ```bash
 curl -s -X POST http://localhost:8000/v1/city/optimize \
@@ -128,8 +122,7 @@ curl -s -X POST http://localhost:8000/v1/city/optimize \
   }' > optimize.json
 ```
 
-The answer holds the optimized NEMA plan and the KPIs of the current and the optimized plan
-(numbers shortened):
+Answer (numbers shortened):
 
 ```json
 {
@@ -158,11 +151,11 @@ The answer holds the optimized NEMA plan and the KPIs of the current and the opt
 The baseline is the corridor's current plan (here the timing sheet), so its cost is the sum of
 the weights, 1.0. The optimizer coordinated the three signals: it kept the common 90 s cycle and
 the splits and searched the offsets of `J2` and `J3`. Your numbers will differ with the trial
-budget. See [KPIs](../reference/kpis.md) for the definitions.
+budget. Definitions: [KPIs](../reference/kpis.md).
 
 ## 5. Look at the run
 
-Every optimization is recorded as a run, the synchronous ones included:
+Every optimization, the synchronous ones included, is recorded as a run:
 
 ```bash
 curl -s 'http://localhost:8000/v1/city/optimizations?corridor_id=demo_arterial'
@@ -181,8 +174,8 @@ curl -s -o report.pdf http://localhost:8000/v1/city/optimizations/$RUN/report.pd
 
 ## 6. Scheduled: the same call on a cadence
 
-In Scheduled mode the caller invokes the same optimization on its own cadence; each call uses the
-snapshots buffered at that time. For example, two invocations one minute apart:
+The caller invokes the same optimization on its own cadence; each call uses the snapshots
+buffered at that time. Two invocations one minute apart:
 
 ```bash
 for i in 1 2; do
@@ -200,8 +193,7 @@ offsets). In production the TMC collector keeps the buffer fresh between invocat
 
 ## 7. Optional: the built-in scheduler
 
-The service can also run the scheduled corridors itself. Stop `terasim-service` (Ctrl+C) and
-start it again with the scheduler on:
+Stop `terasim-service` (Ctrl+C) and start it again with the scheduler on:
 
 ```bash
 export TERASIM_CITY_SCHEDULER_ENABLED=true
@@ -225,8 +217,7 @@ default) before continuing.
 
 ## 8. Through MCP
 
-The VSS agent reaches the same optimization through the MCP server. Start it next to the
-service:
+Start the MCP server (the VSS agent's way to the same optimization) next to the service:
 
 ```bash
 export TERASIM_CITY_URL=http://localhost:8000
@@ -237,7 +228,7 @@ export TERASIM_CITY_DATA_ROOT=/tmp/terasim/store
 terasim-agent-skill                                    # MCP endpoint http://localhost:9911/mcp
 ```
 
-and call a tool with the MCP Python client (installed with `terasim-agent-skill[mcp]`):
+Call a tool with the MCP Python client (installed with `terasim-agent-skill[mcp]`):
 
 ```python
 import asyncio
@@ -275,7 +266,7 @@ The first text block is the summary a chat answer shows (plan, KPI table, NEMA s
 links); the last one is the JSON payload. The downloads always include the optimized NEMA plan
 (`nema_plan.json`) and the full result (`optimization.json`); when the city's current plan is in
 the plan store (step [Upload the current timing plan](../examples/on-demand.md#upload-the-current-timing-plan)),
-they also include `current_plan.json` and the timing report `timing_report.pdf`. See
+also `current_plan.json` and the timing report `timing_report.pdf`. See
 [MCP tools](../reference/mcp-tools.md).
 
 ## Next steps

@@ -40,15 +40,14 @@ everything again:
 python examples/acceptance/run_acceptance.py --out /tmp/terasim-acceptance
 ```
 
-The run takes a while with the contract settings (1,800 s simulated per candidate). For a
-quicker check, lower the horizon and the budget, for example
-`--sim-end 600 --max-trials 6`.
+With the contract settings (1,800 s simulated per candidate) the run takes a while. For a quicker
+check, lower the horizon and the budget, for example `--sim-end 600 --max-trials 6`.
 
 ## Remote mode
 
 Checks an existing deployment that runs the behavior stand-in, for example the
-[Docker Compose](../deployment/docker-compose.md) stack with the `stub` profile. It uses the map
-baked into the image:
+[Docker Compose](../deployment/docker-compose.md) stack with the `stub` profile, on the map baked
+into the image:
 
 ```bash
 python examples/acceptance/run_acceptance.py --remote \
@@ -56,34 +55,39 @@ python examples/acceptance/run_acceptance.py --remote \
 ```
 
 Remote mode registers and optimizes one intersection (`i2`) with the deployment's own TMC
-specification and behavior source: a corridor needs all of its intersections registered before
-the collector's first observation window, which local mode arranges by preparing the
-collector's registry. Corridor coordination (`C3-1`, `C3-2`), the checks that need files on the
-service's asset volume (`A4-2`, `A4-3`, `A4-4`, `B-3`) and the re-evaluation stage, a setting of
-the service (`A1-2`), are reported as skipped in remote mode. `SCH-2` runs when the deployment
-has its built-in scheduler on.
+specification and behavior source (a corridor needs all of its intersections registered before
+the collector's first observation window). Reported as skipped in remote mode:
+
+- `C3-1`, `C3-2`: corridor coordination;
+- `A4-2`, `A4-3`, `A4-4`, `B-3`: need files on the service's asset volume;
+- `A1-2`: the re-evaluation stage, a setting of the service.
+
+`SCH-2` runs when the deployment has its built-in scheduler on.
 
 ## Neural NDE profile
 
-On a machine with a CUDA GPU and the Neural NDE runtime module and checkpoint installed (both
-are installed separately, see [Behavior models](../developer-guide/behavior-models.md)),
-`--neural-nde` checks the model itself: environment (runtime importable, CUDA device, checkpoint
-present), service health, then one optimization of the demo corridor in which the current plan
-and the two best candidates are re-evaluated under Neural NDE (`A1-2`, `A1-3`), and an
-`optimize_corridor` tool call with `traffic_model="cnde"` in which every candidate runs under
-Neural NDE, followed by the same call without it (`A1-4`):
+Needs a CUDA GPU and the Neural NDE runtime module and checkpoint (both installed separately, see
+[Behavior models](../developer-guide/behavior-models.md)).
 
 ```bash
 python examples/acceptance/run_acceptance.py --neural-nde --out /tmp/terasim-acceptance-nnde
 ```
 
+`--neural-nde` checks the model itself:
+
+1. environment (runtime importable, CUDA device, checkpoint present) and service health;
+2. `A1-2`, `A1-3`: one optimization of the demo corridor in which the current plan and the two
+   best candidates are re-evaluated under Neural NDE;
+3. `A1-4`: an `optimize_corridor` tool call with `traffic_model="cnde"`, in which every candidate
+   runs under Neural NDE, followed by the same call without it.
+
 The corridor's map in this profile is an OpenStreetMap version of the demo corridor, written at
 run time and stored through the map upload tool, so the model's map artifacts are generated in
 the map store. For `A1-4` the stored package, with its artifacts, is placed under the input root
 the way a deployment mounts one, and the corridor's entry points at it with a budget of six
-trials and four workers; the deployment limits `TERASIM_CITY_CNDE_MAX_TRIALS` and
+trials and four workers. The deployment limits `TERASIM_CITY_CNDE_MAX_TRIALS` and
 `TERASIM_CITY_CNDE_MAX_WORKERS` cut the Neural NDE run down to `--cnde-max-trials` and
-`--cnde-max-workers`, while the SUMO run keeps the entry's budget.
+`--cnde-max-workers`; the SUMO run keeps the entry's budget.
 
 ## Options
 
@@ -147,10 +151,9 @@ trials and four workers; the deployment limits `TERASIM_CITY_CNDE_MAX_TRIALS` an
 
 The script prints one `[PASS]`, `[FAIL]` or `[SKIP]` line per criterion and writes into `--out`:
 
-- `acceptance_report.md`: the result, the mode and the simulated horizon, then a table of every
-  criterion with its status and evidence;
-- `acceptance_report.json` (schema `terasim.acceptance_report.v1`): start and end time,
-  duration, counts per status, the overall `result` and, per criterion, its status, evidence,
-  detail and duration.
+| File | Content |
+| --- | --- |
+| `acceptance_report.md` | The result, the mode and the simulated horizon, then a table of every criterion with its status and evidence |
+| `acceptance_report.json` | Schema `terasim.acceptance_report.v1`: start and end time, duration, counts per status, the overall `result` and, per criterion, its status, evidence, detail and duration |
 
 The exit code is 0 only when no criterion failed.

@@ -1,7 +1,6 @@
 # Installation
 
-TeraSim Metropolis ships as a container image for deployments and as Python packages for
-development. Both contain the same code.
+Same code in two forms: a container image for deployments, Python packages for development.
 
 ## Requirements
 
@@ -17,41 +16,45 @@ development. Both contain the same code.
 
 ## Option 1: container image
 
-The release image is `terasim-metropolis:0.1.0`. Pull it from the GitHub Container Registry as
-`ghcr.io/saferdrive-ai/terasim-metropolis:0.1.0` (see
-[Get the image](../deployment/docker-compose.md#get-the-image)), load it from an image archive
-(`docker load -i <archive>`), or build it from a checkout: run from the repository root (the
-build context must be the root so `packages/` and `examples/` resolve):
+The release image is `terasim-metropolis:0.1.0`. Either:
+
+- pull it from the GitHub Container Registry as `ghcr.io/saferdrive-ai/terasim-metropolis:0.1.0`
+  (see [Get the image](../deployment/docker-compose.md#get-the-image));
+- load it from an image archive: `docker load -i <archive>`;
+- or build it from a checkout, from the repository root (the build context must be the root so
+  `packages/` and `examples/` resolve):
 
 ```bash
 docker build -f apps/deploy/city/Dockerfile -t terasim-metropolis:0.1.0 .
 ```
 
-On an Apple Silicon machine, add `--platform linux/amd64` to build the x86-64 image.
+On Apple Silicon, add `--platform linux/amd64` to build the x86-64 image. The build installs the
+packages, compiles the Cython extensions and verifies the runtime as the non-root user (imports,
+the `libsumo` backend, the `sumo` binary and its libraries, Redis, the writable data directories,
+the read-only baked inputs); a broken runtime fails the build.
 
-The build installs the packages, compiles the Cython extensions and verifies the runtime as the
-non-root user: imports, the `libsumo` backend, the `sumo` binary and its libraries, Redis, the
-writable data directories and the read-only baked inputs. A broken runtime fails the build.
+The image contains the release packages and their dependencies, SUMO 1.23.1 and `redis-server`,
+plus:
 
-What the image contains:
-
-- the release packages and their dependencies, SUMO 1.23.1 and `redis-server`;
-- the synthetic demo corridor map at `/data/input/map` (`demo.sumocfg`, `demo.net.xml`,
-  `demo.tls.xml`, `demo.rou.xml`) and the demo scenario at `/data/input/demo_scenario`;
-- writable data directories `/data/output` (service runs and stores), `/data/artifacts` (MCP
-  downloads) and `/data/tmc` (TMC registry).
+| Path | Content |
+| --- | --- |
+| `/data/input/map` | Synthetic demo corridor map: `demo.sumocfg`, `demo.net.xml`, `demo.tls.xml`, `demo.rou.xml` |
+| `/data/input/demo_scenario` | Demo scenario |
+| `/data/output` | Writable: service runs and stores |
+| `/data/artifacts` | Writable: MCP downloads |
+| `/data/tmc` | Writable: TMC registry |
 
 The image runs as uid 1001 in group 0 and works under any uid in group 0 (OpenShift
 `restricted-v2`). It exposes ports 8000, 9911 and 8200 and starts `terasim-service` by default;
-the other two services are started by passing their command (`terasim-agent-skill`,
-`terasim-tmc-service`). See [Docker Compose](../deployment/docker-compose.md) and
+pass `terasim-agent-skill` or `terasim-tmc-service` as the command to start the other two. See
+[Docker Compose](../deployment/docker-compose.md) and
 [Helm on OpenShift](../deployment/helm-openshift.md).
 
 ## Option 2: Python packages from source
 
-Clone the repository, then create a virtual environment and install the packages in editable
-mode. The constraints file pins the version ranges that span several packages (FastAPI,
-Starlette, MCP, httpx).
+Clone the repository, create a virtual environment and install the packages in editable mode. The
+constraints file pins the version ranges that span several packages (FastAPI, Starlette, MCP,
+httpx).
 
 ```bash
 python3.10 -m venv .venv
@@ -69,11 +72,11 @@ pip install -c $C -e packages/terasim-tmc-service
 pip install -c $C -e packages/terasim-plugin-sdk
 ```
 
-The `mcp` extra of `terasim-agent-skill` installs the MCP server runtime; the `report` extra
-installs the PDF renderer of the timing report.
+Extras of `terasim-agent-skill`: `mcp` installs the MCP server runtime, `report` the PDF renderer
+of the timing report.
 
 The SUMO wheels put `sumo`, `netconvert` and the other SUMO tools on the virtual environment's
-`PATH`. Tools that look for `SUMO_HOME` find it with:
+`PATH`. For tools that look for `SUMO_HOME`:
 
 ```bash
 export SUMO_HOME="$(python -c 'import sumo; print(sumo.SUMO_HOME)')"
@@ -95,6 +98,6 @@ the `PATH`.
 ## Next steps
 
 - [Quickstart](quickstart.md): optimize the synthetic corridor in both operating modes.
-- [Acceptance test](../examples/acceptance.md): run every acceptance criterion with one command.
+- [Acceptance test](../examples/acceptance.md): every acceptance criterion in one command.
 - [Repository layout](../developer-guide/repository-layout.md) and
-  [Packages](../developer-guide/packages.md) for a tour of the code.
+  [Packages](../developer-guide/packages.md): a tour of the code.

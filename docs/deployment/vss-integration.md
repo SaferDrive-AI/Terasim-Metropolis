@@ -1,7 +1,7 @@
 # VSS integration
 
 TeraSim Metropolis connects to an NVIDIA Metropolis VSS (Video Search and Summarization)
-deployment at three points:
+deployment at three points; VSS needs no image or code changes:
 
 | Connection | Direction | Configured where |
 | --- | --- | --- |
@@ -9,16 +9,12 @@ deployment at three points:
 | Traffic counts | `terasim-tmc-service` → VSS behavior API (`GET /behavior`, port 8081) | `VSS_BEHAVIOR_URL` (Helm `tmc.vssBehaviorUrl`) |
 | Download links | reader's browser → `terasim-agent-skill` `/files` | `TERASIM_MCP_PUBLIC_URL` (Helm: the Route, `global.externalHost`) |
 
-No VSS image or code changes are needed: the agent gains a tool group in its configuration,
-and the TMC collector reads the behavior API that VSS already serves.
-
 ## Traffic counts from VSS
 
 ### Corridor specification (`Metadata.json`)
 
-The TMC collector reads one corridor from `TMC_SPEC_FILE`. The format is the one of the NVIDIA
-reference TMC script: per intersection, which camera watches which approach, and how the road
-segments of the behavior objects map to headings and turns.
+The TMC collector reads one corridor from `TMC_SPEC_FILE`, in the format of the NVIDIA reference
+TMC script:
 
 ```json
 {
@@ -56,47 +52,47 @@ segments of the behavior objects map to headings and turns.
 | `Movements` | `"<entry heading> - <exit heading>"` → turn (`Left`, `Straight`, `Right`) |
 | `Assignments` | Approach heading → camera (sensor id) that counts it |
 
-The deployment assets ship the specification of the synthetic demo corridor
-(`apps/deploy/city/phase1/Metadata.json`, and the same file in the Helm chart's `configs/`).
+The demo corridor's specification ships as `apps/deploy/city/phase1/Metadata.json` (the same
+file is in the Helm chart's `configs/`).
 
 ### How the counting works
 
-1. An intersection becomes active when it is registered: through the MCP tool
-   `register_intersection` or `POST /v1/tmc/intersections`. The id must be in the specification
+1. Only registered intersections are counted. Register one through the MCP tool
+   `register_intersection` or `POST /v1/tmc/intersections`; the id must be in the specification
    and the coordinates within 50 m of its location. Registrations persist in
    `TMC_REGISTRY_FILE`.
-2. Every observation window, aligned to the clock and taken once it ended `TMC_SETTLE_LAG_S`
-   seconds ago (default 180 s, because behavior objects are written when a track ends), the
+2. Every observation window (aligned to the clock, taken once it ended `TMC_SETTLE_LAG_S`
+   seconds ago; default 180 s, as behavior objects are written when a track ends), the
    collector queries the behavior API for every camera of the registered intersections:
    `GET <VSS_BEHAVIOR_URL>/behavior?sensorId=<camera>&queryString=end:[<start> TO <end>]`.
-3. It keeps the objects of that camera whose `object.type` is a counted label, takes the
-   heading of the first and of the last road segment of each object's `edges`, and counts the
-   turn that `Movements` gives for the pair, under the approach the camera is assigned to. The
+3. Of each camera's objects it keeps those whose `object.type` is a counted label, takes the
+   headings of the first and the last road segment of the object's `edges`, and counts the turn
+   that `Movements` gives for the pair under the approach the camera is assigned to. The
    counting functions are the NVIDIA reference functions, vendored in
    `terasim_tmc_service/nv_generate_tmc.py`.
 4. It pushes the snapshot (one count table per registered intersection, see
    [TMC snapshot format](../reference/tmc-snapshot-format.md)) to `terasim-service`, which
-   buffers it for two hours. The window is remembered, also across restarts, so a window is
-   never pushed twice.
+   buffers it for two hours. The window is remembered, also across restarts, so no window is
+   pushed twice.
 
-A registration also starts one counting pass right away, and `POST /v1/tmc/run-once` runs one
-on request. `GET /v1/tmc/health` shows the registered intersections, the counted labels and the
+A registration also starts one counting pass right away; `POST /v1/tmc/run-once` runs one on
+request. `GET /v1/tmc/health` shows the registered intersections, the counted labels and the
 result of the last pass, including the object labels each camera returned.
 
 ### Counted labels
 
 `TMC_COUNTED_OBJECT_TYPES` lists the detector labels counted as traffic (comma-separated,
 case-insensitive, `-` and `_` are the same). The default, `Vehicle,two_wheeler`, matches the
-labels of the NVIDIA Metropolis smart-city detector. A detector that labels vehicles `car` and
-`bicycle` needs `TMC_COUNTED_OBJECT_TYPES=car,bicycle` (Helm `tmc.countedObjectTypes`);
-otherwise every count is zero. The `object_types` of a pass in `/v1/tmc/health` shows the
-labels the cameras actually return.
+NVIDIA Metropolis smart-city detector. A detector that labels vehicles `car` and `bicycle` needs
+`TMC_COUNTED_OBJECT_TYPES=car,bicycle` (Helm `tmc.countedObjectTypes`); otherwise every count is
+zero. The labels the cameras actually return are in `object_types` of a pass in
+`/v1/tmc/health`.
 
 ## VSS agent configuration
 
-The edits below go into the VSS agent's `config.yml` (on the VSS Helm chart, the config source
-of the agent's ConfigMap). Back up the file first; after the edits, restart the agent so it
-reloads the configuration. The URL depends on the deployment:
+Edit the VSS agent's `config.yml` (with the VSS Helm chart: the config source of the agent's
+ConfigMap). Back the file up first, and restart the agent after the edits so it reloads the
+configuration. MCP URL per deployment:
 
 | TeraSim deployment | MCP URL |
 | --- | --- |
@@ -173,9 +169,8 @@ section below before the `GET PLACES TOOL:` section:
       terasim_mcp.upload_signal_plan with it before optimizing.
 ```
 
-**4. Add the response rule.** Append item 4 to the `RESPONSE FORMAT (CRITICAL):` list at the
-very end of `workflow.prompt`. STEP 4 sits far above the place where the answer is composed;
-this closing rule makes the planner keep the block intact:
+**4. Add the response rule**: append item 4 to the `RESPONSE FORMAT (CRITICAL):` list at the
+very end of `workflow.prompt`:
 
 ```yaml
     4. If a tool result begins with a "**Signal timing optimization: ...**" markdown block, your
@@ -190,14 +185,12 @@ this closing rule makes the planner keep the block intact:
 The same configuration text ships with the Helm chart as
 `apps/deploy/city/helm/terasim-phase1/VSS-WIRING.md`.
 
-**5. Recommended:** raise `workflow.max_iterations` from `15` to `25`. A signal-timing
-conversation spends iterations on `list_intersections`, the optimization and the answer; 25
-leaves room for a retry.
+**5. Recommended:** raise `workflow.max_iterations` from `15` to `25`.
 
-**6. Planning mode.** VSS agent profiles that set `workflow.planning_enabled: true` compose the
-final answer in a separate plan-execution step that summarizes the tool results. Set
-`workflow.planning_enabled: false` (the agent's own default) so the answer is the tool's
-markdown block as written in STEP 4.
+**6. Planning mode:** set `workflow.planning_enabled: false` (the agent's own default). VSS agent
+profiles with `workflow.planning_enabled: true` compose the final answer in a separate
+plan-execution step that summarizes the tool results, instead of answering with the markdown
+block of STEP 4.
 
 On startup the agent logs each `terasim_mcp` tool it added, which confirms that it reached the
 MCP server. `optimize_intersection_by_id` (the same optimization with flat arguments) is
@@ -206,21 +199,20 @@ intersections that are not in the registry.
 
 ### Long tool calls
 
-An optimization runs for minutes inside one tool call. While it runs, the MCP server sends a
-progress notification and a log notification every `TERASIM_MCP_HEARTBEAT_S` seconds (default
-2, Helm `mcp.heartbeatS`) on the call's response stream. This keeps the stream active for MCP
-clients with short read timeouts, so no client-side setting other than `tool_call_timeout` is
-needed.
+While an optimization runs, the MCP server sends a progress notification and a log notification
+every `TERASIM_MCP_HEARTBEAT_S` seconds (default 2, Helm `mcp.heartbeatS`) on the call's response
+stream. MCP clients with short read timeouts therefore need no setting other than
+`tool_call_timeout`.
 
 ### Neural NDE traffic on request
 
-When the TeraSim deployment runs the Neural NDE image (`compose.cnde.yml`, see
+With the Neural NDE image (`compose.cnde.yml`, see
 [Behavior models](../developer-guide/behavior-models.md)), the optimize tools accept
-`traffic_model="cnde"`, and STEP 3 above tells the agent to send it only when the user asks for
-Neural NDE traffic explicitly. Such a call simulates every candidate plan on the GPU: about 12
-minutes for 24 candidates of 600 s in the fast mode (`TERASIM_CITY_CNDE_PREDICT_CONTROL_ONLY=1`,
-eight at a time) on the reference deployment, about 39 minutes in the default mode. The
-synchronous chain then needs matching timeouts:
+`traffic_model="cnde"`; STEP 3 above sends it only when the user explicitly asks for Neural NDE
+traffic. Such a call simulates every candidate plan on the GPU: on the reference deployment
+about 12 minutes for 24 candidates of 600 s in the fast mode
+(`TERASIM_CITY_CNDE_PREDICT_CONTROL_ONLY=1`, eight at a time), about 39 minutes in the default
+mode. Set matching timeouts along the synchronous chain:
 
 | Where | Setting | Value (fast mode, 24 candidates) |
 | --- | --- | --- |
@@ -229,9 +221,9 @@ synchronous chain then needs matching timeouts:
 | Reverse proxy in front of the VSS chat UI (for example HAProxy `timeout client` / `timeout server`) | idle timeout | longer than the tool timeout, for example `2100s` |
 
 The VSS chat page ends a request after 300 s without data, and the agent sends none while a tool
-call runs, so a Neural NDE request goes through the agent API (`POST /generate` on the agent's
-port 8000, body `{"messages": [{"role": "user", "content": "<request>"}]}`); other requests
-work in both.
+call runs: send a Neural NDE request through the agent API (`POST /generate` on the agent's port
+8000, body `{"messages": [{"role": "user", "content": "<request>"}]}`). Other requests work in
+both.
 
 The answer's facts line then reads `Traffic model: CNDE (Neural NDE, learned driver behavior)
 simulated every candidate plan.`, and the run is listed with `traffic_model: "cnde"`. Requests
@@ -243,13 +235,13 @@ In the VSS chat, ask for example: *"Optimize the intersection of <street A> and
 <street B>."* The agent calls `list_intersections`, registers the intersection if needed, calls
 `optimize_registered_intersection` and answers with the plan sentence, the KPI table, the NEMA
 splits and the download links. Right after a registration the TMC collector counts the latest
-complete observation window; when that window holds no detections yet, the counts arrive with
-the next window (10 minutes by default).
+complete observation window; if that window holds no detections yet, the counts arrive with the
+next window (10 minutes by default).
 
 ## Download links
 
 Each optimization through MCP writes its files under `TERASIM_ARTIFACT_ROOT` and links them in
-the answer:
+the answer as `<TERASIM_MCP_PUBLIC_URL>/files/<artifact_id>/<file>`:
 
 | File | Content |
 | --- | --- |
@@ -258,16 +250,16 @@ the answer:
 | `current_plan.json` | The city's current plan from the plan store, when there is one |
 | `timing_report.pdf` | The signal timing report (current plan, optimized plan, KPI comparison), when the current plan is in the plan store |
 
-Links read `<TERASIM_MCP_PUBLIC_URL>/files/<artifact_id>/<file>`. With Helm on OpenShift, the
-chart's Route publishes only `/files` at `https://<global.externalHost>`; the MCP protocol
-endpoint stays inside the cluster. With Docker Compose, put a reverse proxy in front of
-`127.0.0.1:9911/files/` and set `TERASIM_MCP_PUBLIC_URL` to its address.
+With Helm on OpenShift, the chart's Route publishes only `/files` at
+`https://<global.externalHost>`; the MCP protocol endpoint stays inside the cluster. With Docker
+Compose, put a reverse proxy in front of `127.0.0.1:9911/files/` and set
+`TERASIM_MCP_PUBLIC_URL` to its address ([Download links](docker-compose.md#download-links)).
 
 ## Timing plans from the city
 
 `upload_signal_plan` (and `POST /v1/city/plans`) take the city's current timing as a
 `terasim.nema_plan.v1` document: phases, rings, coordination patterns and the time-of-day
-schedule per intersection, with coordinates. Once stored, the plan is the baseline of later
-optimizations and the seed of their search, the KPI comparison is against it, and the timing
+schedule per intersection, with coordinates. A stored plan is the baseline of later
+optimizations and the seed of their search; the KPIs are compared against it, and the timing
 report shows current and optimized timing side by side. See
 [NEMA plan formats](../reference/nema-plan-format.md).
