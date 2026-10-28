@@ -525,7 +525,7 @@ Runs one counting pass now: pulls the behavior objects of the latest settled obs
 
 *Health*
 
-`{status, corridor_id, observation_interval, registered, settle_lag_s, counted_object_types, autostart, last_tick}`.
+`{status, corridor_id, observation_interval, registered, settle_lag_s, counted_object_types, autostart, last_tick, last_injected}`; `last_injected` is the last tick that injected a window.
 
 **Responses**
 

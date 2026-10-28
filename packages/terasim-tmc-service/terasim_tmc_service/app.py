@@ -197,15 +197,25 @@ def _load_last_windows(path: Path) -> dict[str, str]:
     return dict(data)
 
 
-def _store_last_windows(path: Path, last_windows: dict[str, str]) -> None:
-    """Atomically persist the injected-window watermark (best effort: never fails a tick)."""
+def _load_last_injected(path: Path) -> dict | None:
+    """Restore the last injected tick; an unusable file starts without one."""
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        logger.warning("ignoring unreadable last-injected file %s: %s", path, exc)
+        return None
+    return data if isinstance(data, dict) and data.get("status") == "injected" else None
+
+
+def _store_json(path: Path, data: Any) -> None:
+    """Atomically persist ``data`` as JSON (best effort: never fails a tick)."""
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
         tmp = path.with_name(path.name + ".tmp")
-        tmp.write_text(json.dumps(last_windows), encoding="utf-8")
+        tmp.write_text(json.dumps(data), encoding="utf-8")
         tmp.replace(path)
-    except OSError:
-        logger.exception("could not persist last windows to %s", path)
+    except (OSError, TypeError, ValueError):
+        logger.exception("could not persist %s", path)
 
 
 def create_app(
@@ -226,16 +236,26 @@ def create_app(
     ``windows_file`` persists the injected-window watermark (``{corridor_id: timestamp_start}``):
     it is read at creation when the file exists (a corrupt file only logs a warning) and
     rewritten atomically after every injected tick, so a restart inside the same observation
-    window skips instead of re-injecting it.
+    window skips instead of re-injecting it. The last injected tick is kept next to it
+    (``tmc_last_injected.json``) and reported by the health endpoint as ``last_injected``, also
+    after later ticks skip the window.
     ``tick_on_register`` runs one best-effort tick on a daemon thread right after a successful
     registration, so the first snapshot does not wait for the next window boundary.
     """
     clock = clock or _utc_now
     windows_path = Path(windows_file) if windows_file is not None else None
+    injected_path = windows_path.with_name("tmc_last_injected.json") if windows_path else None
     last_windows: dict[str, str] = {}
     if windows_path is not None and windows_path.exists():
         last_windows = _load_last_windows(windows_path)
-    state: dict[str, Any] = {"last_windows": last_windows, "last_tick": None}
+    last_injected = None
+    if injected_path is not None and injected_path.exists():
+        last_injected = _load_last_injected(injected_path)
+    state: dict[str, Any] = {
+        "last_windows": last_windows,
+        "last_tick": None,
+        "last_injected": last_injected,
+    }
     tick_lock = threading.Lock()
 
     def tick_now() -> dict:
@@ -258,9 +278,13 @@ def create_app(
                     "error": str(exc),
                 }
                 raise
-            if windows_path is not None and result.get("status") == "injected":
-                _store_last_windows(windows_path, state["last_windows"])
-            state["last_tick"] = {"at": _stamp(clock()), **result}
+            tick = {"at": _stamp(clock()), **result}
+            if result.get("status") == "injected":
+                state["last_injected"] = tick
+                if windows_path is not None:
+                    _store_json(windows_path, state["last_windows"])
+                    _store_json(injected_path, tick)
+            state["last_tick"] = tick
         return result
 
     def _background_tick() -> None:
@@ -354,6 +378,7 @@ def create_app(
             "counted_object_types": sorted(counted_object_types),
             "autostart": autostart,
             "last_tick": state["last_tick"],
+            "last_injected": state["last_injected"],
         }
 
     return app

@@ -123,6 +123,15 @@ def test_run_once_endpoint(harness):
     assert client.get("/v1/tmc/health").json()["last_tick"]["status"] == "injected"
     assert len(injector.payloads) == 1
 
+    # The same window again is skipped; the health keeps reporting the window that was injected.
+    assert client.post("/v1/tmc/run-once").json()["status"] == "skipped"
+    health = client.get("/v1/tmc/health").json()
+    assert health["last_tick"]["status"] == "skipped"
+    assert health["last_injected"]["timestamp_start"] == WINDOW_START
+    assert health["last_injected"]["behaviors"] == {
+        "i1-cam1": 8, "i1-cam2": 2, "i1-cam3": 2, "i1-cam4": 3}
+    assert len(injector.payloads) == 1
+
 
 def test_run_once_reports_upstream_failure(spec, sample_behaviors):
     registry = IntersectionRegistry(spec)
@@ -191,14 +200,18 @@ def test_last_windows_persist_across_app_instances(spec, sample_behaviors, tmp_p
         assert client.post("/v1/tmc/run-once").json()["status"] == "injected"
     assert json.loads(windows_file.read_text(encoding="utf-8")) == {"demo_arterial": WINDOW_START}
 
-    # A restart re-reads the watermark: the same window must not be injected twice.
+    # A restart re-reads the watermark: the same window must not be injected twice, and the
+    # health still reports the window that was injected before the restart.
     restarted = create_app(spec, IntersectionRegistry(spec), FakeSource(sample_behaviors), injector,
                            autostart=False, clock=lambda: _NOW, windows_file=windows_file,
                            tick_on_register=False)
     with TestClient(restarted) as client:
         client.post("/v1/tmc/intersections", json=I1)
         result = client.post("/v1/tmc/run-once").json()
+        last_injected = client.get("/v1/tmc/health").json()["last_injected"]
     assert result["status"] == "skipped" and result["timestamp_start"] == WINDOW_START
+    assert last_injected["status"] == "injected"
+    assert last_injected["timestamp_start"] == WINDOW_START
     assert len(injector.payloads) == 1
 
 

@@ -1223,11 +1223,12 @@ class AcceptanceRun:
             time.sleep(2)
         count = self.snapshot_count()
         health = httpx.get(f"{self.tmc}/v1/tmc/health", timeout=30).json()
-        # The window's counts come from whichever tick injected it: the collector's own
-        # periodic tick (before) or the manual run-once (tick); a repeated window is skipped.
+        # The window's counts come from whichever tick injected it: the manual run-once (tick)
+        # or an earlier tick of the collector, which it reports as last_injected.
         initial = getattr(self.stack, "initial_tick", {}) if self.stack is not None else {}
         injected = next((t for t in (tick, after_registration, health.get("last_tick") or {},
-                                     initial) if t.get("status") == "injected"), {})
+                                     health.get("last_injected") or {}, initial)
+                         if t.get("status") == "injected"), {})
         behaviors = injected.get("behaviors") or tick.get("behaviors") or {}
         ok = (set(registered) >= {i["intersection_id"] for i in self.targets} and count >= 1
               and tick.get("status") in ("injected", "skipped"))
