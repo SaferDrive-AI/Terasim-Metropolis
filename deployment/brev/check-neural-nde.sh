@@ -11,13 +11,15 @@
 # Neural NDE fast mode, as compose.brev.yml sets it. The script fails unless the check prints
 # PASS. The container is removed at the end. About 5 minutes, depending on the GPU.
 #
-#   ./check-neural-nde.sh <path of nn_weights.pth> [image]
+#   ./check-neural-nde.sh <path of the checkpoint> [image]
+#   image: default terasim-metropolis:0.1.0-open-nnde (apps/deploy/city/Dockerfile.open-nnde, MTR
+#   checkpoint); the Neural NDE image built from Dockerfile.cnde works the same way.
 # Environment (optional): CNDE_GPU (0), CHECK_PORT (18100).
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CHECKPOINT="$(realpath "${1:?usage: $0 <path of nn_weights.pth> [image]}")"
-IMAGE="${2:-terasim-metropolis:0.1.0-cnde}"
+CHECKPOINT="$(realpath "${1:?usage: $0 <path of the checkpoint> [image]}")"
+IMAGE="${2:-terasim-metropolis:0.1.0-open-nnde}"
 GPU="${CNDE_GPU:-0}"
 PORT="${CHECK_PORT:-18100}"
 NAME="terasim-neural-nde-check"

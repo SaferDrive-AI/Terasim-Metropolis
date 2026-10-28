@@ -1,4 +1,5 @@
-# Reference deployment on NVIDIA Brev, the last file over compose.yml and compose.cnde.yml (README, steps 2 and 3).
+# Reference deployment on NVIDIA Brev, the last file of the stack (README, step 3):
+#   SUMO mode: compose.yml + compose.brev.yml; MTR mode: compose.yml + compose.cnde.yml + compose.brev.yml.
 services:
   terasim-service:
     volumes:
@@ -18,6 +19,6 @@ services:
       OPENBLAS_NUM_THREADS: "2"
   terasim-mcp:
     ports:
-      - "<instance-private-ip>:9911:9911"         # MCP for the VSS agent (README, steps 2 and 6)
+      - "<instance-private-ip>:9911:9911"         # MCP for the VSS agent (README, steps 3 and 4)
     environment:
-      TERASIM_CITY_TIMEOUT_S: "1800"              # README, timeouts table
+      TERASIM_CITY_TIMEOUT_S: "1800"              # one optimization; the agent's tool_call_timeout (README, step 4)

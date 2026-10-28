@@ -14,6 +14,15 @@ All notable changes to this project are documented in this file. The format foll
   versions of MTR's two CUDA operators. `apps/deploy/city/Dockerfile.open-nnde` builds it on the
   release image from public sources; model weights are not included
   (docs/developer-guide/open-neural-nde.md).
+- `deployment/brev/configure-vss.py`: TeraSim's edits of a VSS 3.3.0 checkout (cameras, detector
+  labels, behavior analytics, Logstash, HAProxy, VSS agent tools and prompt) in one idempotent
+  command.
+
+### Changed
+
+- The reference deployment on NVIDIA Brev (`deployment/brev/README.md`) runs from public inputs
+  and the sample data (available on request) with VSS 3.3.0, in two modes: SUMO, and MTR (Neural
+  NDE traffic on the open runtime).
 
 ## [0.1.0] - 2026-10-27
 

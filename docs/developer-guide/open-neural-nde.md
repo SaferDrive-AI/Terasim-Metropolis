@@ -86,7 +86,8 @@ docker compose -f apps/deploy/city/phase1/compose.yml -f apps/deploy/city/phase1
 
 Then send an optimization with `traffic_model="cnde"`, or ask the VSS agent for Neural NDE
 traffic. The answer says `Traffic model: CNDE (Neural NDE, learned driver behavior) simulated
-every candidate plan.`
+every candidate plan.` The whole pipeline with VSS, on one NVIDIA Brev instance, is the MTR mode
+of the reference deployment (`deployment/brev/README.md`).
 
 ## How it works
 
@@ -101,7 +102,7 @@ MTR reads neither traffic lights nor routes. Signals are kept because TeraSim gi
 only vehicles away from junctions and stop lines and hands every vehicle back to SUMO before
 the stop line. On a real four-camera intersection (600 s, the current timing plan, every
 vehicle crossing the stop line instrumented), the model drove 0 red-light crossings and
-matched SUMO's control delay within 3 %.
+matched SUMO's control delay within 5 %.
 
 ## Files
 
