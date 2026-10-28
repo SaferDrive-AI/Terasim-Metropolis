@@ -1,0 +1,42 @@
+# Open Neural NDE image: the release image plus PyTorch, the source of the public MTR network
+# (Motion Transformer) and the open runtime of packages/open-nnde. MTR's two CUDA ops run as pure
+# PyTorch, so no CUDA toolchain is needed. No model weights are included: mount an MTR checkpoint
+# at /app/TeraSim/packages/cnde/assets/nn_weights.pth at run time, where compose.cnde.yml and
+# deployment/brev/check-neural-nde.sh mount the Neural NDE checkpoint.
+# See docs/developer-guide/open-neural-nde.md.
+#
+# From the repository root:
+#   docker build -f apps/deploy/city/Dockerfile.open-nnde -t terasim-metropolis:0.1.0-open-nnde .
+#
+# Research use: MTR models trained on the Waymo Open Motion Dataset are licensed for
+# non-commercial use only (Waymo Dataset License Agreement for Non-Commercial Use).
+ARG BASE_IMAGE=ghcr.io/saferdrive-ai/terasim-metropolis:0.1.0
+FROM ${BASE_IMAGE}
+
+# PyTorch for CUDA 12.8 (its wheels bring the CUDA libraries); easydict for MTR's configuration.
+ARG TORCH_VERSION=2.11.0
+ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu128
+# MTR (https://github.com/sshaoshuai/MTR, Apache-2.0) at a fixed commit; the archive is checked.
+ARG MTR_COMMIT=a5ba7bdafa09a1a355cc34f8a895499a2b14ddb3
+ARG MTR_SHA256=92a6639dbe3fb3eaeff8cf4a7b00001816110f461b41bb30d8c6ee2324eaec95
+
+USER 0
+RUN python -m ensurepip --default-pip \
+ && python -m pip install --no-cache-dir --index-url "${TORCH_INDEX_URL}" "torch==${TORCH_VERSION}" \
+ && python -m pip install --no-cache-dir "easydict==1.13" \
+ && python -m pip uninstall -y pip
+RUN --mount=type=bind,source=apps/deploy/city/open-nnde/fetch_mtr.py,target=/tmp/fetch_mtr.py \
+    python /tmp/fetch_mtr.py "${MTR_COMMIT}" "${MTR_SHA256}" /opt/mtr
+COPY packages/open-nnde/runtime /opt/open-nnde/runtime
+# The runtime reads the checkpoint from its assets/ directory; point that at the mount target.
+RUN mkdir -p /app/TeraSim/packages/cnde/assets /opt/open-nnde/runtime/assets \
+ && ln -s /app/TeraSim/packages/cnde/assets/nn_weights.pth /opt/open-nnde/runtime/assets/nn_weights.pth
+ENV PYTHONPATH=/opt/open-nnde/runtime \
+    OPEN_NNDE_MTR_DIR=/opt/mtr \
+    OPEN_NNDE_OPS=torch
+USER 1001:0
+
+LABEL org.opencontainers.image.title="terasim-metropolis" \
+      org.opencontainers.image.version="0.1.0-open-nnde" \
+      org.opencontainers.image.licenses="Apache-2.0" \
+      org.opencontainers.image.description="TeraSim Metropolis with the open Neural NDE runtime on the public MTR network; mount an MTR checkpoint at /app/TeraSim/packages/cnde/assets/nn_weights.pth"

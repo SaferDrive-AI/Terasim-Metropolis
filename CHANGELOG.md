@@ -4,6 +4,17 @@ All notable changes to this project are documented in this file. The format foll
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Open Neural NDE runtime on the public MTR network (`packages/open-nnde`), for research: a
+  drop-in for the Neural NDE runtime module (`csim`, `cnde`, `tools.dataset`) with conversion of
+  the SUMO network to MTR's map polylines, vehicle histories, MTR prediction and pure PyTorch
+  versions of MTR's two CUDA operators. `apps/deploy/city/Dockerfile.open-nnde` builds it on the
+  release image from public sources; model weights are not included
+  (docs/developer-guide/open-neural-nde.md).
+
 ## [0.1.0] - 2026-10-27
 
 First public release of TeraSim Metropolis: the Phase 1 open-source MVP.

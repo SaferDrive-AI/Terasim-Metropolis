@@ -29,6 +29,7 @@ offers two more uses of the Neural NDE model:
 | Per-request traffic model (`traffic_model`) on the HTTP API and the MCP optimize tools | yes | `terasim-service`, `terasim-agent-skill` |
 | Re-evaluation stage of the optimizer and its deployment settings | yes | `terasim_city.orchestration.corridor_optimization`, `terasim-service` |
 | Neural NDE image (`Dockerfile.cnde`) and its Compose override (`compose.cnde.yml`) | yes | `apps/deploy/city` |
+| Open runtime on the public MTR network, for research: the same interface, its image built from public sources, no weights | yes | `packages/open-nnde` ([Open Neural NDE](open-neural-nde.md)) |
 | Acceptance criteria A1-1 to A1-4 and the Neural NDE profile of the acceptance check | yes | `examples/acceptance` |
 | Neural NDE runtime module (`csim`, `cutils`, the `cnde` model package, the planner trees its rule controller imports) and the model checkpoint | **no** | installed separately |
 
@@ -116,6 +117,11 @@ docker build -f apps/deploy/city/Dockerfile.cnde \
 `terasim-service` from that image on one GPU with the checkpoint and a map package mounted
 read-only and sets the two limits below; the MCP server's `TERASIM_CITY_TIMEOUT_S` goes to
 1800 s (see [Docker Compose](../deployment/docker-compose.md)).
+
+Without the runtime module, `Dockerfile.open-nnde` builds an image with the open runtime on the
+public MTR network for research. It takes an MTR checkpoint at the same mount point, so
+`compose.cnde.yml` and `deployment/brev/check-neural-nde.sh` work with it unchanged (see
+[Open Neural NDE](open-neural-nde.md)).
 
 ## Re-evaluation stage
 

@@ -191,10 +191,28 @@ inside it (nuplan-devkit, tuplan-garage: Apache-2.0; compiled `torch_cluster` ex
 carry their license files. License texts of the Python packages: their `*.dist-info`
 directories in the image.
 
-## 7. Components not included in this release
+## 7. Open Neural NDE image (`terasim-metropolis:0.1.0-open-nnde`, optional)
+
+The image built from `apps/deploy/city/Dockerfile.open-nnde` derives from the release image
+(section 5) and adds:
+
+| Component | Version | License |
+| --- | --- | --- |
+| PyTorch (`torch`) and the packages installed with it (NVIDIA CUDA libraries, Triton, sympy, networkx, mpmath, fsspec, filelock) | 2.11.0+cu128 | as in section 6 |
+| EasyDict | 1.13 | LGPL-3.0 |
+| MTR (Motion Transformer), source tree at commit `a5ba7bdafa09a1a355cc34f8a895499a2b14ddb3`, downloaded at build time from https://github.com/sshaoshuai/MTR (its `mtr/ops/attention` derives from EQNet of DeepVision3D) | a5ba7bd | Apache-2.0 (the tree's LICENSE file, kept at `/opt/mtr/LICENSE`) |
+
+The open runtime itself (`packages/open-nnde`) is part of this repository (Apache-2.0); its
+`open_nnde.mtr_backend` adapts MTR's `WaymoDataset.create_map_data_for_center_objects`
+(Apache-2.0, Shaoshuai Shi). The image holds no model weights. MTR checkpoints trained on the
+Waymo Open Motion Dataset are governed by the Waymo Dataset License Agreement for
+Non-Commercial Use (https://waymo.com/open/terms/) and are not distributed with this project.
+
+## 8. Components not included in this release
 
 - The Neural NDE runtime module and its model checkpoint: not part of this repository. The
   inference interface in `terasim-city` (`vehicle_behavior="cnde"`, `traffic_model="cnde"`)
-  loads them when they are installed (docs/developer-guide/behavior-models.md).
+  loads them when they are installed (docs/developer-guide/behavior-models.md). For research,
+  the open runtime of section 7 takes the module's place; no checkpoint is distributed.
 - The optional operator console and its camera video relay: not part of this repository
   or of the `terasim-metropolis` image.

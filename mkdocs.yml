@@ -94,6 +94,7 @@ nav:
       - Python API: developer-guide/python-api.md
       - Configuration system: developer-guide/configuration.md
       - Behavior models: developer-guide/behavior-models.md
+      - Open Neural NDE (MTR): developer-guide/open-neural-nde.md
       - Adversarial environment: developer-guide/adversarial-environment.md
       - Testing: developer-guide/testing.md
       - Contributing: developer-guide/contributing.md

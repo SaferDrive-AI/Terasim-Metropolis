@@ -21,7 +21,7 @@ Release: **v0.1.0** (Phase 1, open-source MVP). License: Apache-2.0.
 
 | Module | What it does | Package(s) |
 | --- | --- | --- |
-| A1 Behavior models | Naturalistic driving behavior (NDE) and the naturalistic-and-adversarial environment (NADE); the Neural NDE inference interface, Neural NDE traffic per request (`traffic_model="cnde"`) and an optional GPU re-evaluation stage (runtime module and checkpoint installed separately; image definition `apps/deploy/city/Dockerfile.cnde`) | `terasim-nde-nade`, `terasim-city` (`vehicle_behavior`) |
+| A1 Behavior models | Naturalistic driving behavior (NDE) and the naturalistic-and-adversarial environment (NADE); the Neural NDE inference interface, Neural NDE traffic per request (`traffic_model="cnde"`) and an optional GPU re-evaluation stage (runtime module and checkpoint installed separately; image definition `apps/deploy/city/Dockerfile.cnde`; for research, an open runtime on the public MTR network: `packages/open-nnde`, `Dockerfile.open-nnde`) | `terasim-nde-nade`, `terasim-city` (`vehicle_behavior`) |
 | A2 Adversarial driving environment | Parameterized injection of safety-critical behaviors (red-light running, cut-ins, rear-end, VRU crossings, stalled objects, construction zones) | `terasim-nde-nade`, `configs/adversities/` |
 | A3 Simulation core | SUMO-based simulation kernel with a Python API and a configuration system | `terasim` |
 | A4 HD map adapter | Ingests OpenDRIVE, Lanelet2, OpenStreetMap and SUMO maps, converts them to geo-referenced SUMO networks | `terasim-city` (`terasim_city.maps`) |
