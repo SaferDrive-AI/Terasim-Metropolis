@@ -11,10 +11,10 @@
 # from i1 (J1) to i3 (J3) of demo_arterial. Fully offline: the registered map covers
 # the request, so no OpenStreetMap download is triggered.
 #
-#   IMAGE=terasim-metropolis:0.1.0 bash apps/deploy/city/smoke.sh
+#   IMAGE=terasim-metropolis:0.2.0 bash apps/deploy/city/smoke.sh
 set -euo pipefail
 
-IMAGE="${IMAGE:-terasim-metropolis:0.1.0}"
+IMAGE="${IMAGE:-terasim-metropolis:0.2.0}"
 PORT="${PORT:-8000}"
 NAME="terasim-metropolis-smoke"
 

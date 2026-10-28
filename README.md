@@ -10,8 +10,8 @@ timing plan with its KPIs (control delay, stops per vehicle) and a PDF timing re
 NVIDIA Metropolis VSS agent asks for it through MCP tools (On-Demand) or on a cadence (Scheduled).
 It collects the counts from VSS every 10 minutes.
 
-v0.1.0 · Apache-2.0 · [documentation](https://saferdrive-ai.github.io/Terasim-Metropolis/) ·
-image `ghcr.io/saferdrive-ai/terasim-metropolis:0.1.0` · [release notes](docs/release-notes.md) ·
+v0.2.0 · Apache-2.0 · [documentation](https://saferdrive-ai.github.io/Terasim-Metropolis/) ·
+image `ghcr.io/saferdrive-ai/terasim-metropolis:0.2.0` · [release notes](docs/release-notes.md) ·
 [changelog](CHANGELOG.md)
 
 ## Reproduce
@@ -29,8 +29,8 @@ Docker, with an offline stand-in for the VSS behavior API
 
 ```bash
 git clone https://github.com/SaferDrive-AI/Terasim-Metropolis.git && cd Terasim-Metropolis
-docker pull ghcr.io/saferdrive-ai/terasim-metropolis:0.1.0
-docker tag ghcr.io/saferdrive-ai/terasim-metropolis:0.1.0 terasim-metropolis:0.1.0
+docker pull ghcr.io/saferdrive-ai/terasim-metropolis:0.2.0
+docker tag ghcr.io/saferdrive-ai/terasim-metropolis:0.2.0 terasim-metropolis:0.2.0
 docker compose -f apps/deploy/city/phase1/compose.yml --profile stub up -d
 curl -s http://127.0.0.1:8100/health
 ```

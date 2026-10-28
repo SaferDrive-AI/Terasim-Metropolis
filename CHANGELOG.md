@@ -6,6 +6,8 @@ All notable changes to this project are documented in this file. The format foll
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-28
+
 ### Added
 
 - Open Neural NDE runtime on the public MTR network (`packages/open-nnde`), for research: a
@@ -17,9 +19,14 @@ All notable changes to this project are documented in this file. The format foll
 - `deployment/brev/configure-vss.py`: TeraSim's edits of a VSS 3.3.0 checkout (cameras, detector
   labels, behavior analytics, Logstash, HAProxy, VSS agent tools and prompt) in one idempotent
   command.
+- TMC collector (`terasim-tmc-service` 0.2.0): `GET /v1/tmc/health` also reports the last
+  injected window (`last_injected`), kept next to the window watermark across restarts; the
+  acceptance check reads it.
 
 ### Changed
 
+- Release 0.2.0: image `ghcr.io/saferdrive-ai/terasim-metropolis:0.2.0`; Helm chart
+  `terasim-phase1` 0.6.1 with image tag 0.2.0 (`deployment/helm/terasim-phase1-0.6.1.tgz`).
 - The reference deployment on NVIDIA Brev (`deployment/brev/README.md`) runs from public inputs
   and the sample data (available on request) with VSS 3.3.0, in two modes: SUMO, and MTR (Neural
   NDE traffic on the open runtime).
@@ -108,4 +115,5 @@ First public release of TeraSim Metropolis: the Phase 1 open-source MVP.
 | terasim-plugin-sdk | 0.1.0 |
 | Helm chart terasim-phase1 | 0.6.0 (appVersion 0.1.0) |
 
+[0.2.0]: https://github.com/SaferDrive-AI/Terasim-Metropolis/releases/tag/v0.2.0
 [0.1.0]: https://github.com/SaferDrive-AI/Terasim-Metropolis/releases/tag/v0.1.0

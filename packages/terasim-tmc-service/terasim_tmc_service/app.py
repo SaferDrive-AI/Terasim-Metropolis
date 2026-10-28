@@ -314,7 +314,7 @@ def create_app(
                 with suppress(asyncio.CancelledError):
                     await task
 
-    app = FastAPI(title="TeraSim Metropolis TMC collector", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(title="TeraSim Metropolis TMC collector", version="0.2.0", lifespan=lifespan)
 
     @app.post("/v1/tmc/intersections", status_code=201)
     def register_intersection(request: RegisterRequest):

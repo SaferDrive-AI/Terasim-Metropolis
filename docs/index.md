@@ -3,8 +3,8 @@
 TeraSim Metropolis turns the turning-movement counts that NVIDIA Metropolis VSS (Video Search
 and Summarization) derives from intersection cameras into better traffic signal timing.
 
-This site documents release **v0.1.0**: the Python packages, the container image
-`terasim-metropolis:0.1.0`, the Helm chart `terasim-phase1` (chart version 0.6.0) and the
+This site documents release **v0.2.0**: the Python packages, the container image
+`terasim-metropolis:0.2.0`, the Helm chart `terasim-phase1` (chart version 0.6.1) and the
 synthetic examples that exercise the whole chain.
 
 ## What it does

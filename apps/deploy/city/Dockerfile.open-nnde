@@ -6,11 +6,11 @@
 # See docs/developer-guide/open-neural-nde.md.
 #
 # From the repository root:
-#   docker build -f apps/deploy/city/Dockerfile.open-nnde -t terasim-metropolis:0.1.0-open-nnde .
+#   docker build -f apps/deploy/city/Dockerfile.open-nnde -t terasim-metropolis:0.2.0-open-nnde .
 #
 # Research use: MTR models trained on the Waymo Open Motion Dataset are licensed for
 # non-commercial use only (Waymo Dataset License Agreement for Non-Commercial Use).
-ARG BASE_IMAGE=ghcr.io/saferdrive-ai/terasim-metropolis:0.1.0
+ARG BASE_IMAGE=ghcr.io/saferdrive-ai/terasim-metropolis:0.2.0
 FROM ${BASE_IMAGE}
 
 # PyTorch for CUDA 12.8 (its wheels bring the CUDA libraries); easydict for MTR's configuration.
@@ -37,6 +37,6 @@ ENV PYTHONPATH=/opt/open-nnde/runtime \
 USER 1001:0
 
 LABEL org.opencontainers.image.title="terasim-metropolis" \
-      org.opencontainers.image.version="0.1.0-open-nnde" \
+      org.opencontainers.image.version="0.2.0-open-nnde" \
       org.opencontainers.image.licenses="Apache-2.0" \
       org.opencontainers.image.description="TeraSim Metropolis with the open Neural NDE runtime on the public MTR network; mount an MTR checkpoint at /app/TeraSim/packages/cnde/assets/nn_weights.pth"

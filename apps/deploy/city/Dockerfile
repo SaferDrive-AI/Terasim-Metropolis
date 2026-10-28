@@ -11,7 +11,7 @@
 # server), terasim-tmc-service (TMC collector).
 #
 # Build from the repository ROOT (the context must hold packages/ and examples/):
-#   docker build -f apps/deploy/city/Dockerfile -t terasim-metropolis:0.1.0 .
+#   docker build -f apps/deploy/city/Dockerfile -t terasim-metropolis:0.2.0 .
 # Cross-build an amd64 server image from an arm64 machine: add --platform linux/amd64
 #
 # Two stages:
@@ -222,7 +222,7 @@ RUN python -c "import libsumo, traci, sumolib, terasim_city, terasim_service, te
  && echo 'runtime verified: non-root, imports + libsumo backend active + cython + sumo binary + no missing libs + redis + writable data trees + read-only inputs + demo map loads + license texts + no pip'
 
 LABEL org.opencontainers.image.title="terasim-metropolis" \
-      org.opencontainers.image.version="0.1.0" \
+      org.opencontainers.image.version="0.2.0" \
       org.opencontainers.image.licenses="Apache-2.0" \
       org.opencontainers.image.description="TeraSim Metropolis signal-optimization service (terasim-service / terasim-agent-skill MCP server / terasim-tmc-service TMC collector) with embedded Redis; non-root, multi-stage" \
       org.opencontainers.image.base.name="docker.io/library/python:${PYTHON_VERSION}-slim-bookworm" \

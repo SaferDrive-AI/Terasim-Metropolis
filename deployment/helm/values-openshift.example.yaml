@@ -1,7 +1,7 @@
-# Example site values for the terasim-phase1 chart (0.6.0) on Red Hat OpenShift
+# Example site values for the terasim-phase1 chart (0.6.1) on Red Hat OpenShift
 # (restricted-v2, no SCC grant needed). Copy, fill in the <...> values and install:
 #
-#   helm upgrade --install terasim-phase1 terasim-phase1-0.6.0.tgz -n <terasim-namespace> \
+#   helm upgrade --install terasim-phase1 terasim-phase1-0.6.1.tgz -n <terasim-namespace> \
 #     -f values-openshift.example.yaml [-f values-corridor.yaml]
 #
 # values-corridor.yaml (the corridor's TMC spec and scheduled configuration) is generated from a
@@ -20,7 +20,7 @@ global:
 
 image:
   repository: <registry>/terasim-metropolis
-  tag: "0.1.0"
+  tag: "0.2.0"
 
 service:
   # Maps ship as files or are registered with POST /v1/city/maps: no OpenStreetMap download.

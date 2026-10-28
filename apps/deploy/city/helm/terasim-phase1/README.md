@@ -7,7 +7,7 @@ conventions of NVIDIA's OpenShift VSS chart (`global.externalHost/externalScheme
 Route with edge TLS, no hardcoded namespace) and runs under the default
 `restricted-v2` SCC.
 
-Chart version `0.6.0`, application version (image tag) `0.1.0`.
+Chart version `0.6.1`, application version (image tag) `0.2.0`.
 
 ## What it deploys
 
@@ -38,7 +38,7 @@ exposing only `/files` (edge TLS, HTTP→HTTPS redirect).
    ```
    An `anyuid` grant does not break anything (the pods then run as the image's
    uid 1001).
-3. **Image** must be reachable from the cluster (push `terasim-metropolis:0.1.0` to
+3. **Image** must be reachable from the cluster (push `terasim-metropolis:0.2.0` to
    a registry the cluster can pull from, or import it). Provide pull access via
    `global.imagePullSecrets` (an existing Secret) or `pullSecret.create=true` with
    inline credentials.
@@ -57,7 +57,7 @@ exposing only `/files` (edge TLS, HTTP→HTTPS redirect).
 ```bash
 helm upgrade --install terasim-phase1 apps/deploy/city/helm/terasim-phase1 \
   -n terasim --create-namespace \
-  --set image.repository=<registry>/terasim-metropolis --set image.tag=0.1.0 \
+  --set image.repository=<registry>/terasim-metropolis --set image.tag=0.2.0 \
   --set global.imagePullSecrets[0].name=<pull-secret> \
   --set global.storageClass=<rwo-storageclass> \
   --set global.externalHost=terasim.apps.<cluster-domain> \

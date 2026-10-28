@@ -18,7 +18,7 @@ re-evaluation stage and the check script.
 | Item | Value |
 | --- | --- |
 | Host | Linux x86_64, Docker with BuildKit, an NVIDIA GPU with the NVIDIA Container Toolkit (validated: GeForce RTX 4080 SUPER 16 GB, RTX PRO 6000 Blackwell) |
-| Image | built from `ghcr.io/saferdrive-ai/terasim-metropolis:0.1.0`, PyTorch 2.11 for CUDA 12.8, MTR at commit `a5ba7bd` (about 13 GB) |
+| Image | built from `ghcr.io/saferdrive-ai/terasim-metropolis:0.2.0`, PyTorch 2.11 for CUDA 12.8, MTR at commit `a5ba7bd` (about 13 GB) |
 | Weights | an MTR checkpoint of MTR's configuration `mtr+100_percent_data.yaml` (65.8 M parameters) |
 
 ## 1. Build the image
@@ -27,7 +27,7 @@ From the repository root (MTR is downloaded at a fixed commit and its archive's 
 checked; MTR's two CUDA operators run as pure PyTorch, so no CUDA toolchain is needed):
 
 ```bash
-docker build -f apps/deploy/city/Dockerfile.open-nnde -t terasim-metropolis:0.1.0-open-nnde .
+docker build -f apps/deploy/city/Dockerfile.open-nnde -t terasim-metropolis:0.2.0-open-nnde .
 ```
 
 ## 2. Get a checkpoint
@@ -47,7 +47,7 @@ Only the checkpoint's tensors are loaded (`weights_only=True`), and every parame
 ## 3. Run the check
 
 ```bash
-deployment/brev/check-neural-nde.sh "$PWD/checkpoint_epoch_30.pth" terasim-metropolis:0.1.0-open-nnde
+deployment/brev/check-neural-nde.sh "$PWD/checkpoint_epoch_30.pth" terasim-metropolis:0.2.0-open-nnde
 ```
 
 On GPU 0 with the demo corridor, `PASS` means: nothing missing, a `traffic_model="cnde"`
@@ -72,7 +72,7 @@ The Compose stack with the Neural NDE override
 ([Docker Compose](../deployment/docker-compose.md#neural-nde-traffic-on-a-gpu-host-optional)):
 
 ```bash
-export TERASIM_CNDE_IMAGE=terasim-metropolis:0.1.0-open-nnde \
+export TERASIM_CNDE_IMAGE=terasim-metropolis:0.2.0-open-nnde \
        CNDE_CHECKPOINT="$PWD/checkpoint_epoch_30.pth" CNDE_MAP_PACKAGE=<map package directory>
 docker compose -f apps/deploy/city/phase1/compose.yml -f apps/deploy/city/phase1/compose.cnde.yml up -d
 ```

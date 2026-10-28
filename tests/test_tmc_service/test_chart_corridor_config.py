@@ -265,8 +265,8 @@ def test_unusable_corridor_files_fail_with_the_setting_named(tmp_path, values, m
 def test_chart_version_and_corridor_defaults():
     chart = yaml.safe_load((CHART_DIR / "Chart.yaml").read_text(encoding="utf-8"))
     values = yaml.safe_load((CHART_DIR / "values.yaml").read_text(encoding="utf-8"))
-    assert chart["version"] == "0.6.0"
-    assert chart["appVersion"] == values["image"]["tag"] == "0.1.0"
+    assert chart["version"] == "0.6.1"
+    assert chart["appVersion"] == values["image"]["tag"] == "0.2.0"
     assert values["corridorConfig"] == {
         "metadataJson": "",
         "scheduledConfigYaml": "",

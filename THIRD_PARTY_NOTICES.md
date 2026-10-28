@@ -160,7 +160,7 @@ The image carries this file, LICENSE, NOTICE and `LICENSES/` under `/licenses/`.
 redistributing the image (for example through the NVIDIA NGC catalog or GHCR), keep them with
 it and keep the source-code pointers of section 3 available.
 
-## 6. Neural NDE image (`terasim-metropolis:0.1.0-cnde`, optional)
+## 6. Neural NDE image (`terasim-metropolis:0.2.0-cnde`, optional)
 
 The image built from `apps/deploy/city/Dockerfile.cnde` derives from the Python 3.10 variant of
 the release image (section 5 with `python:3.10-slim-bookworm` and CPython 3.10; the packages of
@@ -191,7 +191,7 @@ inside it (nuplan-devkit, tuplan-garage: Apache-2.0; compiled `torch_cluster` ex
 carry their license files. License texts of the Python packages: their `*.dist-info`
 directories in the image.
 
-## 7. Open Neural NDE image (`terasim-metropolis:0.1.0-open-nnde`, optional)
+## 7. Open Neural NDE image (`terasim-metropolis:0.2.0-open-nnde`, optional)
 
 The image built from `apps/deploy/city/Dockerfile.open-nnde` derives from the release image
 (section 5) and adds:

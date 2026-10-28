@@ -24,8 +24,8 @@ Run every command below from the repository root.
 Pull the published image and tag it with the name the compose file uses:
 
 ```bash
-docker pull ghcr.io/saferdrive-ai/terasim-metropolis:0.1.0
-docker tag ghcr.io/saferdrive-ai/terasim-metropolis:0.1.0 terasim-metropolis:0.1.0
+docker pull ghcr.io/saferdrive-ai/terasim-metropolis:0.2.0
+docker tag ghcr.io/saferdrive-ai/terasim-metropolis:0.2.0 terasim-metropolis:0.2.0
 ```
 
 or build it from the checkout:
@@ -195,7 +195,7 @@ docker compose -f apps/deploy/city/phase1/compose.yml -f apps/deploy/city/phase1
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
-| `TERASIM_CNDE_IMAGE` | `terasim-metropolis:0.1.0-cnde` | The Neural NDE image |
+| `TERASIM_CNDE_IMAGE` | `terasim-metropolis:0.2.0-cnde` | The Neural NDE image |
 | `CNDE_CHECKPOINT` | `./cnde_assets/nn_weights.pth` | The checkpoint on the host, mounted at `/app/TeraSim/packages/cnde/assets/nn_weights.pth` |
 | `CNDE_MAP_PACKAGE` | `./cnde_map` | A map package with `cnde_map.pkl` and `cnde_id_mapping.pkl`, mounted at `/data/input/cnde_map` |
 | `CNDE_GPU` | `0` | GPU device id |
@@ -213,12 +213,12 @@ The corridor's entry in `scheduled_config.yaml` must point `base_sumocfg` at the
 The image alone runs the service with its embedded Redis:
 
 ```bash
-docker run -d -p 8000:8000 --name terasim <registry>/terasim-metropolis:0.1.0
+docker run -d -p 8000:8000 --name terasim <registry>/terasim-metropolis:0.2.0
 ```
 
 `apps/deploy/city/smoke.sh` checks it end to end: it registers the baked demo map, posts a
 snapshot, optimizes the demo corridor and verifies the NEMA plan and KPIs
-(`IMAGE=<registry>/terasim-metropolis:0.1.0 bash apps/deploy/city/smoke.sh`).
+(`IMAGE=<registry>/terasim-metropolis:0.2.0 bash apps/deploy/city/smoke.sh`).
 
 ## Stop
 

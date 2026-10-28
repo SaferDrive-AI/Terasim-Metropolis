@@ -107,9 +107,9 @@ context named `neural-nde`. The checkpoint is mounted at run time at
 ```bash
 docker build -f apps/deploy/city/Dockerfile --build-arg PYTHON_VERSION=3.10 \
   --build-arg BASE_DIGEST=sha256:2559be987fd64d61badbdafd303ea58a9ccab36d6c3c08bce219e762177d2eca \
-  -t terasim-metropolis:0.1.0-py3.10 .
+  -t terasim-metropolis:0.2.0-py3.10 .
 docker build -f apps/deploy/city/Dockerfile.cnde \
-  --build-context neural-nde=<path of the runtime module> -t terasim-metropolis:0.1.0-cnde .
+  --build-context neural-nde=<path of the runtime module> -t terasim-metropolis:0.2.0-cnde .
 ```
 
 To run it, layer `apps/deploy/city/phase1/compose.cnde.yml` on the Compose stack: it runs

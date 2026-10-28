@@ -11,7 +11,7 @@
 # /data/input/cnde_map/base.sumocfg.
 #
 # Environment overrides (all optional):
-#   TERASIM_CNDE_IMAGE        the Neural NDE image                (terasim-metropolis:0.1.0-cnde)
+#   TERASIM_CNDE_IMAGE        the Neural NDE image                (terasim-metropolis:0.2.0-cnde)
 #   CNDE_CHECKPOINT           the checkpoint file on the host     (./cnde_assets/nn_weights.pth)
 #   CNDE_MAP_PACKAGE          the map package directory          (./cnde_map)
 #   CNDE_GPU                  the GPU device id                   (0)
@@ -21,7 +21,7 @@
 # Relative paths resolve against the directory of the first compose file.
 services:
   terasim-service:
-    image: ${TERASIM_CNDE_IMAGE:-terasim-metropolis:0.1.0-cnde}
+    image: ${TERASIM_CNDE_IMAGE:-terasim-metropolis:0.2.0-cnde}
     volumes:
       # The checkpoint, at the fixed path the runtime reads it from (never baked).
       - ${CNDE_CHECKPOINT:-./cnde_assets/nn_weights.pth}:/app/TeraSim/packages/cnde/assets/nn_weights.pth:ro

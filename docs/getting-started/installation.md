@@ -16,16 +16,16 @@ Same code in two forms: a container image for deployments, Python packages for d
 
 ## Option 1: container image
 
-The release image is `terasim-metropolis:0.1.0`. Either:
+The release image is `terasim-metropolis:0.2.0`. Either:
 
-- pull it from the GitHub Container Registry as `ghcr.io/saferdrive-ai/terasim-metropolis:0.1.0`
+- pull it from the GitHub Container Registry as `ghcr.io/saferdrive-ai/terasim-metropolis:0.2.0`
   (see [Get the image](../deployment/docker-compose.md#get-the-image));
 - load it from an image archive: `docker load -i <archive>`;
 - or build it from a checkout, from the repository root (the build context must be the root so
   `packages/` and `examples/` resolve):
 
 ```bash
-docker build -f apps/deploy/city/Dockerfile -t terasim-metropolis:0.1.0 .
+docker build -f apps/deploy/city/Dockerfile -t terasim-metropolis:0.2.0 .
 ```
 
 On Apple Silicon, add `--platform linux/amd64` to build the x86-64 image. The build installs the

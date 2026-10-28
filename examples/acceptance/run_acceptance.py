@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""TeraSim Metropolis v0.1.0 - end-to-end acceptance run on synthetic data.
+"""TeraSim Metropolis v0.2.0 - end-to-end acceptance run on synthetic data.
 
 Exercises the Phase 1 acceptance chain exactly the way a VSS agent drives it, through the
 public interfaces only (MCP tools, the HTTP API, the TMC collector):

@@ -8,7 +8,7 @@ Two HTTP services ship in the image. `terasim-service` (port 8000) serves the ci
 | Service | Default port | OpenAPI title | Endpoints |
 | --- | --- | --- | --- |
 | `terasim-service` | 8000 | TeraSim Metropolis service 0.1.0 | 31 |
-| `terasim-tmc-service` | 8200 | TeraSim Metropolis TMC collector 0.1.0 | 4 |
+| `terasim-tmc-service` | 8200 | TeraSim Metropolis TMC collector 0.2.0 | 4 |
 
 The city API is mounted when `TERASIM_ENABLE_CITY_API` is true (the container image sets it); the asset endpoints (`/v1/city/maps`, `/v1/city/plans`) additionally need `TERASIM_CITY_DATA_ROOT`. Errors are JSON objects with a `detail` field.
 

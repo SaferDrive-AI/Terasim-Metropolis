@@ -1,5 +1,36 @@
 # Release notes
 
+## v0.2.0
+
+Reproducible from public sources: an open Neural NDE runtime and the reference deployment with
+NVIDIA Metropolis VSS 3.3.0. All changes are in `CHANGELOG.md`.
+
+### Highlights
+
+- **Open Neural NDE runtime** (`packages/open-nnde`): Neural NDE traffic on the public MTR
+  network, for research; `apps/deploy/city/Dockerfile.open-nnde` builds it on the release image.
+- **Reference deployment from public inputs** (`deployment/brev/README.md`): VSS 3.3.0 and
+  TeraSim on one NVIDIA Brev instance in two modes, SUMO and MTR, with expected results;
+  `deployment/brev/configure-vss.py` makes TeraSim's edits of a VSS checkout in one command; the
+  sample videos and data are available by email.
+- **TMC collector 0.2.0**: the health endpoint also reports the last injected window
+  (`last_injected`).
+- **Documentation** led by the steps and the expected results.
+
+### Validated with
+
+- NVIDIA Metropolis VSS 3.3.0 on NVIDIA Brev, 2 × NVIDIA RTX PRO 6000 Blackwell, SUMO and MTR
+  modes.
+
+### Container image and Helm chart
+
+`ghcr.io/saferdrive-ai/terasim-metropolis:0.2.0`, also tagged `latest` (linux/amd64, Python 3.11);
+Helm chart `terasim-phase1` 0.6.1 (`deployment/helm/terasim-phase1-0.6.1.tgz`):
+
+```bash
+docker pull ghcr.io/saferdrive-ai/terasim-metropolis:0.2.0
+```
+
 ## v0.1.0
 
 The first release of TeraSim Metropolis: simulation-based traffic signal timing optimization for

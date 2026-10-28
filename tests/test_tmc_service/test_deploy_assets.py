@@ -294,7 +294,7 @@ def test_compose_chart_and_values_name_the_same_image_tag():
     chart = yaml.safe_load(CHART.read_text(encoding="utf-8"))
     values = yaml.safe_load(CHART_VALUES.read_text(encoding="utf-8"))
     assert repository == values["image"]["repository"] == "terasim-metropolis"
-    assert tag == values["image"]["tag"] == chart["appVersion"] == "0.1.0"
+    assert tag == values["image"]["tag"] == chart["appVersion"] == "0.2.0"
 
 
 def test_smoke_registers_the_map_the_image_bakes_and_counts_every_corridor_signal():

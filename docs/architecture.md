@@ -5,7 +5,7 @@ engine. It runs next to an NVIDIA Metropolis VSS (Video Search and Summarization
 
 ## Components
 
-One container image (`terasim-metropolis:0.1.0`) serves three commands; Redis runs inside the
+One container image (`terasim-metropolis:0.2.0`) serves three commands; Redis runs inside the
 image by default or as a separate deployment.
 
 | Component | Command | Port | Role |

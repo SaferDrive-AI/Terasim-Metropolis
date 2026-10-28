@@ -18,10 +18,10 @@
 #   docker build -f apps/deploy/city/Dockerfile \
 #     --build-arg PYTHON_VERSION=3.10 \
 #     --build-arg BASE_DIGEST=sha256:2559be987fd64d61badbdafd303ea58a9ccab36d6c3c08bce219e762177d2eca \
-#     -t terasim-metropolis:0.1.0-py3.10 .
+#     -t terasim-metropolis:0.2.0-py3.10 .
 #   docker build -f apps/deploy/city/Dockerfile.cnde \
 #     --build-context neural-nde=<path of the Neural NDE runtime module> \
-#     -t terasim-metropolis:0.1.0-cnde .
+#     -t terasim-metropolis:0.2.0-cnde .
 # The runtime module directory must not hold a checkpoint (*.pth); the build checks it.
 #
 # PyTorch comes from the cu128 index (CUDA 12.8 wheels, NVIDIA Ada and Blackwell GPUs among
@@ -31,7 +31,7 @@
 # The release image runs as uid 1001 without pip: this file switches to root, restores pip
 # with ensurepip for its install steps, removes pip again and ends as uid 1001 like the base
 # (the runtime user and the group-0 layout are unchanged).
-ARG BASE_IMAGE=terasim-metropolis:0.1.0-py3.10
+ARG BASE_IMAGE=terasim-metropolis:0.2.0-py3.10
 FROM ${BASE_IMAGE}
 
 USER 0
@@ -96,6 +96,6 @@ USER 1001:0
 
 # The Neural NDE runtime module is not covered by the Apache-2.0 license of this repository.
 LABEL org.opencontainers.image.title="terasim-metropolis" \
-      org.opencontainers.image.version="0.1.0-cnde" \
+      org.opencontainers.image.version="0.2.0-cnde" \
       org.opencontainers.image.licenses="NOASSERTION" \
       org.opencontainers.image.description="TeraSim Metropolis with the optional Neural NDE (CNDE) GPU runtime; mount the model checkpoint at /app/TeraSim/packages/cnde/assets/nn_weights.pth"

@@ -17,8 +17,8 @@ description: >
   set through values (corridorConfig) or a ConfigMap you manage, without rebuilding
   the chart or the image.
 type: application
-version: 0.6.0
-appVersion: "0.1.0"
+version: 0.6.1
+appVersion: "0.2.0"
 keywords:
   - terasim
   - traffic-signal

@@ -32,7 +32,7 @@ image:
   # e.g. <registry>/terasim-metropolis
   repository: terasim-metropolis
   # The release image (the chart's appVersion).
-  tag: "0.1.0"
+  tag: "0.2.0"
   pullPolicy: IfNotPresent
 
 # Optionally have the chart create a docker-registry pull Secret from inline

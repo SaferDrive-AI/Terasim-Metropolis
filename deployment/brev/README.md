@@ -36,8 +36,8 @@ PUBLIC=<host name of the Brev secure link for port 7777, for example 7777-abcd12
 
 ```bash
 cd ~ && git clone https://github.com/SaferDrive-AI/Terasim-Metropolis.git
-docker pull ghcr.io/saferdrive-ai/terasim-metropolis:0.1.0
-docker tag ghcr.io/saferdrive-ai/terasim-metropolis:0.1.0 terasim-metropolis:0.1.0
+docker pull ghcr.io/saferdrive-ai/terasim-metropolis:0.2.0
+docker tag ghcr.io/saferdrive-ai/terasim-metropolis:0.2.0 terasim-metropolis:0.2.0
 unzip -q sj-reference-corridor-0.2.0.zip
 for n in 1 2 3 4; do cp <folder of the videos>/gtcsj2026-sj-downtown-cam$n.mp4 $SJ/videos/cam$n.mp4; done
 (cd $SJ && sha256sum -c --quiet SHA256SUMS && cd videos && sha256sum -c SHA256SUMS)    # cam1.mp4: OK ... cam4.mp4: OK
@@ -46,7 +46,7 @@ for n in 1 2 3 4; do cp <folder of the videos>/gtcsj2026-sj-downtown-cam$n.mp4 $
 ### Step 2. MTR mode only: the open Neural NDE image and a checkpoint
 
 ```bash
-cd $REPO && docker build -f apps/deploy/city/Dockerfile.open-nnde -t terasim-metropolis:0.1.0-open-nnde .
+cd $REPO && docker build -f apps/deploy/city/Dockerfile.open-nnde -t terasim-metropolis:0.2.0-open-nnde .
 curl -L -o ~/checkpoint_epoch_30.pth \
   https://huggingface.co/Student-Xiaoji/LLM-Augmented-MTR-models/resolve/main/100_percent/MTR/checkpoint_epoch_30.pth
 echo "f14858a1ce6b4098eef8230db39f014b337ef5e158b591e0febe722d7ae4667a  $HOME/checkpoint_epoch_30.pth" | sha256sum -c -

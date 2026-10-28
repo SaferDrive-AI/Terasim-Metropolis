@@ -21,7 +21,7 @@
 # TERASIM_CITY_SCHEDULER_ENABLED, TERASIM_CITY_CADENCE_S.
 services:
   terasim-service:
-    image: terasim-metropolis:0.1.0
+    image: terasim-metropolis:0.2.0
     build:
       context: ../../../..
       dockerfile: apps/deploy/city/Dockerfile
@@ -53,7 +53,7 @@ services:
       retries: 30
 
   terasim-mcp:
-    image: terasim-metropolis:0.1.0
+    image: terasim-metropolis:0.2.0
     command: ["terasim-agent-skill"]
     restart: unless-stopped
     ports:
@@ -82,7 +82,7 @@ services:
         condition: service_started
 
   terasim-tmc:
-    image: terasim-metropolis:0.1.0
+    image: terasim-metropolis:0.2.0
     command: ["terasim-tmc-service"]
     restart: unless-stopped
     ports:
@@ -110,7 +110,7 @@ services:
 
   vss-behavior-stub:
     profiles: ["stub"]
-    image: terasim-metropolis:0.1.0
+    image: terasim-metropolis:0.2.0
     # Standard library only; bypasses the image entrypoint (no Redis needed).
     entrypoint: ["python", "apps/deploy/city/phase1/stub_behavior_server.py"]
     command: ["--port", "8081"]

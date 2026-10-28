@@ -13,7 +13,7 @@ agent configuration) and the self-tests.
 
 ## 1. The image
 
-`terasim-metropolis:0.1.0` (from a registry: `<registry>/terasim-metropolis:0.1.0`),
+`terasim-metropolis:0.2.0` (from a registry: `<registry>/terasim-metropolis:0.2.0`),
 linux/amd64. One image, three commands:
 
 | Command | Port | Role |
@@ -39,7 +39,7 @@ Writable paths: `/data/output` (map store, plan store and run directories),
 ## 2. Single container: the REST API
 
 ```bash
-docker run -d -p 8000:8000 --restart unless-stopped --name terasim terasim-metropolis:0.1.0
+docker run -d -p 8000:8000 --restart unless-stopped --name terasim terasim-metropolis:0.2.0
 ```
 
 The container starts Redis, then the service on `http://localhost:8000` (logs:
@@ -139,13 +139,13 @@ asynchronous run and saves its NEMA plan and KPIs.
 
 ## 4. Kubernetes and OpenShift: Helm
 
-The chart `helm/terasim-phase1` (version 0.6.0, application version 0.1.0) deploys the
+The chart `helm/terasim-phase1` (version 0.6.1, application version 0.2.0) deploys the
 three services, a password-protected Redis, PVCs, NetworkPolicies and an OpenShift Route
 for the downloads, under the default `restricted-v2` SCC:
 
 ```bash
 helm upgrade --install terasim-phase1 apps/deploy/city/helm/terasim-phase1 -n terasim --create-namespace \
-  --set image.repository=<registry>/terasim-metropolis --set image.tag=0.1.0 \
+  --set image.repository=<registry>/terasim-metropolis --set image.tag=0.2.0 \
   --set global.externalHost=terasim.apps.<cluster-domain> \
   --set tmc.vssBehaviorUrl=http://vss-video-analytics-api.<vss-namespace>.svc:8081
 ```

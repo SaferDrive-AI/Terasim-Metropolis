@@ -1,6 +1,6 @@
 # Building the TeraSim Metropolis image
 
-The image `terasim-metropolis:0.1.0` is built from `apps/deploy/city/Dockerfile`. How to run
+The image `terasim-metropolis:0.2.0` is built from `apps/deploy/city/Dockerfile`. How to run
 it: `README.md`.
 
 ## Build
@@ -9,7 +9,7 @@ Run from the **repository root** (the build context must hold `packages/`, `exam
 license files):
 
 ```bash
-docker build -f apps/deploy/city/Dockerfile -t terasim-metropolis:0.1.0 .
+docker build -f apps/deploy/city/Dockerfile -t terasim-metropolis:0.2.0 .
 ```
 
 The image targets linux/amd64; on an arm64 machine add `--platform linux/amd64`. It runs
@@ -72,10 +72,10 @@ image; its first build step stops on any other Python:
 docker build -f apps/deploy/city/Dockerfile \
   --build-arg PYTHON_VERSION=3.10 \
   --build-arg BASE_DIGEST=sha256:2559be987fd64d61badbdafd303ea58a9ccab36d6c3c08bce219e762177d2eca \
-  -t terasim-metropolis:0.1.0-py3.10 .
+  -t terasim-metropolis:0.2.0-py3.10 .
 docker build -f apps/deploy/city/Dockerfile.cnde \
   --build-context neural-nde=<path of the Neural NDE runtime module> \
-  -t terasim-metropolis:0.1.0-cnde .
+  -t terasim-metropolis:0.2.0-cnde .
 ```
 
 The model checkpoint is mounted at run time at
@@ -94,21 +94,21 @@ owner), then publishes the GitHub release. By hand, tag and push to the registry
 pulls from:
 
 ```bash
-docker tag terasim-metropolis:0.1.0 <registry>/terasim-metropolis:0.1.0
-docker push <registry>/terasim-metropolis:0.1.0
+docker tag terasim-metropolis:0.2.0 <registry>/terasim-metropolis:0.2.0
+docker push <registry>/terasim-metropolis:0.2.0
 ```
 
 or save it as an archive and load it on the target host:
 
 ```bash
-docker save terasim-metropolis:0.1.0 | gzip > terasim-metropolis-0.1.0.tar.gz
-docker load -i terasim-metropolis-0.1.0.tar.gz
+docker save terasim-metropolis:0.2.0 | gzip > terasim-metropolis-0.2.0.tar.gz
+docker load -i terasim-metropolis-0.2.0.tar.gz
 ```
 
 ## Checks
 
 ```bash
-IMAGE=terasim-metropolis:0.1.0 bash apps/deploy/city/smoke.sh     # single container, REST API
+IMAGE=terasim-metropolis:0.2.0 bash apps/deploy/city/smoke.sh     # single container, REST API
 docker compose -f apps/deploy/city/phase1/compose.yml --profile stub up -d
 docker compose -f apps/deploy/city/phase1/compose.yml run --rm --no-deps terasim-mcp \
   python apps/deploy/city/phase1/phase1_e2e.py \

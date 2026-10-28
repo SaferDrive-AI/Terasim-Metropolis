@@ -1,6 +1,6 @@
 # Helm on OpenShift
 
-The Helm chart `apps/deploy/city/helm/terasim-phase1` (chart version 0.6.0, app version 0.1.0)
+The Helm chart `apps/deploy/city/helm/terasim-phase1` (chart version 0.6.1, app version 0.2.0)
 deploys the TeraSim Metropolis side of a VSS integration on OpenShift or Kubernetes. VSS itself
 is deployed separately.
 
@@ -28,7 +28,7 @@ and, on OpenShift, a Route that exposes only `/files` (edge TLS, HTTP redirected
    the chart sets a `restricted-v2` compatible security context on every pod: non-root, all
    capabilities dropped, no privilege escalation, `RuntimeDefault` seccomp, read-only root
    filesystem with `emptyDir` volumes at `/tmp` and `$HOME`.
-3. **The image** `<registry>/terasim-metropolis:0.1.0`, pullable by the cluster: an existing
+3. **The image** `<registry>/terasim-metropolis:0.2.0`, pullable by the cluster: an existing
    pull Secret in `global.imagePullSecrets`, or `pullSecret.create=true` with inline
    credentials.
 4. **A StorageClass** for the PVCs (`global.storageClass`, empty for the cluster default).
@@ -43,7 +43,7 @@ oc new-project terasim
 helm upgrade --install terasim-phase1 apps/deploy/city/helm/terasim-phase1 \
   -n terasim \
   --set image.repository=<registry>/terasim-metropolis \
-  --set image.tag=0.1.0 \
+  --set image.tag=0.2.0 \
   --set global.imagePullSecrets[0].name=<pull-secret> \
   --set global.storageClass=<rwo-storageclass> \
   --set global.externalHost=terasim.apps.<cluster-domain> \
@@ -79,7 +79,7 @@ in-cluster MCP URL, the download URL and the Redis Secret.
 
 | Value | Default | Meaning |
 | --- | --- | --- |
-| `image.repository`, `image.tag`, `image.pullPolicy` | `terasim-metropolis`, `"0.1.0"`, `IfNotPresent` | The image (one image for every component); set the repository to `<registry>/terasim-metropolis` |
+| `image.repository`, `image.tag`, `image.pullPolicy` | `terasim-metropolis`, `"0.2.0"`, `IfNotPresent` | The image (one image for every component); set the repository to `<registry>/terasim-metropolis` |
 | `global.externalHost`, `global.externalScheme` | `""`, `https` | Download Route host; scheme of the download links |
 | `global.imagePullSecrets`, `global.storageClass` | `[]`, `""` | Pull secrets; StorageClass of every PVC |
 | `service.windowS` | `3600` | `TERASIM_CITY_WINDOW_S`: seconds of snapshots one optimization aggregates |
